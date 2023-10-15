@@ -47,10 +47,10 @@ public class Program
             });
         });
 
-        // var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-        var keyVaultEndpoint = new Uri(uriString: builder.Configuration["VaultKey"] ?? "https://pbl6.vault.azure.net/");
-        var secretClient = new SecretClient(keyVaultEndpoint, new DefaultAzureCredential());
-        var connectionString = secretClient.GetSecret("pbl6connectionstring1").Value.Value;
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        // var keyVaultEndpoint = new Uri(uriString: builder.Configuration["VaultKey"] ?? "https://pbl6.vault.azure.net/");
+        // var secretClient = new SecretClient(keyVaultEndpoint, new DefaultAzureCredential());
+        // var connectionString = secretClient.GetSecret("pbl6connectionstring1").Value.Value;
         // Console.WriteLine(connectionString);
 
         builder.Services.AddDbContext<ApiDbContext>(options =>
