@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class initaldatabase : Migration
+    public partial class inital_database : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -23,6 +23,9 @@ namespace Infrastructure.Migrations
             migrationBuilder.EnsureSchema(
                 name: "Users");
 
+            migrationBuilder.EnsureSchema(
+                name: "User");
+
             migrationBuilder.CreateTable(
                 name: "AdminInfos",
                 schema: "Admin",
@@ -36,12 +39,12 @@ namespace Infrastructure.Migrations
                     BirthDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     Gender = table.Column<bool>(type: "bit", nullable: true),
                     Status = table.Column<short>(type: "smallint", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -59,12 +62,12 @@ namespace Infrastructure.Migrations
                     Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -81,12 +84,12 @@ namespace Infrastructure.Migrations
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Color = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -101,7 +104,14 @@ namespace Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
+                    Address = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -117,12 +127,12 @@ namespace Infrastructure.Migrations
                     Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -142,12 +152,12 @@ namespace Infrastructure.Migrations
                     Status = table.Column<short>(type: "smallint", nullable: false),
                     RefId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Type = table.Column<short>(type: "smallint", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -164,12 +174,12 @@ namespace Infrastructure.Migrations
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     Status = table.Column<short>(type: "smallint", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -186,12 +196,12 @@ namespace Infrastructure.Migrations
                     Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -211,12 +221,12 @@ namespace Infrastructure.Migrations
                     Status = table.Column<short>(type: "smallint", nullable: false),
                     Gender = table.Column<bool>(type: "bit", nullable: true),
                     BirthDay = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -234,12 +244,12 @@ namespace Infrastructure.Migrations
                     Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -256,12 +266,12 @@ namespace Infrastructure.Migrations
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Color = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -284,12 +294,12 @@ namespace Infrastructure.Migrations
                     LastLogin = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     LastLogout = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     InfoId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -312,12 +322,12 @@ namespace Infrastructure.Migrations
                     ChanelRoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PermissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IsEnable = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -349,12 +359,12 @@ namespace Infrastructure.Migrations
                     Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     Limit = table.Column<int>(type: "int", nullable: false),
                     PlanId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -398,7 +408,7 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Users",
-                schema: "Users",
+                schema: "User",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -410,12 +420,12 @@ namespace Infrastructure.Migrations
                     LastLoginAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     LastLogoutAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     InfoId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -438,12 +448,12 @@ namespace Infrastructure.Migrations
                     WorkspaceRoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PermissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IsEnable = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -479,12 +489,12 @@ namespace Infrastructure.Migrations
                     OTP = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     ValidTo = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     DeviceId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -506,12 +516,12 @@ namespace Infrastructure.Migrations
                 {
                     RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AdminId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -545,12 +555,12 @@ namespace Infrastructure.Migrations
                     RefId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     NotificationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -566,7 +576,7 @@ namespace Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_UserNotifications_Users_UserId",
                         column: x => x.UserId,
-                        principalSchema: "Users",
+                        principalSchema: "User",
                         principalTable: "Users",
                         principalColumn: "Id");
                 });
@@ -585,12 +595,12 @@ namespace Infrastructure.Migrations
                     OTP = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     ValidTo = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     DeviceId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -599,7 +609,7 @@ namespace Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_UserTokens_Users_UserId",
                         column: x => x.UserId,
-                        principalSchema: "Users",
+                        principalSchema: "User",
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -614,12 +624,12 @@ namespace Infrastructure.Migrations
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     OwnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -628,7 +638,7 @@ namespace Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_Workspaces_Users_OwnerId",
                         column: x => x.OwnerId,
-                        principalSchema: "Users",
+                        principalSchema: "User",
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -644,12 +654,12 @@ namespace Infrastructure.Migrations
                     ParentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     WorkspaceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -674,12 +684,12 @@ namespace Infrastructure.Migrations
                     Method = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AddBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -688,7 +698,7 @@ namespace Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_WorkspaceMembers_Users_UserId",
                         column: x => x.UserId,
-                        principalSchema: "Users",
+                        principalSchema: "User",
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -718,12 +728,12 @@ namespace Infrastructure.Migrations
                     AddBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ChanelRoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
@@ -745,7 +755,7 @@ namespace Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_ChanelMembers_Users_UserId",
                         column: x => x.UserId,
-                        principalSchema: "Users",
+                        principalSchema: "User",
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -832,7 +842,7 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_InfoId",
-                schema: "Users",
+                schema: "User",
                 table: "Users",
                 column: "InfoId",
                 unique: true);
@@ -958,7 +968,7 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users",
-                schema: "Users");
+                schema: "User");
 
             migrationBuilder.DropTable(
                 name: "UserInfos",

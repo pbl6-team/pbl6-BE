@@ -5,12 +5,9 @@ using PBL6.Domain.Models.Common;
 namespace PBL6.Domain.Models.Admins
 {
     [Table("Functions", Schema = "Admin")]
-    public class Function : AuditEntity
+    public class Function : FullAuditedEntity
     {
-        [Key]
-        public Guid Id { get; set; }
 
-        [StringLength(50)]
         [Required]
         public string Code { get; set; }
 

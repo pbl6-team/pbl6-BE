@@ -1,62 +1,67 @@
 using Microsoft.AspNetCore.Mvc;
-using PBL6.Domain.Data;
-using PBL6.Domain.Models;
+using PBL6.Application.Contract.Examples.Dtos;
+using PBL6.Application.Contract.Examples;
+
 
 namespace PBL6.API.Controllers
 {
-
     [ApiController]
     [Route("[controller]")]
-    public class UserController : BaseApiController
+    public class ExampleController : BaseApiController
     {
-        private readonly IUnitOfwork _unitOfwork;
+        private readonly IExampleService _exampleService;
 
-        public UserController(IUnitOfwork unitOfwork)
+        public ExampleController(IExampleService exampleService)
         {
-            _unitOfwork = unitOfwork;
+            _exampleService = exampleService;
         }
 
-        [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAsync()
+        [HttpGet]
+        public async Task<IActionResult> GetAllAsync()
         {
-            return Ok(await _unitOfwork.Examples.All());
+            return Ok(await _exampleService.GetAllAsync());
         }
 
-        [HttpGet("GetById")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetAsync(Guid id)
         {
-            return base.Ok(await _unitOfwork.Examples.GetById((object)id));
+            var existExample = await _exampleService.GetByIdAsync(id);
+            if (existExample is null) return NotFound();
+
+            return Ok(existExample);
         }
 
-        [HttpDelete("Delete")]
+        [HttpGet("/byname/{name}")]
+        public async Task<IActionResult> GetByNameAsync(string name)
+        {
+            var existExample = await _exampleService.GetByNameAsync(name);
+            if (existExample is null) return NotFound();
+
+            return Ok(existExample);
+        }
+
+        [HttpDelete]
         public async Task<IActionResult> DeleteAsync(Guid id)
         {
-            var existExample = await _unitOfwork.Examples.GetById(id);
+            var existExample = await _exampleService.DeleteAsync(id);
             if (existExample is null) return NotFound();
-            await _unitOfwork.Examples.Delete(existExample);
-            await _unitOfwork.CompleteAsync();
-
-            return base.Ok();
-        }
-
-
-        [HttpPost("Add")]
-        public async Task<IActionResult> AddAsync(Example example)
-        {
-            await _unitOfwork.Examples.Add(example);
-            await _unitOfwork.CompleteAsync();
 
             return NoContent();
         }
 
-        [HttpPatch("Update")]
-        public async Task<IActionResult> UpdateAsync(Example example)
+        [HttpPost]
+        public async Task<IActionResult> AddAsync(CreateUpdateExampleDto exampleDto)
         {
-            var existExample = await _unitOfwork.Examples.GetById(example.Id);
-            if (existExample is null) return NotFound();
+            var result = await _exampleService.AddAsync(exampleDto);
 
-            await _unitOfwork.Examples.Update(example);
-            await _unitOfwork.CompleteAsync();
+            return Created(nameof(GetAsync), new { Id = result });
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateAsync(Guid id, CreateUpdateExampleDto exampleDto)
+        {
+            var result = await _exampleService.UpdateAsync(id, exampleDto);
+            if (result is null) return NotFound();
 
             return NoContent();
         }

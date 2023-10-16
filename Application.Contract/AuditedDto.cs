@@ -1,8 +1,8 @@
-namespace PBL6.Domain.Models.Common
+namespace PBL6.Application.Contract
 {
-    public class AuditEntity
+    public class AuditedDto
     {
-        public Guid CreatedBy { get; set; }
+        public Guid? CreatedBy { get; set; }
 
         public DateTimeOffset CreatedAt { get; set; }
 
@@ -12,8 +12,8 @@ namespace PBL6.Domain.Models.Common
 
         public bool IsDeleted { get; set; }
 
-        public Guid DeletedBy { get; set; }
+        public Guid? DeletedBy { get; set; }
 
-        public DateTimeOffset DeletedAt { get; set; }
+        public DateTimeOffset? DeletedAt { get; set; }
     }
 }

@@ -5,11 +5,8 @@ using PBL6.Domain.Models.Common;
 namespace PBL6.Domain.Models.Users
 {
     [Table("UserNotifications", Schema = "Notifications")]
-    public class UserNotification : AuditEntity
+    public class UserNotification : FullAuditedEntity
     {
-        [Key]
-        public Guid Id { get; set; }
-
         public DateTimeOffset SendAt { get; set; }
 
         [Required]

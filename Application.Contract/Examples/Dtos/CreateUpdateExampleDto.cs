@@ -1,10 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using PBL6.Domain.Models.Common;
 
-namespace PBL6.Domain.Models
+namespace PBL6.Application.Contract.Examples.Dtos
 {
-    public class Example : FullAuditedEntity
+    public class CreateUpdateExampleDto
     {
         [StringLength(30)]
         [Required]

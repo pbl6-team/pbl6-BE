@@ -5,8 +5,7 @@ namespace PBL6.API.Filters
     [AttributeUsage(AttributeTargets.All)]
     public class AuthorizationFilterAttribute : Attribute, IAuthorizationFilter
     {
-
-        private readonly string _apiKey;
+private readonly string _apiKey;
         private readonly string _apiKeySecondary;
         private readonly bool _canUseSecondaryApiKey;
 

@@ -6,11 +6,8 @@ namespace PBL6.Domain.Models.Users
 {
 
     [Table("PlanDetails", Schema = "Users")]
-    public class PlanDetail : AuditEntity
+    public class PlanDetail : FullAuditedEntity
     {
-        [Key]
-        public Guid Id { get; set; }
-
         [StringLength(50)]
         [Required]
         public string Code { get; set; }

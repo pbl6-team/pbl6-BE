@@ -5,11 +5,8 @@ using PBL6.Domain.Models.Common;
 namespace PBL6.Domain.Models.Users
 {
     [Table("Notifications", Schema = "Notifications")]
-    public class Notification : AuditEntity
+    public class Notification : FullAuditedEntity
     {
-        [Key]
-        public Guid Id { get; set; }
-        
         [StringLength(255)]
         [Required]
         public string Title { get; set; }

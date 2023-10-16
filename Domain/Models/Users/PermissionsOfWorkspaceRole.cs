@@ -5,7 +5,7 @@ using PBL6.Domain.Models.Common;
 namespace PBL6.Domain.Models.Users
 {
     [Table("PermissionsOfWorkspaceRoles", Schema = "Chat")]
-    public class PermissionsOfWorkspaceRole : AuditEntity
+    public class PermissionsOfWorkspaceRole : FullAuditedEntity
     {
         [Required]
         public Guid WorkspaceRoleId { get; set; }

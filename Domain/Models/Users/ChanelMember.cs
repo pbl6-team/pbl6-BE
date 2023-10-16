@@ -5,11 +5,8 @@ using PBL6.Domain.Models.Common;
 namespace PBL6.Domain.Models.Users
 {
     [Table("ChanelMembers", Schema = "Chat")]
-    public class ChanelMember : AuditEntity
+    public class ChanelMember : FullAuditedEntity
     {
-        [Key]
-        public Guid Id { get; set; }
-
         [Required]
         public Guid UserId { get; set; }
 

@@ -21,22 +21,7 @@ namespace PBL6.Infrastructure.Repositories
             }
             catch (Exception e)
             {
-                _logger.LogError(e.Message);
-                throw;
-            }
-        }
-
-        public override async Task<Example> GetById(object id)
-        {
-            try
-            {
-                return await _apiDbContext.Examples
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.Id == (Guid)id);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e.Message);
+                _logger.LogError("{message}", e.Message);
                 throw;
             }
         }

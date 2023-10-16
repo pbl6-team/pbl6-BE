@@ -5,11 +5,8 @@ using PBL6.Domain.Models.Common;
 namespace PBL6.Domain.Models.Users
 {
     [Table("UserMessagess", Schema = "Chat")]
-    public class UserMessages : AuditEntity
+    public class UserMessages : FullAuditedEntity
     {
-         [Key]
-        public Guid Id { get; set; }
-
         public Guid ToUserId { get; set; }
 
         public string RefIds { get; set; }

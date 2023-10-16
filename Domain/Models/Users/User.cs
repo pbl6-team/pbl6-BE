@@ -4,12 +4,9 @@ using PBL6.Domain.Models.Common;
 
 namespace PBL6.Domain.Models.Users
 {
-    [Table("User", Schema = "Users")]
-    public class User : AuditEntity
+    [Table("Users", Schema = "User")]
+    public class User : FullAuditedEntity
     {
-        [Key]
-        public Guid Id { get; set; }
-
         [StringLength(30)]
         [Required]
         public string UserName { get; set; }

@@ -3,6 +3,9 @@ using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using PBL6.Application;
+using PBL6.Application.Contract.Examples;
+using PBL6.Application.Services;
 using PBL6.Domain.Data;
 using PBL6.Infrastructure.Data;
 
@@ -47,6 +50,8 @@ public class Program
             });
         });
 
+        builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
         // var keyVaultEndpoint = new Uri(uriString: builder.Configuration["VaultKey"] ?? "https://pbl6.vault.azure.net/");
         // var secretClient = new SecretClient(keyVaultEndpoint, new DefaultAzureCredential());
@@ -59,6 +64,7 @@ public class Program
                 .EnableDetailedErrors());
 
         builder.Services.AddScoped<IUnitOfwork, UnitOfWork>();
+        builder.Services.AddScoped<IExampleService, ExampleService>();
 
         var app = builder.Build();
 

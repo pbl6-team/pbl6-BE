@@ -1,13 +1,19 @@
 using System.ComponentModel;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using PBL6.Common;
 using PBL6.Domain.Models;
 using PBL6.Domain.Models.Admins;
+using PBL6.Domain.Models.Common;
 using PBL6.Domain.Models.Users;
 
 namespace PBL6.Infrastructure.Data
 {
     public class ApiDbContext : DbContext
     {
+        private IHttpContextAccessor _context;
         // Admins
         public DbSet<Example> Examples { get; set; }
         public DbSet<Function> Functions { get; set; }
@@ -150,6 +156,125 @@ namespace PBL6.Infrastructure.Data
                         .WithMany()
                         .HasForeignKey(e => e.ChanelRoleId)
                 );
+        }
+
+        public override int SaveChanges()
+        {
+            OnBeforeSaving();
+            return base.SaveChanges();
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            OnBeforeSaving();
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Lưu thêm các thông tin cần thiết mặc định khi cập nhật dữ diệu vào Database.
+        /// <para>Created at: 10/07/2020</para>
+        /// <para>Created by: nhamcotdo</para>
+        /// </summary>
+        private void OnBeforeSaving()
+        {
+            // Nếu có sự thay đổi dữ liệu
+            if (ChangeTracker.HasChanges())
+            {
+                // Láy các thông tin cơ bản từ hệ thống
+                DateTimeOffset now = DateTimeOffset.UtcNow;
+                var accountId = GetAccountId();
+                // Duyệt qua hết tất cả dối tượng có thay đổi
+                foreach (var entry in ChangeTracker.Entries())
+                {
+                    try
+                    {
+                        if (entry.Entity is AuditedEntity root)
+                        {
+                            switch (entry.State)
+                            {
+                                case EntityState.Added:
+                                    {
+                                        root.CreatedAt = now;
+                                        root.CreatedBy = accountId;
+                                        root.UpdatedAt = null;
+                                        root.UpdatedBy = null;
+                                        root.IsDeleted = false;
+                                        break;
+                                    }
+                                case EntityState.Modified:
+                                    {
+                                        if (root.IsDeleted)
+                                        {
+                                            root.DeletedAt = now;
+                                            root.DeletedBy = accountId;
+                                        }
+                                        else
+                                        {
+                                            root.UpdatedAt = now;
+                                            root.UpdatedBy = accountId;
+                                        }
+                                        break;
+                                    }
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Lấy user id đang đăng nhập nếu có
+        /// <para>Created at: 15/10/2023</para>
+        /// <para>Created by: nhamcotdo</para>
+        /// </summary>
+        /// <returns>user id của user đang đăng nhập. Trả về 0 nếu không có thông tin user đăng nhập</returns>
+        public Guid? GetAccountId()
+        {
+            try
+            {
+                Guid? accountId = null;
+                ClaimsPrincipal user = null;
+                _context ??= StartupState.Instance.Services.GetService<IHttpContextAccessor>();
+
+                if (_context != null && _context.HttpContext != null)
+                {
+                    user = _context.HttpContext.User;
+                }
+                if (user != null && user.Identity != null && user.Identity.IsAuthenticated)
+                {
+                    var identity = user.Identity as ClaimsIdentity;
+                    accountId = Guid.Parse(identity.Claims.Where(p => p.Type == "UserId").FirstOrDefault()?.Value);
+                }
+
+                return accountId;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Lấy Ip của request hiện tại
+        /// <para>Created at: 15/10/2023</para>
+        /// <para>Created by: nhamcotdo</para>
+        /// </summary>
+        /// <returns>Ip của request hiện tại</returns>
+        public string GetRequestIp()
+        {
+            try
+            {
+                _context ??= StartupState.Instance.Services.GetService<IHttpContextAccessor>();
+                string headerIp = _context?.HttpContext == null ? "::1" : _context.HttpContext.Request.Headers["x-request-ip"].ToString();
+                string ip = string.IsNullOrEmpty(headerIp) ? _context?.HttpContext.Connection.RemoteIpAddress.ToString() : headerIp;
+
+                return ip;
+            }
+            catch
+            {
+                return "::1";
+            }
         }
     }
 }

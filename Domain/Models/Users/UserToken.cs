@@ -5,11 +5,8 @@ using PBL6.Domain.Models.Common;
 namespace PBL6.Domain.Models.Users
 {
     [Table("UserTokens", Schema = "Admin")]
-    public class UserToken : AuditEntity
+    public class UserToken : FullAuditedEntity
     {
-        [Key]
-        public Guid Id { get; set; }
-
         public Guid UserId { get; set; }
 
         [StringLength(255)]

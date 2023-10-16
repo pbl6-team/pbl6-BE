@@ -12,8 +12,8 @@ using PBL6.Infrastructure.Data;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    [Migration("20231015085448_update schemas user")]
-    partial class updateschemasuser
+    [Migration("20231016101631_update_audit")]
+    partial class update_audit
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,13 +49,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
@@ -127,13 +127,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("FirstName")
@@ -182,13 +182,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("DeviceId")
@@ -241,19 +241,18 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
@@ -294,13 +293,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
@@ -329,26 +328,30 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("PBL6.Domain.Models.Admins.RolesOfAdmin", b =>
                 {
-                    b.Property<Guid>("AdminId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("RoleId")
+                    b.Property<Guid>("AdminId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
@@ -356,7 +359,9 @@ namespace Infrastructure.Migrations
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("AdminId", "RoleId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdminId");
 
                     b.HasIndex("RoleId");
 
@@ -374,6 +379,21 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -383,6 +403,12 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -398,13 +424,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
@@ -457,13 +483,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
@@ -508,13 +534,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
@@ -556,13 +582,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
@@ -603,13 +629,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
@@ -645,22 +671,23 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("PBL6.Domain.Models.Users.PermissionsOfChanelRole", b =>
                 {
-                    b.Property<Guid>("ChanelRoleId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("PermissionId")
+                    b.Property<Guid>("ChanelRoleId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
@@ -669,13 +696,18 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsEnable")
                         .HasColumnType("bit");
 
+                    b.Property<Guid>("PermissionId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("ChanelRoleId", "PermissionId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChanelRoleId");
 
                     b.HasIndex("PermissionId");
 
@@ -684,22 +716,20 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("PBL6.Domain.Models.Users.PermissionsOfWorkspaceRole", b =>
                 {
-                    b.Property<Guid>("PermissionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("WorkspaceRoleId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
@@ -708,13 +738,21 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsEnable")
                         .HasColumnType("bit");
 
+                    b.Property<Guid>("PermissionId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("PermissionId", "WorkspaceRoleId");
+                    b.Property<Guid>("WorkspaceRoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PermissionId");
 
                     b.HasIndex("WorkspaceRoleId");
 
@@ -730,13 +768,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
@@ -780,13 +818,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
@@ -825,13 +863,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
@@ -880,7 +918,7 @@ namespace Infrastructure.Migrations
                     b.HasIndex("InfoId")
                         .IsUnique();
 
-                    b.ToTable("User", "Users");
+                    b.ToTable("Users", "User");
                 });
 
             modelBuilder.Entity("PBL6.Domain.Models.Users.UserInfo", b =>
@@ -895,13 +933,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("FirstName")
@@ -947,13 +985,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
@@ -1001,13 +1039,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("DeviceId")
@@ -1064,13 +1102,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
@@ -1114,13 +1152,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
@@ -1166,13 +1204,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
@@ -1214,13 +1252,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("CreatedBy")
+                    b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("DeletedAt")
+                    b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid>("DeletedBy")
+                    b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
