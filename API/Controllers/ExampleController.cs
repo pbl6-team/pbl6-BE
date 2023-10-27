@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using PBL6.Application.Contract.Examples.Dtos;
 using PBL6.Application.Contract.Examples;
-
+using System.ComponentModel.DataAnnotations;
+using PBL6.Common.Functions;
 
 namespace PBL6.API.Controllers
 {
     [ApiController]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [Route("[controller]")]
     public class ExampleController : BaseApiController
     {
@@ -17,12 +19,16 @@ namespace PBL6.API.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ExampleDto>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetAllAsync()
         {
             return Ok(await _exampleService.GetAllAsync());
         }
 
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExampleDto))]
         public async Task<IActionResult> GetAsync(Guid id)
         {
             var existExample = await _exampleService.GetByIdAsync(id);
@@ -32,6 +38,9 @@ namespace PBL6.API.Controllers
         }
 
         [HttpGet("/byname/{name}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExampleDto))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> GetByNameAsync(string name)
         {
             var existExample = await _exampleService.GetByNameAsync(name);
@@ -41,6 +50,8 @@ namespace PBL6.API.Controllers
         }
 
         [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> DeleteAsync(Guid id)
         {
             var existExample = await _exampleService.DeleteAsync(id);
@@ -50,14 +61,21 @@ namespace PBL6.API.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> AddAsync(CreateUpdateExampleDto exampleDto)
         {
+
             var result = await _exampleService.AddAsync(exampleDto);
 
             return Created(nameof(GetAsync), new { Id = result });
+
         }
 
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> UpdateAsync(Guid id, CreateUpdateExampleDto exampleDto)
         {
             var result = await _exampleService.UpdateAsync(id, exampleDto);

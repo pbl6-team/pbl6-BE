@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc;
 
 namespace PBL6.API.Filters
 {
     [AttributeUsage(AttributeTargets.All)]
     public class AuthorizationFilterAttribute : Attribute, IAuthorizationFilter
     {
-private readonly string _apiKey;
+        private readonly string _apiKey;
         private readonly string _apiKeySecondary;
         private readonly bool _canUseSecondaryApiKey;
 
@@ -19,7 +20,7 @@ private readonly string _apiKey;
         public void OnAuthorization(AuthorizationFilterContext context)
         {
             var apiKeyHeader = context.HttpContext.Request.Headers["Authorization"].ToString();
-            var authController = new Controllers.AuthController();
+
 
             if (apiKeyHeader.Any())
             {
@@ -35,12 +36,12 @@ private readonly string _apiKey;
 
                 if (keys.FindIndex(x => x.Equals(apiKeyHeader, StringComparison.OrdinalIgnoreCase)) == -1)
                 {
-                    context.Result = authController.NotAuthorized();
+                    context.Result = new UnauthorizedResult();
                 }
             }
             else
             {
-                context.Result = authController.NotAuthorized();
+                context.Result = new UnauthorizedResult();
             }
         }
     }
