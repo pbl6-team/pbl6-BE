@@ -1,4 +1,3 @@
-
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +7,10 @@ using PBL6.Application.Contract.Examples;
 using PBL6.Application.Services;
 using PBL6.Domain.Data;
 using PBL6.Infrastructure.Data;
-
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
+using System.Text.Json.Serialization;
+using PBL6.API.Middlewares;
 namespace API;
 
 public class Program
@@ -19,7 +21,14 @@ public class Program
 
         // Add services to the container.
 
-        builder.Services.AddControllers();
+        builder.Services.AddControllers()
+            .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
+        builder.Services.Configure<MvcOptions>(options =>
+        {
+        options.ModelMetadataDetailsProviders.Add(
+            new NewtonsoftJsonValidationMetadataProvider());
+        });
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
@@ -74,6 +83,8 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
+
+        app.UseCustomExceptionHandler();
 
         app.UseHttpsRedirection();
 

@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using PBL6.Domain.Data;
 using PBL6.Infrastructure.Repositories;
@@ -22,7 +23,7 @@ namespace PBL6.Infrastructure.Data
         }
 
 
-        public async Task CompleteAsync()
+        public async Task SaveChangeAsync()
         {
             await _apiDbContext.SaveChangesAsync();
         }
@@ -30,6 +31,21 @@ namespace PBL6.Infrastructure.Data
         public void Dispose()
         {
             _apiDbContext.Dispose();
+        }
+
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            return await _apiDbContext.Database.BeginTransactionAsync();
+        }
+
+        public async Task CommitAsync(IDbContextTransaction transaction)
+        {
+            if (transaction is not null) await transaction.CommitAsync();
+        }
+
+        public async Task RollbackAsync(IDbContextTransaction transaction)
+        {
+            if (transaction is not null) await transaction.RollbackAsync();
         }
     }
 }

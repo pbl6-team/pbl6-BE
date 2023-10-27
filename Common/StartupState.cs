@@ -42,8 +42,6 @@ namespace PBL6.Common
             }
         }
 
-      
-
         public virtual IConfiguration Configuration
         {
             get
