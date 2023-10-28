@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PBL6.Application.Contract.Examples.Dtos;
 using PBL6.Application.Contract.Examples;
-using System.ComponentModel.DataAnnotations;
-using PBL6.Common.Functions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PBL6.API.Controllers
 {
@@ -18,6 +17,12 @@ namespace PBL6.API.Controllers
             _exampleService = exampleService;
         }
 
+        /// <summary>
+        /// Get tất cả example - không cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200"></response>
+        /// <response code="400">Có lỗi xảy ra</response>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ExampleDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -26,6 +31,12 @@ namespace PBL6.API.Controllers
             return Ok(await _exampleService.GetAllAsync());
         }
 
+        /// <summary>
+        /// Get example theo id- không cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200"></response>
+        /// <response code="400">Có lỗi xảy ra</response>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExampleDto))]
@@ -37,6 +48,12 @@ namespace PBL6.API.Controllers
             return Ok(existExample);
         }
 
+        /// <summary>
+        /// Get example theo name- không cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200"></response>
+        /// <response code="400">Có lỗi xảy ra</response>
         [HttpGet("/byname/{name}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExampleDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -49,9 +66,16 @@ namespace PBL6.API.Controllers
             return Ok(existExample);
         }
 
+        /// <summary>
+        /// xóa example  -  cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200"></response>
+        /// <response code="400">Có lỗi xảy ra</response>
         [HttpDelete]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [Authorize]
         public async Task<IActionResult> DeleteAsync(Guid id)
         {
             var existExample = await _exampleService.DeleteAsync(id);
@@ -60,10 +84,17 @@ namespace PBL6.API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Tạo example mới -  cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200"></response>
+        /// <response code="400">Có lỗi xảy ra</response>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
+        [Authorize]
         public async Task<IActionResult> AddAsync(CreateUpdateExampleDto exampleDto)
         {
 
@@ -72,10 +103,17 @@ namespace PBL6.API.Controllers
             return Created(nameof(GetAsync), new { Id = result });
 
         }
-
+        
+        /// <summary>
+        /// Cập nhật example -  cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200"></response>
+        /// <response code="400">Có lỗi xảy ra</response>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [Authorize]
         public async Task<IActionResult> UpdateAsync(Guid id, CreateUpdateExampleDto exampleDto)
         {
             var result = await _exampleService.UpdateAsync(id, exampleDto);

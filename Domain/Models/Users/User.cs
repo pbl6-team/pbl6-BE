@@ -9,18 +9,16 @@ namespace PBL6.Domain.Models.Users
     {
         [StringLength(30)]
         [Required]
-        public string UserName { get; set; }
+        public string Username { get; set; }
 
         [StringLength(50)]
         [Required]
         public string Email { get; set; }
 
-        [StringLength(50)]
-        [Required]
+        [StringLength(255)]
         public string Password { get; set; }
 
         [StringLength(50)]
-        [Required]
         public string PasswordSalt { get; set; }
 
         [Required]
@@ -34,7 +32,7 @@ namespace PBL6.Domain.Models.Users
 
         public UserInfo Information { get; set; }
 
-        public IEnumerable<UserToken> UserTokens { get; set; }
+        public ICollection<UserToken> UserTokens { get; set; }
 
         public IEnumerable<UserNotification> UserNotifications { get; set; }
     }

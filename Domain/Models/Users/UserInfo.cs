@@ -4,8 +4,7 @@ using PBL6.Domain.Models.Common;
 
 namespace PBL6.Domain.Models.Users
 {
-
-    [Table("UserInfos", Schema = "Users")]
+    [Table("UserInfos", Schema = "User")]
     public class UserInfo : FullAuditedEntity
     {
         [StringLength(50)]
@@ -13,7 +12,6 @@ namespace PBL6.Domain.Models.Users
         public string FirstName { get; set; }
 
         [StringLength(50)]
-        [Required]
         public string LastName { get; set; }
 
         [StringLength(20)]
@@ -23,7 +21,8 @@ namespace PBL6.Domain.Models.Users
 
         public bool? Gender { get; set; }
 
-        [Required]
+        public string Picture { get; set; }
+
         public DateTimeOffset BirthDay { get; set; }
 
         public User User { get; set; }

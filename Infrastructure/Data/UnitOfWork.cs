@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using PBL6.Domain.Data;
+using PBL6.Domain.Data.Users;
 using PBL6.Infrastructure.Repositories;
 
 namespace PBL6.Infrastructure.Data
@@ -10,6 +11,8 @@ namespace PBL6.Infrastructure.Data
         private readonly ApiDbContext _apiDbContext;
 
         public IExampleRepository Examples { get; }
+        public IUserRepository Users { get; }
+        public IUserTokenRepository UserTokens { get; }
 
         public UnitOfWork(
             ApiDbContext apiDbContext,
@@ -20,8 +23,9 @@ namespace PBL6.Infrastructure.Data
             var logger = loggerFactory.CreateLogger("logs");
 
             Examples = new ExampleRepository(apiDbContext, logger);
+            Users = new UserRepository(apiDbContext, logger);
+            UserTokens = new UserTokenRepository(apiDbContext, logger);
         }
-
 
         public async Task SaveChangeAsync()
         {

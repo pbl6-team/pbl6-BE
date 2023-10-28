@@ -5,7 +5,7 @@ using PBL6.Domain.Models.Common;
 namespace PBL6.Domain.Models.Users
 {
 
-    [Table("PlanDetails", Schema = "Users")]
+    [Table("PlanDetails", Schema = "User")]
     public class PlanDetail : FullAuditedEntity
     {
         [StringLength(50)]
