@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PBL6.Domain.Data;
 using PBL6.Domain.Models;
-using  PBL6.Application.Contract.Examples.Dtos;
-using  PBL6.Application.Contract.Examples;
+using PBL6.Application.Contract.Examples.Dtos;
+using PBL6.Application.Contract.Examples;
 using PBL6.Common.Exceptions;
 
 namespace PBL6.Application.Services
 {
-    public class ExampleService : IExampleService
+    public class ExampleService : BaseService, IExampleService
     {
         private readonly IUnitOfwork _unitOfwork;
         private readonly IMapper _mapper;
@@ -20,8 +20,9 @@ namespace PBL6.Application.Services
         public ExampleService(
             IUnitOfwork unitOfwork,
             IMapper mapper,
+            IServiceProvider serviceProvider,
             ILogger<ExampleService> logger
-        )
+        ) : base(serviceProvider)
         {
             _unitOfwork = unitOfwork;
             _mapper = mapper;
