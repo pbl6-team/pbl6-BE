@@ -173,18 +173,19 @@ namespace PBL6.Application.Services
                     .Include(x => x.UserTokens)
                     .FirstOrDefaultAsync(x => x.Email == getOtpDto.Email);
 
-                if (existedUser is null)
-                {
-                    return;
-                }
+                if (existedUser is null) return;
+
+                if (getOtpDto.OtpType == ((short)OTP_TYPE.VERIFY_USER) && existedUser.IsActive) throw new BadRequestException("Email is verified");
 
                 var existToken = await _unitOfwork.UserTokens
                     .Queryable()
+                    .OrderByDescending(x => x.ValidTo)
                     .FirstOrDefaultAsync(x => x.Otp != null
+                        && x.UserId == existedUser.Id
                         && x.ValidTo >= DateTimeOffset.UtcNow
                         && x.TimeOut >= DateTimeOffset.UtcNow
                     );
-                if (existToken is not null) throw new ExistedOtpException(existToken.ValidTo - DateTimeOffset.UtcNow);
+                if (existToken is not null) throw new ExistedOtpException((int)(existToken.ValidTo - DateTimeOffset.UtcNow).TotalSeconds);
                 var OTP = SecurityFunction.GenerationOTP();
                 ClaimData claimData = new()
                 {
@@ -207,7 +208,21 @@ namespace PBL6.Application.Services
                     }
                 );
                 await _unitOfwork.SaveChangeAsync();
-                await _mailService.Send(existedUser.Email, MailConsts.SignUp.Subject, MailConsts.SignUp.Template, OTP);
+                var subject = MailConsts.SignUp.Subject;
+                var template = MailConsts.SignUp.Template;
+                switch ((getOtpDto.OtpType))
+                {
+                    case ((short)OTP_TYPE.CHANGE_PASSWORD):
+                        subject = MailConsts.ChangePassword.Subject;
+                        template = MailConsts.ChangePassword.Template;
+                        break;
+                    case ((short)OTP_TYPE.FORGOT_PASSWORD):
+                        subject = MailConsts.ForgotPassword.Subject;
+                        template = MailConsts.ForgotPassword.Template;
+                        break;
+                }
+
+                await _mailService.Send(existedUser.Email, subject, template, OTP);
 
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
             }

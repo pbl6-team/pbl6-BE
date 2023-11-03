@@ -33,7 +33,7 @@ namespace PBL6.API.Controllers.Auth
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        /// <response code="200">Đăng ký thành công</response>
+        /// <response code="200">Xác thực email thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpPost("/verify-register")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -60,11 +60,11 @@ namespace PBL6.API.Controllers.Auth
         }
 
         /// <summary>
-        /// API đăng nhập bằng tài khoản và mật khẩu
+        /// API đăng nhập/ đăng ký bằng tài khoản google
         /// </summary>
         /// <param name="code"></param>
         /// <returns></returns>
-        /// <response code="200">Đăng ký thành công</response>
+        /// <response code="200">Đăng ký/Đăng nhập thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpGet("/signin-google")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]
@@ -78,7 +78,7 @@ namespace PBL6.API.Controllers.Auth
         /// </summary>
         /// <param name="changePasswordDto"></param>
         /// <returns></returns>
-        /// <response code="200">Đăng ký thành công</response>
+        /// <response code="200">Đổi mật khẩu thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpGet("/change-password")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]
@@ -98,7 +98,7 @@ namespace PBL6.API.Controllers.Auth
         /// </summary>
         /// <param name="getOtpDto"></param>
         /// <returns></returns>
-        /// <response code="200">Đăng ký thành công</response>
+        /// <response code="200">Lấy OTP thành công và đã gửi mail cho user</response>
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpGet("/get-otp")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]
@@ -114,7 +114,7 @@ namespace PBL6.API.Controllers.Auth
         /// </summary>
         /// <param name="forgotPasswordRequest"></param>
         /// <returns></returns>
-        /// <response code="200">Đăng ký thành công</response>
+        /// <response code="200">Đổi mật khẩu thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpGet("/forgot-password")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]

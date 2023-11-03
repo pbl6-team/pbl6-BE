@@ -22,8 +22,8 @@ namespace PBL6.Common
 
     public class ExistedOtpException : CustomException
     {
-        public ExistedOtpException(TimeSpan time)
-            : base($"Please try after {time}!") { }
+        public ExistedOtpException(int second)
+            : base($"Please try after {second} seconds!") { }
     }
 
     public class InvalidUsernamePasswordException : CustomException
