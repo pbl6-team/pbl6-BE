@@ -2,11 +2,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PBL6.Application.Contract.Users.Dtos
 {
-    public class ChangePasswordDto
+    public class ForgotPasswordDto
     {
         [Required]
-        [StringLength(50)]
-        public string CurrentPassword { get; set; }
+        public string Email { get; set; }
 
         [Required]
         [StringLength(50)]

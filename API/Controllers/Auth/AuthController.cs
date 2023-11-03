@@ -102,10 +102,25 @@ namespace PBL6.API.Controllers.Auth
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpGet("/get-otp")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]
-        [Authorize]
         public async Task<IActionResult> GetOtp(GetOtpDto getOtpDto)
         {
             await _authService.GetNewOtpAsync(getOtpDto);
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// API Get forgot password
+        /// </summary>
+        /// <param name="forgotPasswordRequest"></param>
+        /// <returns></returns>
+        /// <response code="200">Đăng ký thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpGet("/forgot-password")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto forgotPasswordRequest)
+        {
+            await _authService.ForgotPasswordAsync(forgotPasswordRequest);
 
             return Ok();
         }

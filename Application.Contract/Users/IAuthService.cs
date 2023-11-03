@@ -9,7 +9,7 @@ namespace PBL6.Application.Contract.Users
        Task<TokenData> SigninAsync(UserLoginDto userLogin);
        Task GetNewOtpAsync(GetOtpDto getOtpDto);
        Task ChangePasswordAsync(ChangePasswordDto changePassword);
-       Task ForgotPasswordAsync();
+       Task ForgotPasswordAsync(ForgotPasswordDto forgotPassword);
        Task<TokenData> GoogleLoginAsync(string oauthCode);
     }
 }

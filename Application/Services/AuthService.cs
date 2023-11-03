@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -16,23 +15,20 @@ using workspace.PBL6.Common;
 
 namespace PBL6.Application.Services
 {
-    public class AuthService : BaseService,  IAuthService
+    public class AuthService : BaseService, IAuthService
     {
         private readonly IUnitOfwork _unitOfwork;
-        private readonly IMapper _mapper;
         private readonly ILogger<AuthService> _logger;
         private readonly string _className;
 
         public AuthService(
           IUnitOfwork unitOfwork,
-          IMapper mapper,
           ILogger<AuthService> logger,
           IServiceProvider serviceProvider
         ) : base(serviceProvider)
         {
             _unitOfwork = unitOfwork;
             _logger = logger;
-            _mapper = mapper;
             _className = GetType().Name;
         }
 
@@ -256,7 +252,7 @@ namespace PBL6.Application.Services
                         Otp = null,
                         ValidTo = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["OtpTimeOut"] ?? CommonConfig.OtpTimeOut)),
                         TimeOut = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["TokenTimeOut"] ?? CommonConfig.OtpTimeOut)),
-                    RefreshTokenTimeOut = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["RefreshTokenTimeOut"] ?? CommonConfig.OtpTimeOut)),
+                        RefreshTokenTimeOut = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["RefreshTokenTimeOut"] ?? CommonConfig.OtpTimeOut)),
                         RefreshToken = refresshToken
                     }
                 );
@@ -303,7 +299,7 @@ namespace PBL6.Application.Services
                         {
                             FirstName = googleOauthUser.Name,
                             Status = (short)USER.DEFAULT
-                        }                       
+                        }
                     };
 
                     existedUser = await _unitOfwork.Users.AddAsync(newUser);
@@ -331,7 +327,7 @@ namespace PBL6.Application.Services
                         Otp = null,
                         ValidTo = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["OtpTimeOut"] ?? CommonConfig.OtpTimeOut)),
                         TimeOut = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["TokenTimeOut"] ?? CommonConfig.OtpTimeOut)),
-                    RefreshTokenTimeOut = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["RefreshTokenTimeOut"] ?? CommonConfig.OtpTimeOut)),
+                        RefreshTokenTimeOut = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["RefreshTokenTimeOut"] ?? CommonConfig.OtpTimeOut)),
                         RefreshToken = refresshToken
                     }
                 );
@@ -358,14 +354,12 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var userId = Guid.Parse(_currentUser.UserId);
-                var currentUser = await _unitOfwork.Users.Queryable().FirstOrDefaultAsync(x => x.Id == userId && x.IsActive);
-                if (currentUser is null)
-                {
-                    throw new BadRequestException("User is not exist or inactive");
-                }
-
-                var validToken = await _unitOfwork.UserTokens.Queryable()
-                    .FirstOrDefaultAsync(x => x.Otp == changePasswordDto.OTP 
+                var currentUser = await _unitOfwork.Users.Queryable().FirstOrDefaultAsync(x => x.Id == userId && x.IsActive) ?? throw new BadRequestException("User is not exist or inactive");
+                var validToken = await _unitOfwork.UserTokens
+                    .Queryable()
+                    .FirstOrDefaultAsync(x =>
+                        x.UserId == userId
+                        && x.Otp == changePasswordDto.Otp
                         && x.OtpType == ((short)OTP_TYPE.CHANGE_PASSWORD)
                         && x.ValidTo >= now
                         && x.TimeOut >= now
@@ -404,14 +398,42 @@ namespace PBL6.Application.Services
             }
         }
 
-        public Task ForgotPasswordAsync()
+        public async Task ForgotPasswordAsync(ForgotPasswordDto forgotPasswordRequest)
         {
             var method = GetActualAsyncMethodName();
+            var now = DateTimeOffset.UtcNow;
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+                var currentUser = await _unitOfwork.Users.Queryable().FirstOrDefaultAsync(x => x.Email == forgotPasswordRequest.Email && x.IsActive) ?? throw new BadRequestException("Email is not exist or user is inactive");
+                var validToken = await _unitOfwork.UserTokens
+                    .Queryable()
+                    .Include(x => x.User)
+                    .FirstOrDefaultAsync(x =>
+                        x.User.Email == forgotPasswordRequest.Email
+                        && x.Otp == forgotPasswordRequest.Otp
+                        && x.OtpType == ((short)OTP_TYPE.FORGOT_PASSWORD)
+                        && x.ValidTo >= now
+                        && x.TimeOut >= now
+                    );
+                if (validToken is null)
+                {
+                    throw new BadRequestException("OTP is invalid or expried");
+                }
+                else
+                {
+                    validToken.ValidTo = now;
+                    validToken.TimeOut = now;
+                    await _unitOfwork.UserTokens.UpdateAsync(validToken);
+                }
+
+                var passwordSalt = SecurityFunction.GenerateRandomString();
+                var hashPassword = SecurityFunction.HashPassword(forgotPasswordRequest.NewPassword, passwordSalt);
+                currentUser.Password = hashPassword;
+                currentUser.PasswordSalt = passwordSalt;
+                await _unitOfwork.Users.UpdateAsync(currentUser);
+                await _unitOfwork.SaveChangeAsync();
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
-                throw new NotImplementedException();
             }
             catch (Exception e)
             {
