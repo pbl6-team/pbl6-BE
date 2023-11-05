@@ -3,11 +3,12 @@ using PBL6.Domain.Data.Users;
 
 namespace PBL6.Domain.Data
 {
-    public interface IUnitOfwork
+    public interface IUnitOfWork
     {
         IExampleRepository Examples { get; }
         IUserRepository Users { get; }
         IUserTokenRepository UserTokens { get; }
+        IWorkspaceRepository Workspaces { get; }
 
         Task SaveChangeAsync();
         Task<IDbContextTransaction> BeginTransactionAsync();

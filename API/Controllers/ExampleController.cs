@@ -7,7 +7,7 @@ namespace PBL6.API.Controllers
 {
     [ApiController]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class ExampleController : BaseApiController
     {
         private readonly IExampleService _exampleService;

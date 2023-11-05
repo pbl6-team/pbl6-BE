@@ -7,4 +7,4 @@
 - include_granted_scopes :true
 - response_type: code
 - client_id: 945996023510-0j32cbj68e6ftd38sampakldkhok571m.apps.googleusercontent.com
-- redirect_uri: https://localhost:7117/signin-google
+- redirect_uri: {baseurl}/signin-google

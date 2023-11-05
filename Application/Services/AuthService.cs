@@ -9,7 +9,6 @@ using PBL6.Common.Consts;
 using PBL6.Common.Enum;
 using PBL6.Common.Exceptions;
 using PBL6.Common.Functions;
-using PBL6.Domain.Data;
 using PBL6.Domain.Models.Users;
 using workspace.PBL6.Common;
 
@@ -17,18 +16,12 @@ namespace PBL6.Application.Services
 {
     public class AuthService : BaseService, IAuthService
     {
-        private readonly IUnitOfwork _unitOfwork;
-        private readonly ILogger<AuthService> _logger;
         private readonly string _className;
 
         public AuthService(
-          IUnitOfwork unitOfwork,
-          ILogger<AuthService> logger,
           IServiceProvider serviceProvider
         ) : base(serviceProvider)
         {
-            _unitOfwork = unitOfwork;
-            _logger = logger;
             _className = GetType().Name;
         }
 

@@ -12,21 +12,12 @@ namespace PBL6.Application.Services
 {
     public class ExampleService : BaseService, IExampleService
     {
-        private readonly IUnitOfwork _unitOfwork;
-        private readonly IMapper _mapper;
-        private readonly ILogger<ExampleService> _logger;
         private readonly string _className;
 
         public ExampleService(
-            IUnitOfwork unitOfwork,
-            IMapper mapper,
-            IServiceProvider serviceProvider,
-            ILogger<ExampleService> logger
+            IServiceProvider serviceProvider
         ) : base(serviceProvider)
         {
-            _unitOfwork = unitOfwork;
-            _mapper = mapper;
-            _logger = logger;
             _className = GetType().Name;
         }
 
