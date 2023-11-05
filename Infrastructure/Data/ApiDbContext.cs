@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PBL6.Common;
+using PBL6.Common.Functions;
 using PBL6.Domain.Models;
 using PBL6.Domain.Models.Admins;
 using PBL6.Domain.Models.Common;
@@ -244,7 +245,7 @@ namespace PBL6.Infrastructure.Data
                 if (user != null && user.Identity != null && user.Identity.IsAuthenticated)
                 {
                     var identity = user.Identity as ClaimsIdentity;
-                    accountId = Guid.Parse(identity.Claims.Where(p => p.Type == "UserId").FirstOrDefault()?.Value);
+                    accountId = Guid.Parse(identity.Claims.Where(p => p.Type == CustomClaimTypes.UserId).FirstOrDefault()?.Value);
                 }
 
                 return accountId;
