@@ -8,7 +8,7 @@ namespace PBL6.API.Controllers.Auth
     [Produces("application/json")]
     [Route("api/[controller]")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public class AuthController : Controller
+    public class AuthController : BaseApiController
     {
         private readonly IAuthService _authService;
 

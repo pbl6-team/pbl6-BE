@@ -6,8 +6,8 @@ namespace PBL6.Common
     public class StartupState
     {
         public static StartupState Instance { get; protected set; } = new StartupState();
-        private IConfiguration? _configuration;
-        private IServiceProvider? _services;
+        private IConfiguration _configuration;
+        private IServiceProvider _services;
 
         public virtual IServiceProvider Services
         {
@@ -28,7 +28,7 @@ namespace PBL6.Common
             }
         }
 
-        public virtual HttpContext? Current
+        public virtual HttpContext Current
         {
             get
             {
@@ -36,8 +36,8 @@ namespace PBL6.Common
                 {
                     if (_services == null)
                         return null;
-                    IHttpContextAccessor? httpContextAccessor = _services.GetService(typeof(IHttpContextAccessor)) as IHttpContextAccessor;
-                    return httpContextAccessor?.HttpContext;
+                    IHttpContextAccessor httpContextAccessor = _services.GetService(typeof(IHttpContextAccessor)) as IHttpContextAccessor;
+                    return httpContextAccessor.HttpContext;
                 }
             }
         }
@@ -67,7 +67,7 @@ namespace PBL6.Common
             {
                 lock (_configuration!)
                 {
-                    string? path = _configuration.GetSection(nameServer!).Value;
+                    string path = _configuration.GetSection(nameServer!).Value;
                     if (string.IsNullOrEmpty(path))
                     {
                         path = nameDefault;

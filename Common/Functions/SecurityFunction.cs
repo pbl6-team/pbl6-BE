@@ -113,7 +113,7 @@ namespace PBL6.Common.Functions
         //     return tokenHandler.WriteToken(token);
         // }
 
-        public static async Task<GoogleJsonWebSignature.Payload?> VerifyGoogleToken(string oauthCode, IConfiguration configuration)
+        public static async Task<GoogleJsonWebSignature.Payload> VerifyGoogleToken(string oauthCode, IConfiguration configuration)
         {
             try
             {
