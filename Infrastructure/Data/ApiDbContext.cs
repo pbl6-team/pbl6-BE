@@ -28,9 +28,9 @@ namespace PBL6.Infrastructure.Data
         public DbSet<UserNotification> UserNotifications { get; set; }
         public DbSet<UserToken> UserTokens { get; set; }
         public DbSet<Workspace> Workspaces { get; set; }
-        public DbSet<Chanel> Chanels { get; set; }
+        public DbSet<Channel> Chanels { get; set; }
         public DbSet<WorkspaceMember> WorkspaceMembers { get; set; }
-        public DbSet<ChanelMember> ChanelMembers { get; set; }
+        public DbSet<ChannelMember> ChanelMembers { get; set; }
         public DbSet<WorkspaceRole> WorkspaceRoles { get; set; }
         public DbSet<WorkspacePermission> WorkspacePermissions { get; set; }
         public DbSet<PermissionsOfWorkspaceRole> PermissionsOfWorkspaces { get; set; }

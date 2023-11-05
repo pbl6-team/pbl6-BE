@@ -16,11 +16,14 @@ namespace PBL6.Domain.Models.Users
         public string Description { get; set; }
 
         [Required]
+        public string AvartarUrl { get; set; }
+
+        [Required]
         public Guid OwnerId { get; set; }
 
         public User Owner { get; set; }
 
-        public IEnumerable<Chanel> Chanels { get; set; }
+        public IEnumerable<Channel> Chanels { get; set; }
 
         public IEnumerable<WorkspaceMember> Members { get; set; }
     }

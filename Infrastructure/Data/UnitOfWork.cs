@@ -6,13 +6,14 @@ using PBL6.Infrastructure.Repositories;
 
 namespace PBL6.Infrastructure.Data
 {
-    public class UnitOfWork : IUnitOfwork, IDisposable
+    public class UnitOfWork : IUnitOfWork, IDisposable
     {
         private readonly ApiDbContext _apiDbContext;
 
         public IExampleRepository Examples { get; }
         public IUserRepository Users { get; }
         public IUserTokenRepository UserTokens { get; }
+        public IWorkspaceRepository Workspaces { get; }
 
         public UnitOfWork(
             ApiDbContext apiDbContext,
@@ -25,6 +26,7 @@ namespace PBL6.Infrastructure.Data
             Examples = new ExampleRepository(apiDbContext, logger);
             Users = new UserRepository(apiDbContext, logger);
             UserTokens = new UserTokenRepository(apiDbContext, logger);
+            Workspaces = new WorkspaceRepository(apiDbContext, logger);
         }
 
         public async Task SaveChangeAsync()

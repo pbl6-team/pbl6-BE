@@ -4,8 +4,8 @@ using PBL6.Domain.Models.Common;
 
 namespace PBL6.Domain.Models.Users
 {
-    [Table("ChanelMembers", Schema = "Chat")]
-    public class ChanelMember : FullAuditedEntity
+    [Table("ChannelMembers", Schema = "Chat")]
+    public class ChannelMember : FullAuditedEntity
     {
         [Required]
         public Guid UserId { get; set; }
@@ -15,11 +15,13 @@ namespace PBL6.Domain.Models.Users
 
         public string Method { get; set; }
 
+        public short Status { get; set; }
+
         public Guid AddBy { get; set; }
 
-        public Guid RoleId { get; set; }
+        public Guid? RoleId { get; set; }
 
-        public Chanel Workspace { get; set; }
+        public Channel Channel { get; set; }
 
         public User User { get; set; }
     }

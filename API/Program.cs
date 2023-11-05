@@ -122,13 +122,13 @@ namespace PBL6.API
                     .EnableSensitiveDataLogging()
                     .EnableDetailedErrors());
 
-            builder.Services.AddScoped<IUnitOfwork, UnitOfWork>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IExampleService, ExampleService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             builder.Services.AddTransient<IMailService, MailService>();
-
+            builder.Services.AddTransient<IFileService, FileService>();
 
             var app = builder.Build();
 

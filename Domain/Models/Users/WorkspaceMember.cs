@@ -14,6 +14,8 @@ namespace PBL6.Domain.Models.Users
 
         [Required]
         public Guid WorkspaceId { get; set; }
+        
+        public short Status { get; set; }
 
         public Workspace Workspace { get; set; }
 
@@ -21,7 +23,7 @@ namespace PBL6.Domain.Models.Users
 
         public Guid AddBy { get; set; }
 
-        public Guid RoleId { get; set; }
+        public Guid? RoleId { get; set; }
 
         public WorkspaceRole WorkspaceRole { get; set; }
     }

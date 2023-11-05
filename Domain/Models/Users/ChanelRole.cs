@@ -17,7 +17,7 @@ namespace PBL6.Domain.Models.Users
 
         public string Color { get; set; }
 
-        public IEnumerable<ChanelMember> Members { get; set; }
+        public IEnumerable<ChannelMember> Members { get; set; }
 
         public IEnumerable<ChanelPermission> Permissions { get; set; }
     }
