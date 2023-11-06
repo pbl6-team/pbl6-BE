@@ -131,7 +131,7 @@ namespace PBL6.Infrastructure.Data
             modelBuilder.Entity<WorkspaceRole>()
                .HasMany(x => x.Members)
                .WithOne(x => x.WorkspaceRole)
-               .HasForeignKey(x => x.WorkspaceId)
+               .HasForeignKey(x => x.RoleId)
                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<WorkspaceRole>()
