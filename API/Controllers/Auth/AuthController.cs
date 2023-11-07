@@ -21,7 +21,7 @@ namespace PBL6.API.Controllers.Auth
         /// <returns></returns>
         /// <response code="200">Đăng ký thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpPost("/signup")]
+        [HttpPost("signup")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserRegisterResponse))]
         public async Task<IActionResult> Signup(UserRegisterDto input)
         {
@@ -35,7 +35,7 @@ namespace PBL6.API.Controllers.Auth
         /// <returns></returns>
         /// <response code="200">Xác thực email thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpPost("/verify-register")]
+        [HttpPost("verify-register")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
         public async Task<IActionResult> VerifyRegister(VerifyRegisterDto input)
@@ -52,7 +52,7 @@ namespace PBL6.API.Controllers.Auth
         /// <returns></returns>
         /// <response code="200">Đăng ký thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpPost("/signin")]
+        [HttpPost("signin")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]
         public async Task<IActionResult> Login(UserLoginDto input)
         {
@@ -66,7 +66,7 @@ namespace PBL6.API.Controllers.Auth
         /// <returns></returns>
         /// <response code="200">Đăng ký/Đăng nhập thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpGet("/signin-google")]
+        [HttpGet("signin-google")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]
         public async Task<IActionResult> ExternalLogin(string code)
         {
@@ -80,7 +80,7 @@ namespace PBL6.API.Controllers.Auth
         /// <returns></returns>
         /// <response code="200">Đổi mật khẩu thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpGet("/change-password")]
+        [HttpGet("change-password")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]
         [Authorize]
         public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
@@ -100,7 +100,7 @@ namespace PBL6.API.Controllers.Auth
         /// <returns></returns>
         /// <response code="200">Lấy OTP thành công và đã gửi mail cho user</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpGet("/get-otp")]
+        [HttpGet("get-otp")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]
         public async Task<IActionResult> GetOtp(GetOtpDto getOtpDto)
         {
@@ -116,7 +116,7 @@ namespace PBL6.API.Controllers.Auth
         /// <returns></returns>
         /// <response code="200">Đổi mật khẩu thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpGet("/forgot-password")]
+        [HttpGet("forgot-password")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordDto forgotPasswordRequest)
         {

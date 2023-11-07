@@ -46,7 +46,7 @@ namespace PBL6.API.Controllers
             if (existExample is null) return NotFound();
 
             return Ok(existExample);
-        }
+        }   
 
         /// <summary>
         /// Get example theo name- không cần đăng nhập
@@ -54,7 +54,7 @@ namespace PBL6.API.Controllers
         /// <returns></returns>
         /// <response code="200"></response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpGet("/byname/{name}")]
+        [HttpGet("byname/{name}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExampleDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesDefaultResponseType]

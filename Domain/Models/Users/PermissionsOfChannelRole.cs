@@ -4,11 +4,11 @@ using PBL6.Domain.Models.Common;
 
 namespace PBL6.Domain.Models.Users
 {
-    [Table("PermissionsOfChanelRoles", Schema = "Chat")]
-    public class PermissionsOfChanelRole : FullAuditedEntity
+    [Table("PermissionsOfChannelRoles", Schema = "Chat")]
+    public class PermissionsOfChannelRole : FullAuditedEntity
     {
         [Required]
-        public Guid ChanelRoleId { get; set; }
+        public Guid ChannelRoleId { get; set; }
         
         [Required]
         public Guid PermissionId { get; set; }
