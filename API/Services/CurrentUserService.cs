@@ -9,7 +9,7 @@ namespace PBL6.API.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public CurrentUserService(IHttpContextAccessor httpContextAccessor)
-        {
+        {   
             _httpContextAccessor = httpContextAccessor;
         }
 

@@ -17,6 +17,10 @@ namespace PBL6.Domain.Models.Users
 
         public string Color { get; set; }
 
+        public Guid ChannelId { get; set; }
+        
+        public Channel Channel { get; set; }
+
         public IEnumerable<ChannelMember> Members { get; set; }
 
         public IEnumerable<ChannelPermission> Permissions { get; set; }

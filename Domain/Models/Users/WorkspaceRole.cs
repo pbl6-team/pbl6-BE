@@ -17,6 +17,10 @@ namespace PBL6.Domain.Models.Users
 
         public string Color { get; set; }
 
+        public Guid WorkspaceId { get; set; }
+
+        public Workspace Workspace { get; set; }
+
         public IEnumerable<WorkspaceMember> Members { get; set; }
 
         public IEnumerable<WorkspacePermission> Permissions { get; set; }

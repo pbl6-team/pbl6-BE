@@ -26,5 +26,7 @@ namespace PBL6.Domain.Models.Users
         public IEnumerable<Channel> Channels { get; set; }
 
         public IEnumerable<WorkspaceMember> Members { get; set; }
+
+        public IEnumerable<WorkspaceRole> WorkspaceRoles { get; set; }
     }
 }
