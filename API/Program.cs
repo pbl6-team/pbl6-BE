@@ -40,6 +40,7 @@ namespace PBL6.API
             app.UseAuthorization();
             app.Map("/", () => Results.Redirect("/swagger"));
             app.MapControllers();
+            app.UseCors("CorsPolicy");
 
             app.Run();
         }

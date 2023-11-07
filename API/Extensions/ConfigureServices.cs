@@ -25,6 +25,32 @@ namespace PBL6.API.Extensions
                 options.ModelMetadataDetailsProviders.Add(
                     new NewtonsoftJsonValidationMetadataProvider());
             });
+
+            services.AddCors(options =>
+            {
+                var allowHostsConfig = configuration["AllowedHosts"] ?? "";
+                options.AddPolicy("CorsPolicy",
+                builder =>
+                {
+                    if (allowHostsConfig.Equals("*"))
+                    {
+                        builder.SetIsOriginAllowed((origin) => true)
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            .AllowCredentials();
+                    }
+                    else
+                    {
+                        var allowHosts = allowHostsConfig.Split(";");
+                        builder.WithOrigins(allowHosts)
+                            .AllowAnyOrigin()
+                            .AllowAnyMethod()
+                            .AllowAnyHeader();
+                    }
+                });
+            });
+
+
             services.AddEndpointsApiExplorer();
             services.AddAutoMapper(typeof(AutoMapperProfile));
             services.AddHttpContextAccessor();
