@@ -11,7 +11,7 @@ namespace PBL6.Domain.Models.Users
         public Guid UserId { get; set; }
 
         [Required]
-        public Guid ChanelId { get; set; }
+        public Guid ChannelId { get; set; }
 
         public string Method { get; set; }
 

@@ -4,8 +4,8 @@ using PBL6.Domain.Models.Common;
 
 namespace PBL6.Domain.Models.Users
 {
-    [Table("ChanelPermissions", Schema = "Chat")]
-    public class ChanelPermission : FullAuditedEntity
+    [Table("ChannelRoles", Schema = "Chat")]
+    public class ChannelRole : FullAuditedEntity
     {
         [StringLength(50)]
         [Required]
@@ -15,11 +15,10 @@ namespace PBL6.Domain.Models.Users
         [Required]
         public string Description { get; set; }
 
-        public bool IsActive { get; set; }
+        public string Color { get; set; }
 
-        [Required]
-        public string Code { get; set; }
-        
-        public IEnumerable<ChanelRole> ChanelRoles { get; set; }
+        public IEnumerable<ChannelMember> Members { get; set; }
+
+        public IEnumerable<ChannelPermission> Permissions { get; set; }
     }
 }

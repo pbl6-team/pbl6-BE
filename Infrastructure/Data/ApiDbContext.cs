@@ -29,15 +29,15 @@ namespace PBL6.Infrastructure.Data
         public DbSet<UserNotification> UserNotifications { get; set; }
         public DbSet<UserToken> UserTokens { get; set; }
         public DbSet<Workspace> Workspaces { get; set; }
-        public DbSet<Channel> Chanels { get; set; }
+        public DbSet<Channel> Channels { get; set; }
         public DbSet<WorkspaceMember> WorkspaceMembers { get; set; }
-        public DbSet<ChannelMember> ChanelMembers { get; set; }
+        public DbSet<ChannelMember> ChannelMembers { get; set; }
         public DbSet<WorkspaceRole> WorkspaceRoles { get; set; }
         public DbSet<WorkspacePermission> WorkspacePermissions { get; set; }
         public DbSet<PermissionsOfWorkspaceRole> PermissionsOfWorkspaces { get; set; }
-        public DbSet<ChanelRole> ChanelRoles { get; set; }
-        public DbSet<ChanelPermission> ChanelPermissions { get; set; }
-        public DbSet<PermissionsOfChanelRole> PermissionsOfChanelRoles { get; set; }
+        public DbSet<ChannelRole> ChannelRoles { get; set; }
+        public DbSet<ChannelPermission> ChannelPermissions { get; set; }
+        public DbSet<PermissionsOfChannelRole> PermissionsOfChanelRoles { get; set; }
 
         public ApiDbContext() { }
 
@@ -117,7 +117,7 @@ namespace PBL6.Infrastructure.Data
                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Workspace>()
-               .HasMany(x => x.Chanels)
+               .HasMany(x => x.Channels)
                .WithOne(x => x.Workspace)
                .HasForeignKey(x => x.WorkspaceId)
                .OnDelete(DeleteBehavior.NoAction);
@@ -146,16 +146,16 @@ namespace PBL6.Infrastructure.Data
                         .HasForeignKey(e => e.WorkspaceRoleId)
                 );
 
-            modelBuilder.Entity<ChanelRole>()
+            modelBuilder.Entity<ChannelRole>()
                 .HasMany(e => e.Permissions)
-                .WithMany(e => e.ChanelRoles)
-                .UsingEntity<PermissionsOfChanelRole>(
-                    l => l.HasOne<ChanelPermission>()
+                .WithMany(e => e.ChannelRoles)
+                .UsingEntity<PermissionsOfChannelRole>(
+                    l => l.HasOne<ChannelPermission>()
                         .WithMany()
                         .HasForeignKey(e => e.PermissionId),
-                    r => r.HasOne<ChanelRole>()
+                    r => r.HasOne<ChannelRole>()
                         .WithMany()
-                        .HasForeignKey(e => e.ChanelRoleId)
+                        .HasForeignKey(e => e.ChannelRoleId)
                 );
         }
 

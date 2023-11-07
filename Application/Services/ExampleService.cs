@@ -147,7 +147,7 @@ namespace PBL6.Application.Services
                 else
                 {
                     throw new NotFoundException<Example>(id.ToString());
-                }
+                }   
 
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 

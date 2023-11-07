@@ -3,6 +3,8 @@ using PBL6.Application.Contract.Examples.Dtos;
 using PBL6.Application.Contract;
 using PBL6.Domain.Models;
 using PBL6.Domain.Models.Common;
+using PBL6.Domain.Models.Users;
+using PBL6.Application.Contract.Workspaces.Dtos;
 
 namespace PBL6.Application
 {
@@ -18,6 +20,12 @@ namespace PBL6.Application
                 .IncludeBase<FullAuditedEntity, FullAuditedDto>();
             CreateMap<CreateUpdateExampleDto, Example>();
             CreateMap<CreateUpdateExampleDto, ExampleDto>();
+            
+            CreateMap<Workspace, WorkspaceDto>()
+                .IncludeBase<FullAuditedEntity, FullAuditedDto>();
+            CreateMap<CreateUpdateWorkspaceDto, Workspace>();
+            CreateMap<CreateUpdateWorkspaceDto, WorkspaceDto>();
+            
         }
     }
 }
