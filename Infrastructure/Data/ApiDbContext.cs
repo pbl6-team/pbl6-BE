@@ -23,6 +23,8 @@ namespace PBL6.Infrastructure.Data
         public DbSet<AdminInfo> AdminInfos { get; set; }
 
         // Users
+        public DbSet<User> Users { get; set; }
+        public DbSet<UserInfo> UserInfos { get; set; }
         public DbSet<Plan> Plans { get; set; }
         public DbSet<PlanDetail> PlanDetails { get; set; }
         public DbSet<Notification> Notifications { get; set; }
@@ -128,6 +130,12 @@ namespace PBL6.Infrastructure.Data
                .HasForeignKey(x => x.WorkspaceId)
                .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Workspace>()
+               .HasMany(x => x.WorkspaceRoles)
+               .WithOne(x => x.Workspace)
+               .HasForeignKey(x => x.WorkspaceId)
+               .OnDelete(DeleteBehavior.NoAction);
+
             modelBuilder.Entity<WorkspaceRole>()
                .HasMany(x => x.Members)
                .WithOne(x => x.WorkspaceRole)
@@ -157,6 +165,12 @@ namespace PBL6.Infrastructure.Data
                         .WithMany()
                         .HasForeignKey(e => e.ChannelRoleId)
                 );
+            
+            modelBuilder.Entity<Channel>()
+               .HasMany(x => x.ChannelRoles)
+               .WithOne(x => x.Channel)
+               .HasForeignKey(x => x.ChannelId)
+               .OnDelete(DeleteBehavior.NoAction);
         }
 
         public override int SaveChanges()

@@ -6,7 +6,7 @@ namespace PBL6.API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +26,7 @@ namespace PBL6.API
                     options.SerializeAsV2 = true;
                 });
                 app.UseSwaggerUI();
+                await app.UseItToSeedSqlServerAsync();
             }
             else
             {
