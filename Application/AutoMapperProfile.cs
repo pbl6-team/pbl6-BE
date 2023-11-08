@@ -23,8 +23,12 @@ namespace PBL6.Application
             
             CreateMap<Workspace, WorkspaceDto>()
                 .IncludeBase<FullAuditedEntity, FullAuditedDto>();
-            CreateMap<CreateUpdateWorkspaceDto, Workspace>();
-            CreateMap<CreateUpdateWorkspaceDto, WorkspaceDto>();
+            CreateMap<CreateWorkspaceDto, Workspace>();
+            CreateMap<CreateWorkspaceDto, WorkspaceDto>();
+            CreateMap<UpdateWorkspaceDto, Workspace>();
+            CreateMap<UpdateWorkspaceDto, WorkspaceDto>();
+            CreateMap<UpdateAvatarWorkspaceDto, Workspace>();
+            CreateMap<UpdateAvatarWorkspaceDto, WorkspaceDto>();
             
         }
     }
