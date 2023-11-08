@@ -174,6 +174,11 @@ namespace PBL6.Application.Services
 
                 if (workspace is null) throw new NotFoundException<Workspace>(id.ToString());
 
+                if (updateWorkspaceDto.Description is null)
+                {
+                    updateWorkspaceDto.Description = string.Empty;
+                }
+
                 _mapper.Map(updateWorkspaceDto, workspace);
                 await _unitOfwork.Workspaces.UpdateAsync(workspace);
                 await _unitOfwork.SaveChangeAsync();
