@@ -29,7 +29,7 @@ namespace PBL6.API.Extensions
             services.AddCors(options =>
             {
                 var allowHostsConfig = configuration["AllowedHosts"] ?? "";
-                options.AddPolicy("CorsPolicy",
+                options.AddPolicy("CorsPolicy", 
                 builder =>
                 {
                     if (allowHostsConfig.Equals("*"))

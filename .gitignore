@@ -350,3 +350,6 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+*/Logs/log.txt
+API/nohup.out
+.vscode/launch.json
