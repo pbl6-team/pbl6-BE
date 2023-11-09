@@ -16,7 +16,8 @@ namespace PBL6.API.Filters
         public void OnAuthorization(AuthorizationFilterContext context)
         {
             var apiKeyHeader = context.HttpContext.Request.Headers["x-apikey"].ToString();
-
+            if(string.IsNullOrEmpty(apiKeyHeader))
+                apiKeyHeader = context.HttpContext.Request.Query["x-apikey"].ToString();
             if (apiKeyHeader.Any())
             {
                 var keys = new List<string>

@@ -66,10 +66,12 @@ namespace PBL6.API.Controllers.Auth
         /// <returns></returns>
         /// <response code="200">Đăng ký/Đăng nhập thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpGet("signin-google")]
+        [HttpPost("signin-google")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]
         public async Task<IActionResult> ExternalLogin(string code)
         {
+            Response.Headers.Add("Access-Control-Allow-Origin", "*");
+
             return Ok(await _authService.GoogleLoginAsync(code));
         }
 
