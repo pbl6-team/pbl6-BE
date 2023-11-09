@@ -27,7 +27,7 @@ namespace PBL6.API.Controllers.Auth
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
         [Authorize]
-        public async Task<IActionResult> Create(CreateUpdateWorkspaceDto input)
+        public async Task<IActionResult> Create(CreateWorkspaceDto input)
         {
             return Ok(await _workspaceService.AddAsync(input));
         }
@@ -38,13 +38,13 @@ namespace PBL6.API.Controllers.Auth
         /// <param name="id"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        /// <response code="200">Cập nhật thành công</response>
+        /// <response code="204">Cập nhật thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [Authorize]
-        public async Task<IActionResult> Update(Guid id, CreateUpdateWorkspaceDto input)
+        public async Task<IActionResult> Update(Guid id, UpdateWorkspaceDto input)
         {
             var result = await _workspaceService.UpdateAsync(id, input);
             if (result is null) return NotFound();
@@ -58,13 +58,13 @@ namespace PBL6.API.Controllers.Auth
         /// <param name="id"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        /// <response code="200">Cập nhật thành công</response>
+        /// <response code="204">Cập nhật thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpPut("avatar")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [Authorize]
-        public async Task<IActionResult> UpdateAvatar(Guid id, IFormFile input)
+        public async Task<IActionResult> UpdateAvatar(Guid id, UpdateAvatarWorkspaceDto input)
         {
             var result = await _workspaceService.UpdateAvatarAsync(id, input);
             if (result is null) return NotFound();
@@ -77,7 +77,7 @@ namespace PBL6.API.Controllers.Auth
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        /// <response code="200">Xoá thành công</response>
+        /// <response code="204">Xoá thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpDelete]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -92,7 +92,7 @@ namespace PBL6.API.Controllers.Auth
         }
 
         /// <summary>
-        /// API Get all workspaces - không cần đăng nhập
+        /// API Get all workspaces - cần đăng nhập
         /// </summary>
         /// <returns></returns>
         /// <response code="200">Get thành công</response>
@@ -100,13 +100,14 @@ namespace PBL6.API.Controllers.Auth
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<WorkspaceDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize]
         public async Task<IActionResult> GetAll()
         {
             return Ok(await _workspaceService.GetAllAsync());
         }
 
         /// <summary>
-        /// API Get workspace by id - không cần đăng nhập
+        /// API Get workspace by id - cần đăng nhập
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -115,13 +116,14 @@ namespace PBL6.API.Controllers.Auth
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(WorkspaceDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize]
         public async Task<IActionResult> GetById(Guid id)
         {
             return Ok(await _workspaceService.GetByIdAsync(id));
         }
 
         /// <summary>
-        /// API Get workspace by name - không cần đăng nhập
+        /// API Get workspace by name - cần đăng nhập
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
@@ -130,6 +132,7 @@ namespace PBL6.API.Controllers.Auth
         [HttpGet("byname/{input}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<WorkspaceDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize]
         public async Task<IActionResult> GetByName(string input)
         {
             return Ok(await _workspaceService.GetByNameAsync(input));

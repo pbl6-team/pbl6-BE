@@ -8,9 +8,9 @@ namespace PBL6.Application.Contract.Workspaces
         Task<WorkspaceDto> GetByIdAsync(Guid id);
         Task<IEnumerable<WorkspaceDto>> GetByNameAsync(string name);
         Task<IEnumerable<WorkspaceDto>> GetAllAsync();
-        Task<WorkspaceDto> UpdateAsync(Guid id, CreateUpdateWorkspaceDto workspaceDto);
-        Task<WorkspaceDto> UpdateAvatarAsync(Guid id, IFormFile workspaceDto);
-        Task<Guid> AddAsync(CreateUpdateWorkspaceDto workspaceDto);
+        Task<WorkspaceDto> UpdateAsync(Guid id, UpdateWorkspaceDto updateWorkspaceDto);
+        Task<WorkspaceDto> UpdateAvatarAsync(Guid id, UpdateAvatarWorkspaceDto updateAvatarWorkspaceDto);
+        Task<Guid> AddAsync(CreateWorkspaceDto createWorkspaceDto);
         Task<WorkspaceDto> DeleteAsync(Guid id);
     }
 }

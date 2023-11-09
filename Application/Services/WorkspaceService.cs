@@ -24,7 +24,7 @@ namespace PBL6.Application.Services
 
         static string GetActualAsyncMethodName([CallerMemberName] string name = null) => name;
 
-        public async Task<Guid> AddAsync(CreateUpdateWorkspaceDto workspaceDto)
+        public async Task<Guid> AddAsync(CreateWorkspaceDto workspaceDto)
         {
             var method = GetActualAsyncMethodName();
             try
@@ -34,9 +34,18 @@ namespace PBL6.Application.Services
                 var userId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
 
                 if (workspaceDto.Avatar is not null)
-                {   
+                {
                     var imageUrl = await _fileService.UploadImageToImgbb(workspaceDto.Avatar, workspace.Id);
                     workspace.AvatarUrl = imageUrl;
+                }
+                else
+                {
+                    workspace.AvatarUrl = CommonConsts.DEFAULT_WORKSPACE_AVATAR;
+                }
+
+                if (workspaceDto.Description is null)
+                {
+                    workspace.Description = string.Empty;
                 }
 
                 workspace.OwnerId = userId;
@@ -80,9 +89,9 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var workspace = await _unitOfwork.Workspaces.FindAsync(id);
-                
+
                 if (workspace is null) throw new NotFoundException<Workspace>(id.ToString());
-                
+
                 await _unitOfwork.Workspaces.DeleteAsync(workspace);
                 await _unitOfwork.SaveChangeAsync();
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
@@ -104,7 +113,7 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var workspaces = await _unitOfwork.Workspaces.Queryable().ToListAsync();
-                
+
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
                 return _mapper.Map<IEnumerable<WorkspaceDto>>(workspaces);
             }
@@ -123,7 +132,7 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var workspace = await _unitOfwork.Workspaces.Queryable().FirstOrDefaultAsync(x => x.Id == id);
-                
+
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
                 return _mapper.Map<WorkspaceDto>(workspace);
             }
@@ -142,7 +151,7 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var workspaces = await _unitOfwork.Workspaces.Queryable().Where(x => x.Name.Contains(name)).ToListAsync();
-                
+
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
                 return _mapper.Map<IEnumerable<WorkspaceDto>>(workspaces);
             }
@@ -154,7 +163,7 @@ namespace PBL6.Application.Services
             }
         }
 
-        public async Task<WorkspaceDto> UpdateAsync(Guid id, CreateUpdateWorkspaceDto workspaceDto)
+        public async Task<WorkspaceDto> UpdateAsync(Guid id, UpdateWorkspaceDto updateWorkspaceDto)
         {
             var method = GetActualAsyncMethodName();
             try
@@ -162,10 +171,15 @@ namespace PBL6.Application.Services
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var userId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
                 var workspace = await _unitOfwork.Workspaces.FindAsync(id);
-                
+
                 if (workspace is null) throw new NotFoundException<Workspace>(id.ToString());
-                
-                _mapper.Map(workspaceDto, workspace);
+
+                if (updateWorkspaceDto.Description is null)
+                {
+                    updateWorkspaceDto.Description = string.Empty;
+                }
+
+                _mapper.Map(updateWorkspaceDto, workspace);
                 await _unitOfwork.Workspaces.UpdateAsync(workspace);
                 await _unitOfwork.SaveChangeAsync();
 
@@ -180,7 +194,7 @@ namespace PBL6.Application.Services
             }
         }
 
-        public async Task<WorkspaceDto> UpdateAvatarAsync(Guid id, IFormFile avatar)
+        public async Task<WorkspaceDto> UpdateAvatarAsync(Guid id, UpdateAvatarWorkspaceDto updateAvatarWorkspaceDto)
         {
             var method = GetActualAsyncMethodName();
             try
@@ -188,11 +202,17 @@ namespace PBL6.Application.Services
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var userId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
                 var workspace = await _unitOfwork.Workspaces.FindAsync(id);
-                
+
                 if (workspace is null) throw new NotFoundException<Workspace>(id.ToString());
                 
-                var imageUrl = await _fileService.UploadImageToImgbb(avatar, workspace.Id);
-                workspace.AvatarUrl = imageUrl;
+                if (updateAvatarWorkspaceDto.Avatar is not null)
+                {
+                    workspace.AvatarUrl = await _fileService.UploadImageToImgbb(updateAvatarWorkspaceDto.Avatar, workspace.Id);
+                }
+                else 
+                {
+                    workspace.AvatarUrl = CommonConsts.DEFAULT_WORKSPACE_AVATAR;
+                }
                 await _unitOfwork.Workspaces.UpdateAsync(workspace);
                 await _unitOfwork.SaveChangeAsync();
 

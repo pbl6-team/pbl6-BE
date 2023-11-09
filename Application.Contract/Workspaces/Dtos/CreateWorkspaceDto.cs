@@ -4,14 +4,13 @@ using Microsoft.AspNetCore.Http;
 
 namespace PBL6.Application.Contract.Workspaces.Dtos
 {
-    public class CreateUpdateWorkspaceDto
+    public class CreateWorkspaceDto
     {
         [Required]
         [StringLength(50)]
         public string Name { get; set; }
 
-        [Required]
-        [StringLength(50)]
+        [StringLength(255)]
         public string Description { get; set; }
 
         public IFormFile Avatar { get; set; }
