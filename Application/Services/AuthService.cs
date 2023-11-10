@@ -164,9 +164,7 @@ namespace PBL6.Application.Services
                 var userQueryable = _unitOfwork.Users.Queryable();
                 var existedUser = await userQueryable
                     .Include(x => x.UserTokens)
-                    .FirstOrDefaultAsync(x => x.Email == getOtpDto.Email);
-
-                if (existedUser is null) return;
+                    .FirstOrDefaultAsync(x => x.Email == getOtpDto.Email) ?? throw new BadRequestException($"Not exist user with email '{getOtpDto.Email}'");
 
                 if (getOtpDto.OtpType == ((short)OTP_TYPE.VERIFY_USER) && existedUser.IsActive) throw new BadRequestException("Email is verified");
 
