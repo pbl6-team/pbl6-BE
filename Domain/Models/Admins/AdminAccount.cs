@@ -7,7 +7,7 @@ namespace PBL6.Domain.Models.Admins
     [Table("AdminAccounts", Schema = "Admin")]
     public class AdminAccount : FullAuditedEntity
     {
-[StringLength(50)]
+        [StringLength(50)]
         [Required]
         public string UserName { get; set; }
 
@@ -37,8 +37,8 @@ namespace PBL6.Domain.Models.Admins
 
         public AdminInfo Information { get; set; }
 
-        public IEnumerable<Role> Roles { get; set; }
+        public ICollection<Role> Roles { get; set; }
 
-        public IEnumerable<AdminToken> AdminTokens { get; set; }
+        public ICollection<AdminToken> AdminTokens { get; set; }
     }
 }

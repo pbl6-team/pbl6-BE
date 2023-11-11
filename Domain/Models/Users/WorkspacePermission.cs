@@ -20,6 +20,6 @@ namespace PBL6.Domain.Models.Users
         [Required]
         public string Code { get; set; }
         
-        public IEnumerable<WorkspaceRole> WorkspaceRoles { get; set; }
+        public ICollection<WorkspaceRole> WorkspaceRoles { get; set; }
     }
 }

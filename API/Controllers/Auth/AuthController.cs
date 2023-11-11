@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PBL6.Application.Contract.Users;
 using PBL6.Application.Contract.Users.Dtos;
 
-namespace PBL6.API.Controllers.Auth
+namespace PBL6.API.Controllers.Workspaces
 {
     [Produces("application/json")]
     [Route("api/[controller]")]

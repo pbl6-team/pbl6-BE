@@ -14,6 +14,10 @@ namespace PBL6.Infrastructure.Data
         public IUserRepository Users { get; }
         public IUserTokenRepository UserTokens { get; }
         public IWorkspaceRepository Workspaces { get; }
+        public IChannelRepository Channels { get; }
+        public IWorkspaceMemberRepository WorkspaceMembers { get; }
+        public IChannelMemberRepository ChannelMembers { get; }
+        
 
         public UnitOfWork(
             ApiDbContext apiDbContext,
@@ -27,6 +31,9 @@ namespace PBL6.Infrastructure.Data
             Users = new UserRepository(apiDbContext, logger);
             UserTokens = new UserTokenRepository(apiDbContext, logger);
             Workspaces = new WorkspaceRepository(apiDbContext, logger);
+            Channels = new ChannelRepository(apiDbContext, logger);
+            WorkspaceMembers = new WorkspaceMemberRepository(apiDbContext, logger);
+            ChannelMembers = new ChannelMemberRepository(apiDbContext, logger);
         }
 
         public async Task SaveChangeAsync()

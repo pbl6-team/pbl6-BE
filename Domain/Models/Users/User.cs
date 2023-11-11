@@ -34,6 +34,6 @@ namespace PBL6.Domain.Models.Users
 
         public ICollection<UserToken> UserTokens { get; set; }
 
-        public IEnumerable<UserNotification> UserNotifications { get; set; }
+        public ICollection<UserNotification> UserNotifications { get; set; }
     }
 }

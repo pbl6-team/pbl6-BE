@@ -21,8 +21,8 @@ namespace PBL6.Domain.Models.Admins
         [Required]
         public string Description { get; set; }
 
-        public IEnumerable<Function> Functions { get; set; }
+        public ICollection<Function> Functions { get; set; }
 
-        public IEnumerable<AdminAccount> AdminAccounts { get; set; }
+        public ICollection<AdminAccount> AdminAccounts { get; set; }
     }
 }

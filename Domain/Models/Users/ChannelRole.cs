@@ -21,8 +21,8 @@ namespace PBL6.Domain.Models.Users
         
         public Channel Channel { get; set; }
 
-        public IEnumerable<ChannelMember> Members { get; set; }
+        public ICollection<ChannelMember> Members { get; set; }
 
-        public IEnumerable<ChannelPermission> Permissions { get; set; }
+        public ICollection<ChannelPermission> Permissions { get; set; }
     }
 }

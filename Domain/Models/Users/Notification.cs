@@ -25,6 +25,6 @@ namespace PBL6.Domain.Models.Users
         [Required]
         public short Type { get; set; }
 
-        public IEnumerable<UserNotification> UserNotifications { get; set; }
+        public ICollection<UserNotification> UserNotifications { get; set; }
     }
 }
