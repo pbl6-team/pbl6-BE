@@ -23,10 +23,10 @@ namespace PBL6.Domain.Models.Users
 
         public User Owner { get; set; }
 
-        public IEnumerable<Channel> Channels { get; set; }
+        public ICollection<Channel> Channels { get; set; }
 
-        public IEnumerable<WorkspaceMember> Members { get; set; }
+        public ICollection<WorkspaceMember> Members { get; set; }
 
-        public IEnumerable<WorkspaceRole> WorkspaceRoles { get; set; }
+        public ICollection<WorkspaceRole> WorkspaceRoles { get; set; }
     }
 }

@@ -19,6 +19,6 @@ namespace PBL6.Domain.Models.Admins
         [Required]
         public string Description { get; set; }
 
-        public IEnumerable<Role> Roles { get; set; }
+        public ICollection<Role> Roles { get; set; }
     }
 }

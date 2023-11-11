@@ -32,6 +32,7 @@ namespace PBL6.Infrastructure.Data
         public DbSet<UserToken> UserTokens { get; set; }
         public DbSet<Workspace> Workspaces { get; set; }
         public DbSet<Channel> Channels { get; set; }
+        public DbSet<ChannelCategory> ChannelCategories { get; set; }
         public DbSet<WorkspaceMember> WorkspaceMembers { get; set; }
         public DbSet<ChannelMember> ChannelMembers { get; set; }
         public DbSet<WorkspaceRole> WorkspaceRoles { get; set; }

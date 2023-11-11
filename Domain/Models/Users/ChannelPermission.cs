@@ -20,6 +20,6 @@ namespace PBL6.Domain.Models.Users
         [Required]
         public string Code { get; set; }
         
-        public IEnumerable<ChannelRole> ChannelRoles { get; set; }
+        public ICollection<ChannelRole> ChannelRoles { get; set; }
     }
 }

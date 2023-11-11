@@ -21,8 +21,8 @@ namespace PBL6.Domain.Models.Users
 
         public Workspace Workspace { get; set; }
 
-        public IEnumerable<WorkspaceMember> Members { get; set; }
+        public ICollection<WorkspaceMember> Members { get; set; }
 
-        public IEnumerable<WorkspacePermission> Permissions { get; set; }
+        public ICollection<WorkspacePermission> Permissions { get; set; }
     }
 }

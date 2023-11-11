@@ -1,22 +1,24 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PBL6.Application.Contract.Channels;
+using PBL6.Application.Contract.Channels.Dtos;
 using PBL6.Application.Contract.Users.Dtos;
 using PBL6.Application.Contract.Workspaces;
 using PBL6.Application.Contract.Workspaces.Dtos;
 
-namespace PBL6.API.Controllers.Workspaces
+namespace PBL6.API.Controllers.Channels
 {
     [Produces("application/json")]
     [Route("api/[controller]")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public class WorkspaceController : Controller
+    public class ChannelController : Controller
     {
-        private readonly IWorkspaceService _workspaceService;
+        private readonly IChannelService _channelService;
 
-        public WorkspaceController(IWorkspaceService workspaceService) => _workspaceService = workspaceService;
+        public ChannelController(IChannelService channelService) => _channelService = channelService;
 
         /// <summary>
-        /// API để tạo workspace - cần đăng nhập
+        /// API để tạo channel - cần đăng nhập
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
@@ -27,11 +29,11 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
         [Authorize]
-        public async Task<IActionResult> Create(CreateWorkspaceDto input)
+        public async Task<IActionResult> Create(CreateChannelDto input)
         {
             try
             {
-                return Ok(await _workspaceService.AddAsync(input));
+                return Ok(await _channelService.AddAsync(input));
             }
             catch (Exception e)
             {
@@ -40,22 +42,22 @@ namespace PBL6.API.Controllers.Workspaces
         }
 
         /// <summary>
-        /// API Update workspace - cần đăng nhập
+        /// API Update channel - cần đăng nhập
         /// </summary>
-        /// <param name="workspaceId"></param>
+        /// <param name="channelId"></param>
         /// <param name="input"></param>
         /// <returns></returns>
         /// <response code="200">Cập nhật thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpPut("{workspaceId}")]
+        [HttpPut("{channelId}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
-        public async Task<IActionResult> Update(Guid workspaceId, UpdateWorkspaceDto input)
+        public async Task<IActionResult> Update(Guid channelId, UpdateChannelDto input)
         {
             try
             {
-                return Ok(await _workspaceService.UpdateAsync(workspaceId, input));
+                return Ok(await _channelService.UpdateAsync(channelId, input));
             }
             catch (Exception e)
             {
@@ -64,33 +66,9 @@ namespace PBL6.API.Controllers.Workspaces
         }
 
         /// <summary>
-        /// API Update avatar workspace - cần đăng nhập
+        /// API delete channel - cần đăng nhập
         /// </summary>
-        /// <param name="workspaceId"></param>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        /// <response code="200">Cập nhật thành công</response>
-        /// <response code="400">Có lỗi xảy ra</response>
-        [HttpPut("avatar")]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [Authorize]
-        public async Task<IActionResult> UpdateAvatar(Guid workspaceId, UpdateAvatarWorkspaceDto input)
-        {
-            try
-            {
-                return Ok(await _workspaceService.UpdateAvatarAsync(workspaceId, input));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
-
-        /// <summary>
-        /// API delete workspace - cần đăng nhập
-        /// </summary>
-        /// <param name="workspaceId"></param>
+        /// <param name="channelId"></param>
         /// <returns></returns>
         /// <response code="200">Xoá thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
@@ -98,11 +76,11 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
-        public async Task<IActionResult> Delete(Guid workspaceId)
+        public async Task<IActionResult> Delete(Guid channelId)
         {
             try
             {
-                return Ok(await _workspaceService.DeleteAsync(workspaceId));
+                return Ok(await _channelService.DeleteAsync(channelId));
             }
             catch (Exception e)
             {
@@ -111,20 +89,21 @@ namespace PBL6.API.Controllers.Workspaces
         }
 
         /// <summary>
-        /// API Get all workspaces - cần đăng nhập
+        /// API Get all channels of a workspace - cần đăng nhập
         /// </summary>
+        /// <param name="workspaceId"></param>
         /// <returns></returns>
         /// <response code="200">Get thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<WorkspaceDto>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ChannelDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAllChannelsOfAWorkspace(Guid workspaceId)
         {
             try
             {
-                return Ok(await _workspaceService.GetAllAsync());
+                return Ok(await _channelService.GetAllChannelsOfAWorkspaceAsync(workspaceId));
             }
             catch (Exception e)
             {
@@ -133,21 +112,21 @@ namespace PBL6.API.Controllers.Workspaces
         }
 
         /// <summary>
-        /// API Get workspace by id - cần đăng nhập
+        /// API Get channel by id - cần đăng nhập
         /// </summary>
-        /// <param name="workspaceId"></param>
+        /// <param name="channelId"></param>
         /// <returns></returns>
         /// <response code="200">Get thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpGet("{workspaceId}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(WorkspaceDto))]
+        [HttpGet("{channelId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize]
-        public async Task<IActionResult> GetById(Guid workspaceId)
+        public async Task<IActionResult> GetById(Guid channelId)
         {
             try
             {
-                return Ok(await _workspaceService.GetByIdAsync(workspaceId));
+                return Ok(await _channelService.GetByIdAsync(channelId));
             }
             catch (Exception e)
             {
@@ -156,21 +135,21 @@ namespace PBL6.API.Controllers.Workspaces
         }
 
         /// <summary>
-        /// API Get workspace by name - cần đăng nhập
+        /// API Get channel by name - cần đăng nhập
         /// </summary>
-        /// <param name="workspaceName"></param>
+        /// <param name="channelName"></param>
         /// <returns></returns>
         /// <response code="200">Get thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpGet("byname/{workspaceName}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<WorkspaceDto>))]
+        [HttpGet("byname/{channelName}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ChannelDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize]
-        public async Task<IActionResult> GetByName(string workspaceName)
+        public async Task<IActionResult> GetByName(string channelName)
         {
             try
             {
-                return Ok(await _workspaceService.GetByNameAsync(workspaceName));
+                return Ok(await _channelService.GetByNameAsync(channelName));
             }
             catch (Exception e)
             {
@@ -179,22 +158,22 @@ namespace PBL6.API.Controllers.Workspaces
         }
 
         /// <summary>
-        /// API Add member to workspace - cần đăng nhập
+        /// API Add member to a channel - cần đăng nhập
         /// </summary>
-        /// <param name="workspaceId"></param>
+        /// <param name="channelId"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        /// <response code="200">Add thành công</response>
+        /// <response code="200">Thêm thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpPost("addmember")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
-        public async Task<IActionResult> AddMember(Guid workspaceId, Guid userId)
+        public async Task<IActionResult> AddMemberToChannel(Guid channelId , Guid userId)
         {
             try
             {
-                return Ok(await _workspaceService.AddMemberToWorkspaceAsync(workspaceId, userId));
+                return Ok(await _channelService.AddMemberToChannelAsync(channelId, userId));
             }
             catch (Exception e)
             {
@@ -203,22 +182,22 @@ namespace PBL6.API.Controllers.Workspaces
         }
 
         /// <summary>
-        /// API Remove member from workspace - cần đăng nhập
+        /// API remove member from channel - cần đăng nhập
         /// </summary>
-        /// <param name="workspaceId"></param>
+        /// <param name="channelId"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        /// <response code="200">Remove thành công</response>
+        /// <response code="200">Xoá thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpPost("removemember")]
+        [HttpDelete("removemember")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
-        public async Task<IActionResult> RemoveMember(Guid workspaceId, Guid userId)
+        public async Task<IActionResult> RemoveMemberFromChannel(Guid channelId, Guid userId)
         {
             try
             {
-                return Ok(await _workspaceService.RemoveMemberFromWorkspaceAsync(workspaceId, userId));
+                return Ok(await _channelService.RemoveMemberFromChannelAsync(channelId, userId));
             }
             catch (Exception e)
             {

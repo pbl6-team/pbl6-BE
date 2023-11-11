@@ -5,12 +5,14 @@ namespace PBL6.Application.Contract.Workspaces
 {
     public interface IWorkspaceService
     {
-        Task<WorkspaceDto> GetByIdAsync(Guid id);
-        Task<IEnumerable<WorkspaceDto>> GetByNameAsync(string name);
+        Task<WorkspaceDto> GetByIdAsync(Guid workspaceId);
+        Task<IEnumerable<WorkspaceDto>> GetByNameAsync(string workspaceName);
         Task<IEnumerable<WorkspaceDto>> GetAllAsync();
-        Task<WorkspaceDto> UpdateAsync(Guid id, UpdateWorkspaceDto updateWorkspaceDto);
-        Task<WorkspaceDto> UpdateAvatarAsync(Guid id, UpdateAvatarWorkspaceDto updateAvatarWorkspaceDto);
+        Task<Guid> UpdateAsync(Guid workspaceId, UpdateWorkspaceDto updateWorkspaceDto);
+        Task<Guid> UpdateAvatarAsync(Guid workspaceId, UpdateAvatarWorkspaceDto updateAvatarWorkspaceDto);
         Task<Guid> AddAsync(CreateWorkspaceDto createWorkspaceDto);
-        Task<WorkspaceDto> DeleteAsync(Guid id);
+        Task<Guid> DeleteAsync(Guid workspaceId);
+        Task<Guid> AddMemberToWorkspaceAsync(Guid workspaceId, Guid userId);
+        Task<Guid> RemoveMemberFromWorkspaceAsync(Guid workspaceId, Guid userId);
     }
 }
