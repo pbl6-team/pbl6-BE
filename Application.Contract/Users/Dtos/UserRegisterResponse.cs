@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace PBL6.Application.Contract.Users.Dtos
 {
@@ -11,14 +10,14 @@ namespace PBL6.Application.Contract.Users.Dtos
         /// </summary>
         /// <example>jwt token</example>
         [Required]
-        [JsonPropertyName("Token")]
         public string Token { get; set; }
+
+        public DateTimeOffset TokenTimeOut { get; set; }
 
         /// <summary>
         /// Email
         /// </summary>
         /// <example>123456@gmail.com</example>
-        [JsonPropertyName("Email")]
         public string Email { get; set; }
     }
 }

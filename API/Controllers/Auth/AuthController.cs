@@ -83,7 +83,7 @@ namespace PBL6.API.Controllers.Workspaces
         /// <response code="200">Đổi mật khẩu thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpPost("change-password")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
         public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
         {
@@ -103,7 +103,7 @@ namespace PBL6.API.Controllers.Workspaces
         /// <response code="200">Lấy OTP thành công và đã gửi mail cho user</response>
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpPost("get-otp")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetOtp(GetOtpDto getOtpDto)
         {
             await _authService.GetNewOtpAsync(getOtpDto);
@@ -119,7 +119,7 @@ namespace PBL6.API.Controllers.Workspaces
         /// <response code="200">Đổi mật khẩu thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpPost("forgot-password")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordDto forgotPasswordRequest)
         {
             await _authService.ForgotPasswordAsync(forgotPasswordRequest);
