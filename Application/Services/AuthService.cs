@@ -18,9 +18,8 @@ namespace PBL6.Application.Services
     {
         private readonly string _className;
 
-        public AuthService(
-          IServiceProvider serviceProvider
-        ) : base(serviceProvider)
+        public AuthService(IServiceProvider serviceProvider)
+            : base(serviceProvider)
         {
             _className = GetType().Name;
         }
@@ -46,26 +45,29 @@ namespace PBL6.Application.Services
 
                 var existedUser = await userQueryable
                     .Include(x => x.UserTokens)
-                    .FirstOrDefaultAsync(x => x.Email == userInput.Email || x.Username == userInput.Username);
+                    .FirstOrDefaultAsync(
+                        x => x.Email == userInput.Email || x.Username == userInput.Username
+                    );
                 if (existedUser is null)
                 {
-                    User newUser = new()
-                    {
-                        Email = userInput.Email,
-                        Username = userInput.Username,
-                        Password = hashPassword,
-                        PasswordSalt = passwordSalt,
-                        IsActive = false,
-                        Information = new()
+                    User newUser =
+                        new()
                         {
-                            FirstName = userInput.FirstName,
-                            LastName = userInput.LastName,
-                            BirthDay = userInput.BirthDay,
-                            Phone = userInput.Phone,
-                            Gender = userInput.Gender,
-                            Status = (short)USER.DEFAULT
-                        }
-                    };
+                            Email = userInput.Email,
+                            Username = userInput.Username,
+                            Password = hashPassword,
+                            PasswordSalt = passwordSalt,
+                            IsActive = false,
+                            Information = new()
+                            {
+                                FirstName = userInput.FirstName,
+                                LastName = userInput.LastName,
+                                BirthDay = userInput.BirthDay,
+                                Phone = userInput.Phone,
+                                Gender = userInput.Gender,
+                                Status = (short)USER.DEFAULT
+                            }
+                        };
 
                     existedUser = await _unitOfwork.Users.AddAsync(newUser);
                 }
@@ -88,36 +90,51 @@ namespace PBL6.Application.Services
                     await _unitOfwork.Users.UpdateAsync(existedUser);
                 }
 
-                ClaimData claimData = new()
-                {
-                    UserId = existedUser.Id,
-                    Email = existedUser.Email,
-                    Username = existedUser.Username,
-                    IsActive = existedUser.IsActive,
-                };
+                ClaimData claimData =
+                    new()
+                    {
+                        UserId = existedUser.Id,
+                        Email = existedUser.Email,
+                        Username = existedUser.Username,
+                        IsActive = existedUser.IsActive,
+                    };
                 var token = SecurityFunction.GenerateToken(claimData, _config);
-                await _unitOfwork.UserTokens.AddAsync(
+                var userToken = await _unitOfwork.UserTokens.AddAsync(
                     new()
                     {
                         UserId = existedUser.Id,
                         Token = token,
                         Otp = OTP,
                         OtpType = (short?)OTP_TYPE.VERIFY_USER,
-                        ValidTo = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["OtpTimeOut"] ?? CommonConfig.OtpTimeOut)),
-                        TimeOut = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["OtpTimeOut"] ?? CommonConfig.OtpTimeOut))
+                        ValidTo = DateTimeOffset.UtcNow.AddMinutes(
+                            int.Parse(_config["OtpTimeOut"] ?? CommonConfig.OtpTimeOut)
+                        ),
+                        TimeOut = DateTimeOffset.UtcNow.AddMinutes(
+                            int.Parse(_config["OtpTimeOut"] ?? CommonConfig.OtpTimeOut)
+                        )
                     }
                 );
 
                 await _unitOfwork.SaveChangeAsync();
-                await _mailService.Send(userInput.Email, MailConsts.SignUp.Subject, MailConsts.SignUp.Template, OTP);
+                await _mailService.Send(
+                    userInput.Email,
+                    MailConsts.SignUp.Subject,
+                    MailConsts.SignUp.Template,
+                    OTP
+                );
 
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
-                return new UserRegisterResponse { Token = token, Email = userInput.Email };
+                return new UserRegisterResponse { Token = token, TokenTimeOut = userToken.TimeOut, Email = userInput.Email };
             }
             catch (Exception e)
             {
-                _logger.LogInformation("[{_className}][{method}] Error: {message}", _className, method, e.Message);
+                _logger.LogInformation(
+                    "[{_className}][{method}] Error: {message}",
+                    _className,
+                    method,
+                    e.Message
+                );
 
                 throw;
             }
@@ -130,17 +147,19 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var userId = Guid.Parse(_currentUser.UserId);
-                var userToken = await _unitOfwork.UserTokens
-                    .Queryable()
-                    .Include(x => x.User)
-                    .FirstOrDefaultAsync(x =>
-                        x.User.Id == userId
-                        && !x.User.IsActive
-                        && !x.User.IsDeleted
-                        && x.Otp == verifyRegisterDto.Otp
-                        && x.ValidTo >= DateTimeOffset.UtcNow
-                        && x.TimeOut >= DateTimeOffset.UtcNow
-                    ) ?? throw new InvalidOtpException();
+                var userToken =
+                    await _unitOfwork.UserTokens
+                        .Queryable()
+                        .Include(x => x.User)
+                        .FirstOrDefaultAsync(
+                            x =>
+                                x.User.Id == userId
+                                && !x.User.IsActive
+                                && !x.User.IsDeleted
+                                && x.Otp == verifyRegisterDto.Otp
+                                && x.ValidTo >= DateTimeOffset.UtcNow
+                                && x.TimeOut >= DateTimeOffset.UtcNow
+                        ) ?? throw new InvalidOtpException();
                 userToken.ValidTo = DateTimeOffset.UtcNow;
                 userToken.User.IsActive = true;
                 await _unitOfwork.SaveChangeAsync();
@@ -149,7 +168,12 @@ namespace PBL6.Application.Services
             }
             catch (Exception e)
             {
-                _logger.LogInformation("[{_className}][{method}] Error: {message}", _className, method, e.Message);
+                _logger.LogInformation(
+                    "[{_className}][{method}] Error: {message}",
+                    _className,
+                    method,
+                    e.Message
+                );
 
                 throw;
             }
@@ -162,29 +186,40 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var userQueryable = _unitOfwork.Users.Queryable();
-                var existedUser = await userQueryable
-                    .Include(x => x.UserTokens)
-                    .FirstOrDefaultAsync(x => x.Email == getOtpDto.Email) ?? throw new BadRequestException($"Not exist user with email '{getOtpDto.Email}'");
+                var existedUser =
+                    await userQueryable
+                        .Include(x => x.UserTokens)
+                        .FirstOrDefaultAsync(x => x.Email == getOtpDto.Email)
+                    ?? throw new BadRequestException(
+                        $"Not exist user with email '{getOtpDto.Email}'"
+                    );
 
-                if (getOtpDto.OtpType == ((short)OTP_TYPE.VERIFY_USER) && existedUser.IsActive) throw new BadRequestException("Email is verified");
+                if (getOtpDto.OtpType == ((short)OTP_TYPE.VERIFY_USER) && existedUser.IsActive)
+                    throw new BadRequestException("Email is verified");
 
                 var existToken = await _unitOfwork.UserTokens
                     .Queryable()
                     .OrderByDescending(x => x.ValidTo)
-                    .FirstOrDefaultAsync(x => x.Otp != null
-                        && x.UserId == existedUser.Id
-                        && x.ValidTo >= DateTimeOffset.UtcNow
-                        && x.TimeOut >= DateTimeOffset.UtcNow
+                    .FirstOrDefaultAsync(
+                        x =>
+                            x.Otp != null
+                            && x.UserId == existedUser.Id
+                            && x.ValidTo >= DateTimeOffset.UtcNow
+                            && x.TimeOut >= DateTimeOffset.UtcNow
                     );
-                if (existToken is not null) throw new ExistedOtpException((int)(existToken.ValidTo - DateTimeOffset.UtcNow).TotalSeconds);
+                if (existToken is not null)
+                    throw new ExistedOtpException(
+                        (int)(existToken.ValidTo - DateTimeOffset.UtcNow).TotalSeconds
+                    );
                 var OTP = SecurityFunction.GenerationOTP();
-                ClaimData claimData = new()
-                {
-                    UserId = existedUser.Id,
-                    Email = existedUser.Email,
-                    Username = existedUser.Username,
-                    IsActive = existedUser.IsActive,
-                };
+                ClaimData claimData =
+                    new()
+                    {
+                        UserId = existedUser.Id,
+                        Email = existedUser.Email,
+                        Username = existedUser.Username,
+                        IsActive = existedUser.IsActive,
+                    };
 
                 var token = SecurityFunction.GenerateToken(claimData, _config);
                 await _unitOfwork.UserTokens.AddAsync(
@@ -194,8 +229,12 @@ namespace PBL6.Application.Services
                         Token = token,
                         Otp = OTP,
                         OtpType = getOtpDto.OtpType,
-                        ValidTo = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["OtpTimeOut"] ?? CommonConfig.OtpTimeOut)),
-                        TimeOut = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["TokenTimeOut"] ?? CommonConfig.OtpTimeOut))
+                        ValidTo = DateTimeOffset.UtcNow.AddMinutes(
+                            int.Parse(_config["OtpTimeOut"] ?? CommonConfig.OtpTimeOut)
+                        ),
+                        TimeOut = DateTimeOffset.UtcNow.AddMinutes(
+                            int.Parse(_config["TokenTimeOut"] ?? CommonConfig.OtpTimeOut)
+                        )
                     }
                 );
                 await _unitOfwork.SaveChangeAsync();
@@ -219,7 +258,12 @@ namespace PBL6.Application.Services
             }
             catch (Exception e)
             {
-                _logger.LogInformation("[{_className}][{method}] Error: {message}", _className, method, e.Message);
+                _logger.LogInformation(
+                    "[{_className}][{method}] Error: {message}",
+                    _className,
+                    method,
+                    e.Message
+                );
 
                 throw;
             }
@@ -231,9 +275,15 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                var existedUser = await _unitOfwork.Users
-                    .Queryable().Include(x => x.UserTokens)
-                    .FirstOrDefaultAsync(x => (x.Username == userLogin.Username || x.Email == userLogin.Username) && x.IsActive) ?? throw new InvalidUsernamePasswordException();
+                var existedUser =
+                    await _unitOfwork.Users
+                        .Queryable()
+                        .Include(x => x.UserTokens)
+                        .FirstOrDefaultAsync(
+                            x =>
+                                (x.Username == userLogin.Username || x.Email == userLogin.Username)
+                                && x.IsActive
+                        ) ?? throw new InvalidUsernamePasswordException();
                 var passwordSalt = existedUser.PasswordSalt;
                 var hashPassword = SecurityFunction.HashPassword(userLogin.Password, passwordSalt);
                 if (existedUser.Password != hashPassword)
@@ -241,24 +291,31 @@ namespace PBL6.Application.Services
                     throw new InvalidUsernamePasswordException();
                 }
 
-                ClaimData claimData = new()
-                {
-                    UserId = existedUser.Id,
-                    Email = existedUser.Email,
-                    Username = existedUser.Username,
-                    IsActive = existedUser.IsActive,
-                };
+                ClaimData claimData =
+                    new()
+                    {
+                        UserId = existedUser.Id,
+                        Email = existedUser.Email,
+                        Username = existedUser.Username,
+                        IsActive = existedUser.IsActive,
+                    };
                 var refresshToken = SecurityFunction.GenerateRandomString();
                 var token = SecurityFunction.GenerateToken(claimData, _config);
-                await _unitOfwork.UserTokens.AddAsync(
+                var userToken = await _unitOfwork.UserTokens.AddAsync(
                     new()
                     {
                         UserId = existedUser.Id,
                         Token = token,
                         Otp = null,
-                        ValidTo = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["OtpTimeOut"] ?? CommonConfig.OtpTimeOut)),
-                        TimeOut = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["TokenTimeOut"] ?? CommonConfig.OtpTimeOut)),
-                        RefreshTokenTimeOut = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["RefreshTokenTimeOut"] ?? CommonConfig.OtpTimeOut)),
+                        ValidTo = DateTimeOffset.UtcNow.AddMinutes(
+                            int.Parse(_config["OtpTimeOut"] ?? CommonConfig.OtpTimeOut)
+                        ),
+                        TimeOut = DateTimeOffset.UtcNow.AddMinutes(
+                            int.Parse(_config["TokenTimeOut"] ?? CommonConfig.OtpTimeOut)
+                        ),
+                        RefreshTokenTimeOut = DateTimeOffset.UtcNow.AddMinutes(
+                            int.Parse(_config["RefreshTokenTimeOut"] ?? CommonConfig.OtpTimeOut)
+                        ),
                         RefreshToken = refresshToken
                     }
                 );
@@ -267,11 +324,25 @@ namespace PBL6.Application.Services
 
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
-                return new TokenData { UserId = existedUser.Id, Email = existedUser.Email, Token = token, RefreshToken = refresshToken, TokenType = JwtBearerDefaults.AuthenticationScheme };
+                return new TokenData
+                {
+                    UserId = existedUser.Id,
+                    Email = existedUser.Email,
+                    Token = token,
+                    TokenTimeOut = userToken.TimeOut,
+                    RefreshToken = refresshToken,
+                    RefreshTokenTimeout = (DateTimeOffset)userToken.RefreshTokenTimeOut,
+                    TokenType = JwtBearerDefaults.AuthenticationScheme
+                };
             }
             catch (Exception e)
             {
-                _logger.LogInformation("[{_className}][{method}] Error: {message}", _className, method, e.Message);
+                _logger.LogInformation(
+                    "[{_className}][{method}] Error: {message}",
+                    _className,
+                    method,
+                    e.Message
+                );
 
                 throw;
             }
@@ -283,30 +354,35 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                var payload = await SecurityFunction.VerifyGoogleToken(oauthCode, _config) ?? throw new BadRequestException("Invalid External Authentication.");
-                GoogleOauthUser googleOauthUser = new()
-                {
-                    Name = payload.Name,
-                    Email = payload.Email,
-                    Picture = payload.Picture,
-                    EmailVerified = payload.EmailVerified
-                };
+                var payload =
+                    await SecurityFunction.VerifyGoogleToken(oauthCode, _config)
+                    ?? throw new BadRequestException("Invalid External Authentication.");
+                GoogleOauthUser googleOauthUser =
+                    new()
+                    {
+                        Name = payload.Name,
+                        Email = payload.Email,
+                        Picture = payload.Picture,
+                        EmailVerified = payload.EmailVerified
+                    };
                 var existedUser = await _unitOfwork.Users
-                   .Queryable().Include(x => x.UserTokens)
-                   .FirstOrDefaultAsync(x => x.Email == googleOauthUser.Email);
+                    .Queryable()
+                    .Include(x => x.UserTokens)
+                    .FirstOrDefaultAsync(x => x.Email == googleOauthUser.Email);
 
                 if (existedUser is null)
                 {
-                    User newUser = new()
-                    {
-                        Email = googleOauthUser.Email,
-                        Username = googleOauthUser.Email,
-                        Information = new()
+                    User newUser =
+                        new()
                         {
-                            FirstName = googleOauthUser.Name,
-                            Status = (short)USER.DEFAULT
-                        }
-                    };
+                            Email = googleOauthUser.Email,
+                            Username = googleOauthUser.Email,
+                            Information = new()
+                            {
+                                FirstName = googleOauthUser.Name,
+                                Status = (short)USER.DEFAULT
+                            }
+                        };
 
                     existedUser = await _unitOfwork.Users.AddAsync(newUser);
                 }
@@ -316,24 +392,31 @@ namespace PBL6.Application.Services
                     await _unitOfwork.Users.UpdateAsync(existedUser);
                 }
 
-                ClaimData claimData = new()
-                {
-                    UserId = existedUser.Id,
-                    Email = existedUser.Email,
-                    Username = existedUser.Username,
-                    IsActive = existedUser.IsActive,
-                };
+                ClaimData claimData =
+                    new()
+                    {
+                        UserId = existedUser.Id,
+                        Email = existedUser.Email,
+                        Username = existedUser.Username,
+                        IsActive = existedUser.IsActive,
+                    };
                 var refresshToken = SecurityFunction.GenerateRandomString();
                 var token = SecurityFunction.GenerateToken(claimData, _config);
-                await _unitOfwork.UserTokens.AddAsync(
+                var userToken = await _unitOfwork.UserTokens.AddAsync(
                     new()
                     {
                         UserId = existedUser.Id,
                         Token = token,
                         Otp = null,
-                        ValidTo = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["OtpTimeOut"] ?? CommonConfig.OtpTimeOut)),
-                        TimeOut = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["TokenTimeOut"] ?? CommonConfig.OtpTimeOut)),
-                        RefreshTokenTimeOut = DateTimeOffset.UtcNow.AddMinutes(int.Parse(_config["RefreshTokenTimeOut"] ?? CommonConfig.OtpTimeOut)),
+                        ValidTo = DateTimeOffset.UtcNow.AddMinutes(
+                            int.Parse(_config["OtpTimeOut"] ?? CommonConfig.OtpTimeOut)
+                        ),
+                        TimeOut = DateTimeOffset.UtcNow.AddMinutes(
+                            int.Parse(_config["TokenTimeOut"] ?? CommonConfig.OtpTimeOut)
+                        ),
+                        RefreshTokenTimeOut = DateTimeOffset.UtcNow.AddMinutes(
+                            int.Parse(_config["RefreshTokenTimeOut"] ?? CommonConfig.OtpTimeOut)
+                        ),
                         RefreshToken = refresshToken
                     }
                 );
@@ -342,11 +425,25 @@ namespace PBL6.Application.Services
 
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
-                return new TokenData { UserId = existedUser.Id, Email = existedUser.Email, Token = token, RefreshToken = refresshToken, TokenType = JwtBearerDefaults.AuthenticationScheme };
+                return new TokenData
+                {
+                    UserId = existedUser.Id,
+                    Email = existedUser.Email,
+                    Token = token,
+                    TokenTimeOut = userToken.TimeOut,
+                    RefreshToken = refresshToken,
+                    RefreshTokenTimeout = (DateTimeOffset)userToken.RefreshTokenTimeOut,
+                    TokenType = JwtBearerDefaults.AuthenticationScheme
+                };
             }
             catch (Exception e)
             {
-                _logger.LogInformation("[{_className}][{method}] Error: {message}", _className, method, e.Message);
+                _logger.LogInformation(
+                    "[{_className}][{method}] Error: {message}",
+                    _className,
+                    method,
+                    e.Message
+                );
 
                 throw;
             }
@@ -360,15 +457,20 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var userId = Guid.Parse(_currentUser.UserId);
-                var currentUser = await _unitOfwork.Users.Queryable().FirstOrDefaultAsync(x => x.Id == userId && x.IsActive) ?? throw new BadRequestException("User is not exist or inactive");
+                var currentUser =
+                    await _unitOfwork.Users
+                        .Queryable()
+                        .FirstOrDefaultAsync(x => x.Id == userId && x.IsActive)
+                    ?? throw new BadRequestException("User is not exist or inactive");
                 var validToken = await _unitOfwork.UserTokens
                     .Queryable()
-                    .FirstOrDefaultAsync(x =>
-                        x.UserId == userId
-                        && x.Otp == changePasswordDto.Otp
-                        && x.OtpType == ((short)OTP_TYPE.CHANGE_PASSWORD)
-                        && x.ValidTo >= now
-                        && x.TimeOut >= now
+                    .FirstOrDefaultAsync(
+                        x =>
+                            x.UserId == userId
+                            && x.Otp == changePasswordDto.Otp
+                            && x.OtpType == ((short)OTP_TYPE.CHANGE_PASSWORD)
+                            && x.ValidTo >= now
+                            && x.TimeOut >= now
                     );
                 if (validToken is null)
                 {
@@ -381,14 +483,20 @@ namespace PBL6.Application.Services
                     await _unitOfwork.UserTokens.UpdateAsync(validToken);
                 }
 
-                var hashInputPassword = SecurityFunction.HashPassword(changePasswordDto.CurrentPassword, currentUser.PasswordSalt);
+                var hashInputPassword = SecurityFunction.HashPassword(
+                    changePasswordDto.CurrentPassword,
+                    currentUser.PasswordSalt
+                );
                 if (currentUser.Password != hashInputPassword)
                 {
                     throw new BadRequestException("Invalid password");
                 }
 
                 var passwordSalt = SecurityFunction.GenerateRandomString();
-                var hashPassword = SecurityFunction.HashPassword(changePasswordDto.NewPassword, passwordSalt);
+                var hashPassword = SecurityFunction.HashPassword(
+                    changePasswordDto.NewPassword,
+                    passwordSalt
+                );
                 currentUser.Password = hashPassword;
                 currentUser.PasswordSalt = passwordSalt;
                 await _unitOfwork.Users.UpdateAsync(currentUser);
@@ -398,7 +506,12 @@ namespace PBL6.Application.Services
             }
             catch (Exception e)
             {
-                _logger.LogInformation("[{_className}][{method}] Error: {message}", _className, method, e.Message);
+                _logger.LogInformation(
+                    "[{_className}][{method}] Error: {message}",
+                    _className,
+                    method,
+                    e.Message
+                );
 
                 throw;
             }
@@ -411,16 +524,23 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                var currentUser = await _unitOfwork.Users.Queryable().FirstOrDefaultAsync(x => x.Email == forgotPasswordRequest.Email && x.IsActive) ?? throw new BadRequestException("Email is not exist or user is inactive");
+                var currentUser =
+                    await _unitOfwork.Users
+                        .Queryable()
+                        .FirstOrDefaultAsync(
+                            x => x.Email == forgotPasswordRequest.Email && x.IsActive
+                        )
+                    ?? throw new BadRequestException("Email is not exist or user is inactive");
                 var validToken = await _unitOfwork.UserTokens
                     .Queryable()
                     .Include(x => x.User)
-                    .FirstOrDefaultAsync(x =>
-                        x.User.Email == forgotPasswordRequest.Email
-                        && x.Otp == forgotPasswordRequest.Otp
-                        && x.OtpType == ((short)OTP_TYPE.FORGOT_PASSWORD)
-                        && x.ValidTo >= now
-                        && x.TimeOut >= now
+                    .FirstOrDefaultAsync(
+                        x =>
+                            x.User.Email == forgotPasswordRequest.Email
+                            && x.Otp == forgotPasswordRequest.Otp
+                            && x.OtpType == ((short)OTP_TYPE.FORGOT_PASSWORD)
+                            && x.ValidTo >= now
+                            && x.TimeOut >= now
                     );
                 if (validToken is null)
                 {
@@ -434,7 +554,10 @@ namespace PBL6.Application.Services
                 }
 
                 var passwordSalt = SecurityFunction.GenerateRandomString();
-                var hashPassword = SecurityFunction.HashPassword(forgotPasswordRequest.NewPassword, passwordSalt);
+                var hashPassword = SecurityFunction.HashPassword(
+                    forgotPasswordRequest.NewPassword,
+                    passwordSalt
+                );
                 currentUser.Password = hashPassword;
                 currentUser.PasswordSalt = passwordSalt;
                 await _unitOfwork.Users.UpdateAsync(currentUser);
@@ -443,7 +566,12 @@ namespace PBL6.Application.Services
             }
             catch (Exception e)
             {
-                _logger.LogInformation("[{_className}][{method}] Error: {message}", _className, method, e.Message);
+                _logger.LogInformation(
+                    "[{_className}][{method}] Error: {message}",
+                    _className,
+                    method,
+                    e.Message
+                );
 
                 throw;
             }

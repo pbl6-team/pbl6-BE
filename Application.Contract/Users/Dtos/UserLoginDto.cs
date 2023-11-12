@@ -18,7 +18,6 @@ namespace PBL6.Application.Contract.Users.Dtos
         /// <example>0e7517141fb53f21ee439b355b5a1d0a</example>
         [Required()]
         [StringLength(50)]
-        [JsonProperty("password")]
         public string Password { get; set; }
     }
 }
