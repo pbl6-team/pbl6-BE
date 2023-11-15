@@ -27,16 +27,9 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
         [Authorize]
-        public async Task<IActionResult> Create(CreateWorkspaceDto input)
+        public async Task<IActionResult> Create([FromForm] CreateWorkspaceDto input)
         {
-            try
-            {
-                return Ok(await _workspaceService.AddAsync(input));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return Ok(new {Id = await _workspaceService.AddAsync(input)});
         }
 
         /// <summary>
@@ -51,16 +44,9 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
-        public async Task<IActionResult> Update(Guid workspaceId, UpdateWorkspaceDto input)
+        public async Task<IActionResult> Update([FromRoute] Guid workspaceId, [FromBody] UpdateWorkspaceDto input)
         {
-            try
-            {
-                return Ok(await _workspaceService.UpdateAsync(workspaceId, input));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return Ok(new {Id = await _workspaceService.UpdateAsync(workspaceId, input)});
         }
 
         /// <summary>
@@ -71,20 +57,13 @@ namespace PBL6.API.Controllers.Workspaces
         /// <returns></returns>
         /// <response code="200">Cập nhật thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpPut("avatar")]
+        [HttpPut("{workspaceId}/avatar")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
-        public async Task<IActionResult> UpdateAvatar(Guid workspaceId, UpdateAvatarWorkspaceDto input)
+        public async Task<IActionResult> UpdateAvatar([FromRoute] Guid workspaceId, [FromForm] UpdateAvatarWorkspaceDto input)
         {
-            try
-            {
-                return Ok(await _workspaceService.UpdateAvatarAsync(workspaceId, input));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return Ok(new {Id = await _workspaceService.UpdateAvatarAsync(workspaceId, input)});
         }
 
         /// <summary>
@@ -94,20 +73,13 @@ namespace PBL6.API.Controllers.Workspaces
         /// <returns></returns>
         /// <response code="200">Xoá thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpDelete]
+        [HttpDelete("{workspaceId}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
-        public async Task<IActionResult> Delete(Guid workspaceId)
+        public async Task<IActionResult> Delete([FromRoute] Guid workspaceId)
         {
-            try
-            {
-                return Ok(await _workspaceService.DeleteAsync(workspaceId));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return Ok(new {Id = await _workspaceService.DeleteAsync(workspaceId)});
         }
 
         /// <summary>
@@ -122,14 +94,7 @@ namespace PBL6.API.Controllers.Workspaces
         [Authorize]
         public async Task<IActionResult> GetAll()
         {
-            try
-            {
-                return Ok(await _workspaceService.GetAllAsync());
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return Ok(await _workspaceService.GetAllAsync());
         }
 
         /// <summary>
@@ -143,16 +108,9 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(WorkspaceDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize]
-        public async Task<IActionResult> GetById(Guid workspaceId)
+        public async Task<IActionResult> GetById([FromRoute] Guid workspaceId)
         {
-            try
-            {
-                return Ok(await _workspaceService.GetByIdAsync(workspaceId));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return Ok(await _workspaceService.GetByIdAsync(workspaceId));
         }
 
         /// <summary>
@@ -166,16 +124,9 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<WorkspaceDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize]
-        public async Task<IActionResult> GetByName(string workspaceName)
+        public async Task<IActionResult> GetByName([FromRoute] string workspaceName)
         {
-            try
-            {
-                return Ok(await _workspaceService.GetByNameAsync(workspaceName));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return Ok(await _workspaceService.GetByNameAsync(workspaceName));
         }
 
         /// <summary>
@@ -186,20 +137,13 @@ namespace PBL6.API.Controllers.Workspaces
         /// <returns></returns>
         /// <response code="200">Add thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpPost("addmember")]
+        [HttpPost("{workspaceId}/members/{userId}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
-        public async Task<IActionResult> AddMember(Guid workspaceId, Guid userId)
+        public async Task<IActionResult> AddMember([FromRoute] Guid workspaceId, [FromRoute] Guid userId)
         {
-            try
-            {
-                return Ok(await _workspaceService.AddMemberToWorkspaceAsync(workspaceId, userId));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return Ok(new {Id = await _workspaceService.AddMemberToWorkspaceAsync(workspaceId, userId)});
         }
 
         /// <summary>
@@ -210,20 +154,13 @@ namespace PBL6.API.Controllers.Workspaces
         /// <returns></returns>
         /// <response code="200">Remove thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpPost("removemember")]
+        [HttpDelete("{workspaceId}/members/{userId}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
-        public async Task<IActionResult> RemoveMember(Guid workspaceId, Guid userId)
+        public async Task<IActionResult> RemoveMember([FromRoute] Guid workspaceId, [FromRoute] Guid userId)
         {
-            try
-            {
-                return Ok(await _workspaceService.RemoveMemberFromWorkspaceAsync(workspaceId, userId));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return Ok(new {Id = await _workspaceService.RemoveMemberFromWorkspaceAsync(workspaceId, userId)});
         }
     }
 }

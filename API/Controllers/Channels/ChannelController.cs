@@ -29,16 +29,9 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
         [Authorize]
-        public async Task<IActionResult> Create(CreateChannelDto input)
+        public async Task<IActionResult> Create([FromBody] CreateChannelDto input)
         {
-            try
-            {
-                return Ok(await _channelService.AddAsync(input));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return Ok(new {Id = await _channelService.AddAsync(input)});
         }
 
         /// <summary>
@@ -53,16 +46,9 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
-        public async Task<IActionResult> Update(Guid channelId, UpdateChannelDto input)
+        public async Task<IActionResult> Update([FromRoute] Guid channelId, [FromBody] UpdateChannelDto input)
         {
-            try
-            {
-                return Ok(await _channelService.UpdateAsync(channelId, input));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return Ok(new {Id = await _channelService.UpdateAsync(channelId, input)});
         }
 
         /// <summary>
@@ -72,20 +58,13 @@ namespace PBL6.API.Controllers.Channels
         /// <returns></returns>
         /// <response code="200">Xoá thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpDelete]
+        [HttpDelete("{channelId}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
-        public async Task<IActionResult> Delete(Guid channelId)
+        public async Task<IActionResult> Delete([FromRoute] Guid channelId)
         {
-            try
-            {
-                return Ok(await _channelService.DeleteAsync(channelId));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return Ok(new {Id = await _channelService.DeleteAsync(channelId)});
         }
 
         /// <summary>
@@ -95,20 +74,13 @@ namespace PBL6.API.Controllers.Channels
         /// <returns></returns>
         /// <response code="200">Get thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpGet]
+        [HttpGet("workspace/{workspaceId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ChannelDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize]
-        public async Task<IActionResult> GetAllChannelsOfAWorkspace(Guid workspaceId)
+        public async Task<IActionResult> GetAllChannelsOfAWorkspace([FromRoute] Guid workspaceId)
         {
-            try
-            {
-                return Ok(await _channelService.GetAllChannelsOfAWorkspaceAsync(workspaceId));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return Ok(await _channelService.GetAllChannelsOfAWorkspaceAsync(workspaceId));
         }
 
         /// <summary>
@@ -122,16 +94,9 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize]
-        public async Task<IActionResult> GetById(Guid channelId)
+        public async Task<IActionResult> GetById([FromRoute] Guid channelId)
         {
-            try
-            {
-                return Ok(await _channelService.GetByIdAsync(channelId));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return Ok(await _channelService.GetByIdAsync(channelId));
         }
 
         /// <summary>
@@ -145,16 +110,9 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ChannelDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize]
-        public async Task<IActionResult> GetByName(string channelName)
+        public async Task<IActionResult> GetByName([FromRoute] string channelName)
         {
-            try
-            {
-                return Ok(await _channelService.GetByNameAsync(channelName));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return Ok(await _channelService.GetByNameAsync(channelName));
         }
 
         /// <summary>
@@ -165,20 +123,13 @@ namespace PBL6.API.Controllers.Channels
         /// <returns></returns>
         /// <response code="200">Thêm thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpPost("addmember")]
+        [HttpPost("{channelId}/members/{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize]
-        public async Task<IActionResult> AddMemberToChannel(Guid channelId , Guid userId)
+        public async Task<IActionResult> AddMemberToChannel([FromRoute] Guid channelId, [FromRoute] Guid userId)
         {
-            try
-            {
-                return Ok(await _channelService.AddMemberToChannelAsync(channelId, userId));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return Ok(new {Id = await _channelService.AddMemberToChannelAsync(channelId, userId)});
         }
 
         /// <summary>
@@ -189,20 +140,13 @@ namespace PBL6.API.Controllers.Channels
         /// <returns></returns>
         /// <response code="200">Xoá thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpDelete("removemember")]
+        [HttpDelete("{channelId}/members/{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize]
-        public async Task<IActionResult> RemoveMemberFromChannel(Guid channelId, Guid userId)
+        public async Task<IActionResult> RemoveMemberFromChannel([FromRoute] Guid channelId, [FromRoute] Guid userId)
         {
-            try
-            {
-                return Ok(await _channelService.RemoveMemberFromChannelAsync(channelId, userId));
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
+            return Ok(new {Id = await _channelService.RemoveMemberFromChannelAsync(channelId, userId)});
         }
     }
 }
