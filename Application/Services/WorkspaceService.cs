@@ -247,6 +247,11 @@ namespace PBL6.Application.Services
                 {
                     throw new NotFoundException<User>(userId.ToString());
                 }
+                
+                if (!user.IsActive)
+                {
+                    throw new Exception("User is not active yet");
+                }
 
                 var member = workspace.Members.FirstOrDefault(x => x.UserId == userId);
                 if (member is not null)
