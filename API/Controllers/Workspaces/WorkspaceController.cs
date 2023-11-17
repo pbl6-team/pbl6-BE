@@ -30,6 +30,7 @@ namespace PBL6.API.Controllers.Workspaces
         [AuthorizeFilter]
         public async Task<IActionResult> Create([FromForm] CreateWorkspaceDto input)
         {
+            Response.Headers.Add("Access-Control-Allow-Origin", "*");
             return Ok(new { Id = await _workspaceService.AddAsync(input) });
         }
 
