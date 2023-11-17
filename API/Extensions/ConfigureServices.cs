@@ -50,29 +50,9 @@ namespace PBL6.API.Extensions
                 });
             });
 
-
             services.AddEndpointsApiExplorer();
             services.AddAutoMapper(typeof(AutoMapperProfile));
             services.AddHttpContextAccessor();
-
-            // Add Authentication
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.RequireHttpsMetadata = false;
-                options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(configuration["Jwt:SecretKey"])),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
-                };
-            });
 
             // Add Swagger
             services.AddSwaggerGen(options =>

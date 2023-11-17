@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PBL6.API.Filters;
 using PBL6.Application.Contract.Users;
 using PBL6.Application.Contract.Users.Dtos;
 
@@ -37,7 +38,7 @@ namespace PBL6.API.Controllers.Workspaces
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpPost("verify-register")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> VerifyRegister(VerifyRegisterDto input)
         {
             await _authService.VerifyRegisterAsync(input);
@@ -84,7 +85,7 @@ namespace PBL6.API.Controllers.Workspaces
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpPost("change-password")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
         {
             await _authService.ChangePasswordAsync(changePasswordDto);
