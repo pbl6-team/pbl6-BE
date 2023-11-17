@@ -23,6 +23,6 @@ namespace PBL6.Domain.Models.Users
 
         public ICollection<WorkspaceMember> Members { get; set; }
 
-        public ICollection<WorkspacePermission> Permissions { get; set; }
+        public ICollection<PermissionsOfWorkspaceRole> Permissions { get; set; }
     }
 }

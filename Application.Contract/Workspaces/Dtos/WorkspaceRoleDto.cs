@@ -1,12 +1,13 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace PBL6.Application.Contract.Workspaces.Dtos
 {
-    public class UpdateWorkspaceDto
+    public class WorkspaceRoleDto
     {
-        [Required]
+        public Guid Id { get; set; }
+        
         public string Name { get; set; }
 
         public string Description { get; set; }
+
+        public string  Color { get; set; }
     }
 }

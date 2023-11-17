@@ -13,7 +13,11 @@ namespace PBL6.Domain.Models.Users
         [Required]
         public Guid PermissionId { get; set; }
 
+        public ChannelPermission Permission { get; set; }
+
+        public ChannelRole ChannelRole { get; set; }
+
         [Required]
-        public bool IsEnable { get; set; }
+        public bool IsEnabled { get; set; }
     }
 }

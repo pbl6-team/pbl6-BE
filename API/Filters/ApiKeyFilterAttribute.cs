@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace PBL6.API.Filters
 {
     [AttributeUsage(AttributeTargets.All)]
-    public class AuthorizationFilterAttribute : Attribute, IAuthorizationFilter
+    public class ApiKeyFilterAttribute : Attribute, IAuthorizationFilter
     {
         private readonly string _apiKey;
 
-        public AuthorizationFilterAttribute(IConfiguration configuration)
+        public ApiKeyFilterAttribute(IConfiguration configuration)
         {
             _apiKey = configuration["SecretKeys:ApiKey"];
         }

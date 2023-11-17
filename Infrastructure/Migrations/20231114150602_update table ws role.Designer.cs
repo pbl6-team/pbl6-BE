@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PBL6.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using PBL6.Infrastructure.Data;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    partial class ApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231114150602_update table ws role")]
+    partial class updatetablewsrole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -409,7 +412,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Examples", (string)null);
+                    b.ToTable("Examples");
                 });
 
             modelBuilder.Entity("PBL6.Domain.Models.Users.Channel", b =>
@@ -1564,7 +1567,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("PBL6.Domain.Models.Users.WorkspaceRole", "WorkspaceRole")
                         .WithMany("Members")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("PBL6.Domain.Models.Users.User", "User")
                         .WithMany()

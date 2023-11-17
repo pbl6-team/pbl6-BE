@@ -23,6 +23,6 @@ namespace PBL6.Domain.Models.Users
 
         public ICollection<ChannelMember> Members { get; set; }
 
-        public ICollection<ChannelPermission> Permissions { get; set; }
+        public ICollection<PermissionsOfChannelRole> Permissions { get; set; }
     }
 }
