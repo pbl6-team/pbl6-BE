@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PBL6.Application.Contract.Channels;
@@ -12,58 +12,60 @@ namespace PBL6.Application.Services;
 
 public class ChannelService : BaseService, IChannelService
 {
-        private readonly string _className;
+    private readonly string _className;
 
-        public ChannelService(
-            IServiceProvider serviceProvider
-            ) : base(serviceProvider)
-        {
-            _className = typeof(ChannelService).Name;
-        }
+    public ChannelService(IServiceProvider serviceProvider)
+        : base(serviceProvider)
+    {
+        _className = typeof(ChannelService).Name;
+    }
 
-        static string GetActualAsyncMethodName([CallerMemberName] string name = null) => name;
-
+    static string GetActualAsyncMethodName([CallerMemberName] string name = null) => name;
 
     public async Task<Guid> AddAsync(CreateChannelDto createUpdateChannelDto)
     {
-            var method = GetActualAsyncMethodName();
-            try
+        var method = GetActualAsyncMethodName();
+        try
+        {
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var channel = _mapper.Map<Channel>(createUpdateChannelDto);
+            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+
+            var workspace = await _unitOfwork.Workspaces.FindAsync(channel.WorkspaceId);
+            if (workspace is null)
             {
-                _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                var channel = _mapper.Map<Channel>(createUpdateChannelDto);
-                var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
-
-                var workspace = await _unitOfwork.Workspaces.FindAsync(channel.WorkspaceId);
-                if (workspace is null)
-                {
-                    throw new NotFoundException<Workspace>(channel.WorkspaceId.ToString());
-                }
-                
-                if (channel.Description is null)
-                {
-                    channel.Description = string.Empty;
-                }
-
-                channel.OwnerId = currentUserId;
-
-                channel.ChannelMembers = new List<ChannelMember>
-                {
-                    new(){UserId = currentUserId, AddBy = currentUserId}
-                };
-                channel.CategoryId = Guid.Empty;
-                channel = await _unitOfwork.Channels.AddAsync(channel);
-                await _unitOfwork.SaveChangeAsync();
-                _logger.LogInformation("[{_className}][{method}] End", _className, method);
-
-                return channel.Id;
+                throw new NotFoundException<Workspace>(channel.WorkspaceId.ToString());
             }
-            catch (Exception e)
+
+            if (channel.Description is null)
             {
-                _logger.LogInformation("[{_className}][{method}] Error: {message}", _className, method, e.Message);
-
-                throw;
+                channel.Description = string.Empty;
             }
-        
+
+            channel.OwnerId = currentUserId;
+
+            channel.ChannelMembers = new List<ChannelMember>
+            {
+                new() { UserId = currentUserId, AddBy = currentUserId }
+            };
+            channel.CategoryId = Guid.Empty;
+            channel = await _unitOfwork.Channels.AddAsync(channel);
+            await _unitOfwork.SaveChangeAsync();
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+            return channel.Id;
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation(
+                "[{_className}][{method}] Error: {message}",
+                _className,
+                method,
+                e.Message
+            );
+
+            throw;
+        }
     }
 
     public async Task<Guid> AddMemberToChannelAsync(Guid channelId, Guid userId)
@@ -72,14 +74,22 @@ public class ChannelService : BaseService, IChannelService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var channel = await _unitOfwork.Channels.Queryable().Include(x => x.ChannelMembers.Where(c => !c.IsDeleted)).Where(x => x.Id == channelId).FirstOrDefaultAsync();
+            var channel = await _unitOfwork.Channels
+                .Queryable()
+                .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
+                .Where(x => x.Id == channelId)
+                .FirstOrDefaultAsync();
             var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
             if (channel is null)
             {
                 throw new NotFoundException<Channel>(channelId.ToString());
             }
 
-            var workspace = await _unitOfwork.Workspaces.Queryable().Include(x => x.Members.Where(m => !m.IsDeleted)).Where(w => w.Id == channel.WorkspaceId).FirstOrDefaultAsync();
+            var workspace = await _unitOfwork.Workspaces
+                .Queryable()
+                .Include(x => x.Members.Where(m => !m.IsDeleted))
+                .Where(w => w.Id == channel.WorkspaceId)
+                .FirstOrDefaultAsync();
             if (!workspace.Members.Any(x => x.UserId == userId))
             {
                 throw new Exception("User is not in the workspace of this channel");
@@ -97,11 +107,7 @@ public class ChannelService : BaseService, IChannelService
                 throw new Exception("User is already in this channel");
             }
 
-            var channelMember = new ChannelMember
-            {
-                UserId = userId,
-                AddBy = currentUserId
-            };
+            var channelMember = new ChannelMember { UserId = userId, AddBy = currentUserId };
 
             channel.ChannelMembers.Add(channelMember);
             await _unitOfwork.SaveChangeAsync();
@@ -111,10 +117,36 @@ public class ChannelService : BaseService, IChannelService
         }
         catch (Exception e)
         {
-            _logger.LogInformation("[{_className}][{method}] Error: {message}", _className, method, e.Message);
+            _logger.LogInformation(
+                "[{_className}][{method}] Error: {message}",
+                _className,
+                method,
+                e.Message
+            );
 
             throw;
         }
+    }
+
+    public async Task<Guid> AddRoleAsync(Guid channelId, CreateUpdateChannelRoleDto input)
+    {
+        var method = GetActualAsyncMethodName();
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
+        var isMember = await _unitOfwork.Channels.CheckIsMemberAsync(channelId, userId);
+        if (!isMember)
+        {
+            throw new ForbidException();
+        }
+
+        var role = _mapper.Map<ChannelRole>(input);
+        role = await _unitOfwork.Channels.AddRoleAsync(channelId, role);
+
+        await _unitOfwork.SaveChangeAsync();
+
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+        return role.Id;
     }
 
     public async Task<Guid> DeleteAsync(Guid channelId)
@@ -125,7 +157,8 @@ public class ChannelService : BaseService, IChannelService
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
             var channel = await _unitOfwork.Channels.FindAsync(channelId);
 
-            if (channel is null) throw new NotFoundException<Channel>(channelId.ToString());
+            if (channel is null)
+                throw new NotFoundException<Channel>(channelId.ToString());
 
             await _unitOfwork.Channels.DeleteAsync(channel);
             await _unitOfwork.SaveChangeAsync();
@@ -135,10 +168,38 @@ public class ChannelService : BaseService, IChannelService
         }
         catch (Exception e)
         {
-            _logger.LogInformation("[{_className}][{method}] Error: {message}", _className, method, e.Message);
+            _logger.LogInformation(
+                "[{_className}][{method}] Error: {message}",
+                _className,
+                method,
+                e.Message
+            );
 
             throw;
         }
+    }
+
+    public async Task DeleteRoleAsync(Guid channelId, Guid roleId)
+    {
+        var method = GetActualAsyncMethodName();
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var isMember = await _unitOfwork.Channels.CheckIsMemberAsync(
+            channelId,
+            Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException())
+        );
+        if (!isMember)
+        {
+            throw new ForbidException();
+        }
+        var isExistRole = await _unitOfwork.Channels.CheckIsExistRole(channelId, roleId);
+        if (!isExistRole)
+        {
+            throw new NotFoundException<ChannelRole>(roleId.ToString());
+        }
+        var channelRole = await _unitOfwork.Channels.GetRoleById(channelId, roleId);
+        await _unitOfwork.ChannelRoles.DeleteAsync(channelRole, isHardDelete: true);
+        await _unitOfwork.SaveChangeAsync();
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
     }
 
     public async Task<IEnumerable<ChannelDto>> GetAllChannelsOfAWorkspaceAsync(Guid workspaceId)
@@ -147,13 +208,22 @@ public class ChannelService : BaseService, IChannelService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var channels = await _unitOfwork.Channels.Queryable().Include(x => x.ChannelMembers.Where(c => !c.IsDeleted)).Where(x => x.WorkspaceId == workspaceId).ToListAsync();
+            var channels = await _unitOfwork.Channels
+                .Queryable()
+                .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
+                .Where(x => x.WorkspaceId == workspaceId)
+                .ToListAsync();
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return _mapper.Map<IEnumerable<ChannelDto>>(channels);
         }
         catch (Exception e)
         {
-            _logger.LogInformation("[{_className}][{method}] Error: {message}", _className, method, e.Message);
+            _logger.LogInformation(
+                "[{_className}][{method}] Error: {message}",
+                _className,
+                method,
+                e.Message
+            );
 
             throw;
         }
@@ -165,16 +235,25 @@ public class ChannelService : BaseService, IChannelService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var channel = await _unitOfwork.Channels.Queryable().Include(x => x.ChannelMembers.Where(c => !c.IsDeleted)).FirstOrDefaultAsync(x => x.Id == channelId);
+            var channel = await _unitOfwork.Channels
+                .Queryable()
+                .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
+                .FirstOrDefaultAsync(x => x.Id == channelId);
 
-            if (channel is null) throw new NotFoundException<Channel>(channelId.ToString());
+            if (channel is null)
+                throw new NotFoundException<Channel>(channelId.ToString());
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return _mapper.Map<ChannelDto>(channel);
         }
         catch (Exception e)
         {
-            _logger.LogInformation("[{_className}][{method}] Error: {message}", _className, method, e.Message);
+            _logger.LogInformation(
+                "[{_className}][{method}] Error: {message}",
+                _className,
+                method,
+                e.Message
+            );
 
             throw;
         }
@@ -186,17 +265,98 @@ public class ChannelService : BaseService, IChannelService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var channels = await _unitOfwork.Channels.Queryable().Include(x => x.ChannelMembers.Where(c => !c.IsDeleted)).Where(x => x.Name.Contains(channelName)).ToListAsync();
+            var channels = await _unitOfwork.Channels
+                .Queryable()
+                .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
+                .Where(x => x.Name.Contains(channelName))
+                .ToListAsync();
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return _mapper.Map<IEnumerable<ChannelDto>>(channels);
         }
         catch (Exception e)
         {
-            _logger.LogInformation("[{_className}][{method}] Error: {message}", _className, method, e.Message);
+            _logger.LogInformation(
+                "[{_className}][{method}] Error: {message}",
+                _className,
+                method,
+                e.Message
+            );
 
             throw;
         }
+    }
+
+    public async Task<IEnumerable<PermissionDto>> GetPermissions()
+    {
+        var method = GetActualAsyncMethodName();
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+
+        var permissions = _unitOfwork.ChannelPermissions
+            .Queryable()
+            .Where(x => !x.IsDeleted && x.IsActive);
+        await Task.CompletedTask;
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+        return _mapper.Map<IEnumerable<PermissionDto>>(permissions);
+    }
+
+    public async Task<IEnumerable<PermissionDto>> GetPermissionsAsync(Guid channelId, Guid roleId)
+    {
+        var method = GetActualAsyncMethodName();
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var isMember = await _unitOfwork.Channels.CheckIsMemberAsync(
+            channelId,
+            Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException())
+        );
+        if (!isMember)
+        {
+            throw new ForbidException();
+        }
+        var isExistRole = await _unitOfwork.Channels.CheckIsExistRole(channelId, roleId);
+        if (!isExistRole)
+        {
+            throw new NotFoundException<ChannelRole>(roleId.ToString());
+        }
+        var channelRole = await _unitOfwork.Channels.GetRoleById(channelId, roleId);
+
+        var permissions = channelRole.Permissions
+            .Where(x => !x.IsDeleted && x.Permission.IsActive)
+            .ToList();
+        var permissionDtos = _mapper.Map<List<PermissionDto>>(permissions);
+        permissionDtos.ForEach(x => x.IsEnabled = true);
+
+        var activePermissions = _unitOfwork.ChannelPermissions
+            .Queryable()
+            .Where(x => !x.IsDeleted && x.IsActive);
+
+        permissionDtos.AddRange(
+            _mapper.Map<List<PermissionDto>>(
+                activePermissions.Where(x => !permissionDtos.Select(x => x.Id).Contains(x.Id))
+            )
+        );
+
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+        return permissionDtos;
+    }
+
+    public async Task<object> GetRolesAsync(Guid channelId)
+    {
+        var method = GetActualAsyncMethodName();
+        var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var isMember = await _unitOfwork.Channels.CheckIsMemberAsync(channelId, userId);
+        if (!isMember)
+        {
+            throw new ForbidException();
+        }
+
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+        return _mapper.Map<IEnumerable<ChannelRoleDto>>(
+            await _unitOfwork.Channels.GetRoles(channelId)
+        );
     }
 
     public async Task<Guid> RemoveMemberFromChannelAsync(Guid channelId, Guid userId)
@@ -205,7 +365,11 @@ public class ChannelService : BaseService, IChannelService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var channel = await _unitOfwork.Channels.Queryable().Include(x => x.ChannelMembers.Where(c => !c.IsDeleted)).Where(x => x.Id == channelId).FirstOrDefaultAsync();
+            var channel = await _unitOfwork.Channels
+                .Queryable()
+                .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
+                .Where(x => x.Id == channelId)
+                .FirstOrDefaultAsync();
 
             var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
             if (channel is null)
@@ -227,10 +391,44 @@ public class ChannelService : BaseService, IChannelService
         }
         catch (Exception e)
         {
-            _logger.LogInformation("[{_className}][{method}] Error: {message}", _className, method, e.Message);
+            _logger.LogInformation(
+                "[{_className}][{method}] Error: {message}",
+                _className,
+                method,
+                e.Message
+            );
 
             throw;
         }
+    }
+
+    public async Task SetRoleToUserAsync(Guid channelId, Guid userId, Guid roleId)
+    {
+        var method = GetActualAsyncMethodName();
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var isMember = await _unitOfwork.Channels.CheckIsMemberAsync(
+            channelId,
+            Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException())
+        );
+        if (!isMember)
+        {
+            throw new ForbidException();
+        }
+        var isExistRole = await _unitOfwork.Channels.CheckIsExistRole(channelId, roleId);
+        if (!isExistRole)
+        {
+            throw new NotFoundException<ChannelRole>(roleId.ToString());
+        }
+        isMember = await _unitOfwork.Channels.CheckIsMemberAsync(channelId, userId);
+        if (!isMember)
+        {
+            throw new NotAMemberOfWorkspaceException();
+        }
+        var member = await _unitOfwork.Channels.GetMemberByUserId(channelId, userId);
+        member.RoleId = roleId;
+        await _unitOfwork.ChannelMembers.UpdateAsync(member);
+        await _unitOfwork.SaveChangeAsync();
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
     }
 
     public async Task<Guid> UpdateAsync(Guid channelId, UpdateChannelDto updateChannelDto)
@@ -258,15 +456,44 @@ public class ChannelService : BaseService, IChannelService
             _mapper.Map(updateChannelDto, channel);
             await _unitOfwork.Channels.UpdateAsync(channel);
             await _unitOfwork.SaveChangeAsync();
-            
+
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return channel.Id;
         }
         catch (Exception e)
         {
-            _logger.LogInformation("[{_className}][{method}] Error: {message}", _className, method, e.Message);
+            _logger.LogInformation(
+                "[{_className}][{method}] Error: {message}",
+                _className,
+                method,
+                e.Message
+            );
 
             throw;
         }
+    }
+
+    public async Task UpdateRoleAsync(Guid channelId, Guid roleId, CreateUpdateChannelRoleDto input)
+    {
+        var method = GetActualAsyncMethodName();
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
+        var isMember = await _unitOfwork.Channels.CheckIsMemberAsync(channelId, userId);
+        if (!isMember)
+        {
+            throw new ForbidException();
+        }
+        var isExistRole = await _unitOfwork.Channels.CheckIsExistRole(channelId, roleId);
+        if (!isExistRole)
+        {
+            throw new NotFoundException<WorkspaceRole>(roleId.ToString());
+        }
+
+        var role = await _unitOfwork.Channels.GetRoleById(channelId, roleId);
+        _mapper.Map(input, role);
+        await _unitOfwork.ChannelRoles.UpdateAsync(role);
+        await _unitOfwork.SaveChangeAsync();
+
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
     }
 }

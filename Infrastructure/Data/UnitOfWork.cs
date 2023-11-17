@@ -17,12 +17,12 @@ namespace PBL6.Infrastructure.Data
         public IChannelRepository Channels { get; }
         public IWorkspaceMemberRepository WorkspaceMembers { get; }
         public IChannelMemberRepository ChannelMembers { get; }
-        
+        public IWorkspaceRoleRepository WorkspaceRoles { get; }
+        public IWorkspacePermissionRepository WorkspacePermissions { get; }
+        public IChannelPermissionRepository ChannelPermissions { get; }
+        public IChannelRoleRepository ChannelRoles { get; }
 
-        public UnitOfWork(
-            ApiDbContext apiDbContext,
-            ILoggerFactory loggerFactory
-        )
+        public UnitOfWork(ApiDbContext apiDbContext, ILoggerFactory loggerFactory)
         {
             _apiDbContext = apiDbContext;
             var logger = loggerFactory.CreateLogger("logs");
@@ -34,6 +34,10 @@ namespace PBL6.Infrastructure.Data
             Channels = new ChannelRepository(apiDbContext, logger);
             WorkspaceMembers = new WorkspaceMemberRepository(apiDbContext, logger);
             ChannelMembers = new ChannelMemberRepository(apiDbContext, logger);
+            WorkspaceRoles = new WorkspaceRoleRepository(apiDbContext, logger);
+            WorkspacePermissions = new WorkspacePermissionRepository(apiDbContext, logger);
+            ChannelPermissions = new ChannelPermissionRepository(apiDbContext, logger);
+            ChannelRoles = new ChannelRoleRepository(apiDbContext, logger);
         }
 
         public async Task SaveChangeAsync()
@@ -53,12 +57,14 @@ namespace PBL6.Infrastructure.Data
 
         public async Task CommitAsync(IDbContextTransaction transaction)
         {
-            if (transaction is not null) await transaction.CommitAsync();
+            if (transaction is not null)
+                await transaction.CommitAsync();
         }
 
         public async Task RollbackAsync(IDbContextTransaction transaction)
         {
-            if (transaction is not null) await transaction.RollbackAsync();
+            if (transaction is not null)
+                await transaction.RollbackAsync();
         }
     }
 }
