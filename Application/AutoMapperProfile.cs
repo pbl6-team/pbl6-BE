@@ -51,7 +51,8 @@ namespace PBL6.Application
             CreateMap<WorkspaceRole, WorkspaceRoleDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id));
             CreateMap<CreateUpdatePermissionDto, PermissionsOfWorkspaceRole>()
-                .ForMember(x => x.PermissionId, opt => opt.MapFrom(src => src.Id));
+                .ForMember(x => x.PermissionId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(x => x.Id, opt => opt.Ignore());
             CreateMap<CreateUpdateWorkspaceRoleDto, WorkspaceRole>()
                 .ForMember(x => x.Permissions, opt => opt.MapFrom(src => src.Permissions));
             CreateMap<PermissionsOfWorkspaceRole, PermissionDto>()
@@ -66,7 +67,8 @@ namespace PBL6.Application
             CreateMap<ChannelRole, ChannelRoleDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id));
             CreateMap<CreateUpdatePermissionDto, PermissionsOfChannelRole>()
-                .ForMember(x => x.PermissionId, opt => opt.MapFrom(src => src.Id));
+                .ForMember(x => x.PermissionId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(x => x.Id, opt => opt.Ignore());
             CreateMap<CreateUpdateChannelRoleDto, ChannelRole>()
                 .ForMember(x => x.Permissions, opt => opt.MapFrom(src => src.Permissions));
             CreateMap<PermissionsOfChannelRole, PermissionDto>()

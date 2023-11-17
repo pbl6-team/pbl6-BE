@@ -1,9 +1,7 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PBL6.API.Filters;
 using PBL6.Application.Contract.Channels;
 using PBL6.Application.Contract.Channels.Dtos;
-using PBL6.Application.Contract.Users.Dtos;
-using PBL6.Application.Contract.Workspaces;
 using PBL6.Application.Contract.Workspaces.Dtos;
 
 namespace PBL6.API.Controllers.Channels
@@ -29,7 +27,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> Create([FromBody] CreateChannelDto input)
         {
             return Ok(new { Id = await _channelService.AddAsync(input) });
@@ -46,7 +44,7 @@ namespace PBL6.API.Controllers.Channels
         [HttpPut("{channelId}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> Update(
             [FromRoute] Guid channelId,
             [FromBody] UpdateChannelDto input
@@ -65,7 +63,7 @@ namespace PBL6.API.Controllers.Channels
         [HttpDelete("{channelId}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> Delete([FromRoute] Guid channelId)
         {
             return Ok(new { Id = await _channelService.DeleteAsync(channelId) });
@@ -81,7 +79,7 @@ namespace PBL6.API.Controllers.Channels
         [HttpGet("workspace/{workspaceId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ChannelDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> GetAllChannelsOfAWorkspace([FromRoute] Guid workspaceId)
         {
             return Ok(await _channelService.GetAllChannelsOfAWorkspaceAsync(workspaceId));
@@ -97,7 +95,7 @@ namespace PBL6.API.Controllers.Channels
         [HttpGet("{channelId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> GetById([FromRoute] Guid channelId)
         {
             return Ok(await _channelService.GetByIdAsync(channelId));
@@ -113,7 +111,7 @@ namespace PBL6.API.Controllers.Channels
         [HttpGet("byname/{channelName}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ChannelDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> GetByName([FromRoute] string channelName)
         {
             return Ok(await _channelService.GetByNameAsync(channelName));
@@ -130,7 +128,7 @@ namespace PBL6.API.Controllers.Channels
         [HttpPost("{channelId}/members/{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> AddMemberToChannel(
             [FromRoute] Guid channelId,
             [FromRoute] Guid userId
@@ -152,7 +150,7 @@ namespace PBL6.API.Controllers.Channels
         [HttpDelete("{channelId}/members/{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> RemoveMemberFromChannel(
             [FromRoute] Guid channelId,
             [FromRoute] Guid userId
@@ -173,7 +171,7 @@ namespace PBL6.API.Controllers.Channels
         [HttpGet("{channelId}/roles")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ChannelRoleDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> GetRoles([FromRoute] Guid channelId)
         {
             return Ok(await _channelService.GetRolesAsync(channelId));
@@ -190,7 +188,7 @@ namespace PBL6.API.Controllers.Channels
         [HttpGet("{channelId}/roles/{roleId}/permissions")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<PermissionDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> GetPermissions(
             [FromRoute] Guid channelId,
             [FromRoute] Guid roleId
@@ -208,10 +206,30 @@ namespace PBL6.API.Controllers.Channels
         [HttpGet("permissions")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<PermissionDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> GetPermissions()
         {
             return Ok(await _channelService.GetPermissions());
+        }
+
+        /// <summary>
+        /// API Get role infor - cần đăng nhập
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <param name="roleId"></param>
+        /// <returns></returns>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpGet("{channelId}/roles/{roleId}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelRoleDto))]
+        [AuthorizeFilter]
+        public async Task<IActionResult> GetRole(
+            [FromRoute] Guid channelId,
+            [FromRoute] Guid roleId
+        )
+        {
+            return Ok(await _channelService.GetRoleAsync(channelId, roleId));
         }
 
         /// <summary>
@@ -226,7 +244,7 @@ namespace PBL6.API.Controllers.Channels
         [HttpPut("{channelId}/roles/{roleId}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> UpdateRole(
             [FromRoute] Guid channelId,
             [FromRoute] Guid roleId,
@@ -248,7 +266,7 @@ namespace PBL6.API.Controllers.Channels
         [HttpPost("{channelId}/roles")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> AddRole(
             [FromRoute] Guid channelId,
             [FromBody] CreateUpdateChannelRoleDto input
@@ -268,7 +286,7 @@ namespace PBL6.API.Controllers.Channels
         [HttpDelete("{channelId}/roles/{roleId}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> DeleteRole(
             [FromRoute] Guid channelId,
             [FromRoute] Guid roleId
@@ -290,7 +308,7 @@ namespace PBL6.API.Controllers.Channels
         [HttpPut("{channelId}/users/{userId}/roles")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> SetRoleToUser(
             [FromRoute] Guid channelId,
             [FromRoute] Guid userId,

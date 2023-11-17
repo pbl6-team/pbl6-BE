@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PBL6.Application.Contract.Examples.Dtos;
 using PBL6.Application.Contract.Examples;
-using Microsoft.AspNetCore.Authorization;
+using PBL6.API.Filters;
 
 namespace PBL6.API.Controllers
 {
@@ -75,7 +75,7 @@ namespace PBL6.API.Controllers
         [HttpDelete]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> DeleteAsync(Guid id)
         {
             var existExample = await _exampleService.DeleteAsync(id);
@@ -94,7 +94,7 @@ namespace PBL6.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> AddAsync(CreateUpdateExampleDto exampleDto)
         {
 
@@ -113,7 +113,7 @@ namespace PBL6.API.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [Authorize]
+        [AuthorizeFilter]
         public async Task<IActionResult> UpdateAsync(Guid id, CreateUpdateExampleDto exampleDto)
         {
             var result = await _exampleService.UpdateAsync(id, exampleDto);

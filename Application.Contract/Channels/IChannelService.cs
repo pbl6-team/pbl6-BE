@@ -13,12 +13,13 @@ namespace PBL6.Application.Contract.Channels
         Task<Guid> DeleteAsync(Guid channelId);
         Task<Guid> AddMemberToChannelAsync(Guid channelId, Guid userId);
         Task<Guid> RemoveMemberFromChannelAsync(Guid channelId, Guid userId);
-        Task<object> GetRolesAsync(Guid channelId);
+        Task<IEnumerable<ChannelRoleDto>> GetRolesAsync(Guid channelId);
         Task<IEnumerable<PermissionDto>> GetPermissionsAsync(Guid channelId, Guid roleId);
         Task<IEnumerable<PermissionDto>> GetPermissions();
         Task UpdateRoleAsync(Guid channelId, Guid roleId, CreateUpdateChannelRoleDto input);
         Task<Guid> AddRoleAsync(Guid channelId, CreateUpdateChannelRoleDto input);
         Task DeleteRoleAsync(Guid channelId, Guid roleId);
         Task SetRoleToUserAsync(Guid channelId, Guid userId, Guid role);
+        Task<ChannelRoleDto> GetRoleAsync(Guid channelId, Guid roleId);
     }
 }
