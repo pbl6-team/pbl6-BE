@@ -5,7 +5,7 @@ namespace PBL6.API.Controllers
 {
     [Route("api/[controller]")]
     [Produces("application/json")]
-    [TypeFilter(typeof(AuthorizationFilterAttribute))]
+    [TypeFilter(typeof(ApiKeyFilterAttribute))]
     [ApiController]
     public class BaseApiController : ControllerBase
     {

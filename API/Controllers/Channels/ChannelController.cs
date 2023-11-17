@@ -15,7 +15,8 @@ namespace PBL6.API.Controllers.Channels
     {
         private readonly IChannelService _channelService;
 
-        public ChannelController(IChannelService channelService) => _channelService = channelService;
+        public ChannelController(IChannelService channelService) =>
+            _channelService = channelService;
 
         /// <summary>
         /// API để tạo channel - cần đăng nhập
@@ -31,7 +32,7 @@ namespace PBL6.API.Controllers.Channels
         [Authorize]
         public async Task<IActionResult> Create([FromBody] CreateChannelDto input)
         {
-            return Ok(new {Id = await _channelService.AddAsync(input)});
+            return Ok(new { Id = await _channelService.AddAsync(input) });
         }
 
         /// <summary>
@@ -46,9 +47,12 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
-        public async Task<IActionResult> Update([FromRoute] Guid channelId, [FromBody] UpdateChannelDto input)
+        public async Task<IActionResult> Update(
+            [FromRoute] Guid channelId,
+            [FromBody] UpdateChannelDto input
+        )
         {
-            return Ok(new {Id = await _channelService.UpdateAsync(channelId, input)});
+            return Ok(new { Id = await _channelService.UpdateAsync(channelId, input) });
         }
 
         /// <summary>
@@ -64,7 +68,7 @@ namespace PBL6.API.Controllers.Channels
         [Authorize]
         public async Task<IActionResult> Delete([FromRoute] Guid channelId)
         {
-            return Ok(new {Id = await _channelService.DeleteAsync(channelId)});
+            return Ok(new { Id = await _channelService.DeleteAsync(channelId) });
         }
 
         /// <summary>
@@ -127,9 +131,14 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize]
-        public async Task<IActionResult> AddMemberToChannel([FromRoute] Guid channelId, [FromRoute] Guid userId)
+        public async Task<IActionResult> AddMemberToChannel(
+            [FromRoute] Guid channelId,
+            [FromRoute] Guid userId
+        )
         {
-            return Ok(new {Id = await _channelService.AddMemberToChannelAsync(channelId, userId)});
+            return Ok(
+                new { Id = await _channelService.AddMemberToChannelAsync(channelId, userId) }
+            );
         }
 
         /// <summary>
@@ -144,9 +153,152 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize]
-        public async Task<IActionResult> RemoveMemberFromChannel([FromRoute] Guid channelId, [FromRoute] Guid userId)
+        public async Task<IActionResult> RemoveMemberFromChannel(
+            [FromRoute] Guid channelId,
+            [FromRoute] Guid userId
+        )
         {
-            return Ok(new {Id = await _channelService.RemoveMemberFromChannelAsync(channelId, userId)});
+            return Ok(
+                new { Id = await _channelService.RemoveMemberFromChannelAsync(channelId, userId) }
+            );
+        }
+
+        /// <summary>
+        /// API Get list roles of channel theo id - cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <param name="channelId">Id của channel</param>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpGet("{channelId}/roles")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ChannelRoleDto>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize]
+        public async Task<IActionResult> GetRoles([FromRoute] Guid channelId)
+        {
+            return Ok(await _channelService.GetRolesAsync(channelId));
+        }
+
+        /// <summary>
+        /// API Get list permission of channel by id - cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <param name="channelId">Id của channel</param>
+        /// <param name="roleId">Id của channel</param>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpGet("{channelId}/roles/{roleId}/permissions")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<PermissionDto>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize]
+        public async Task<IActionResult> GetPermissions(
+            [FromRoute] Guid channelId,
+            [FromRoute] Guid roleId
+        )
+        {
+            return Ok(await _channelService.GetPermissionsAsync(channelId, roleId));
+        }
+
+        /// <summary>
+        /// API Get list active permission - cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpGet("permissions")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<PermissionDto>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize]
+        public async Task<IActionResult> GetPermissions()
+        {
+            return Ok(await _channelService.GetPermissions());
+        }
+
+        /// <summary>
+        /// API Update role of channel - cần đăng nhập
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <param name="roleId"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        /// <response code="200">Update thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpPut("{channelId}/roles/{roleId}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [Authorize]
+        public async Task<IActionResult> UpdateRole(
+            [FromRoute] Guid channelId,
+            [FromRoute] Guid roleId,
+            [FromBody] CreateUpdateChannelRoleDto input
+        )
+        {
+            await _channelService.UpdateRoleAsync(channelId, roleId, input);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// API add role to channel - cần đăng nhập
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        /// <response code="200">Add thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpPost("{channelId}/roles")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [Authorize]
+        public async Task<IActionResult> AddRole(
+            [FromRoute] Guid channelId,
+            [FromBody] CreateUpdateChannelRoleDto input
+        )
+        {
+            return Ok(new { Id = await _channelService.AddRoleAsync(channelId, input) });
+        }
+
+        /// <summary>
+        /// API delete role of channel - cần đăng nhập
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <param name="roleId"></param>
+        /// <returns></returns>
+        /// <response code="200">Delete thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpDelete("{channelId}/roles/{roleId}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [Authorize]
+        public async Task<IActionResult> DeleteRole(
+            [FromRoute] Guid channelId,
+            [FromRoute] Guid roleId
+        )
+        {
+            await _channelService.DeleteRoleAsync(channelId, roleId);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// API set role to user - cần đăng nhập
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <param name="userId"></param>
+        /// <param name="role"></param>
+        /// <returns></returns>
+        /// <response code="200">Delete thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpPut("{channelId}/users/{userId}/roles")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [Authorize]
+        public async Task<IActionResult> SetRoleToUser(
+            [FromRoute] Guid channelId,
+            [FromRoute] Guid userId,
+            [FromBody] SetRoleDto role
+        )
+        {
+            await _channelService.SetRoleToUserAsync(channelId, userId, role.Id);
+            return NoContent();
         }
     }
 }

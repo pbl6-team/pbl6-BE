@@ -129,49 +129,37 @@ namespace PBL6.Infrastructure.Data
                .HasMany(x => x.Members)
                .WithOne(x => x.Workspace)
                .HasForeignKey(x => x.WorkspaceId)
-               .OnDelete(DeleteBehavior.NoAction);
+               .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Workspace>()
                .HasMany(x => x.WorkspaceRoles)
                .WithOne(x => x.Workspace)
                .HasForeignKey(x => x.WorkspaceId)
-               .OnDelete(DeleteBehavior.NoAction);
+               .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<WorkspaceRole>()
                .HasMany(x => x.Members)
                .WithOne(x => x.WorkspaceRole)
                .HasForeignKey(x => x.RoleId)
-               .OnDelete(DeleteBehavior.NoAction);
+               .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<WorkspaceRole>()
-                .HasMany(e => e.Permissions)
-                .WithMany(e => e.WorkspaceRoles)
-                .UsingEntity<PermissionsOfWorkspaceRole>(
-                    l => l.HasOne<WorkspacePermission>()
-                        .WithMany()
-                        .HasForeignKey(e => e.PermissionId),
-                    r => r.HasOne<WorkspaceRole>()
-                        .WithMany()
-                        .HasForeignKey(e => e.WorkspaceRoleId)
-                );
+               .HasMany(x => x.Permissions)
+               .WithOne(x => x.WorkspaceRole)
+               .HasForeignKey(x => x.WorkspaceRoleId)
+               .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ChannelRole>()
-                .HasMany(e => e.Permissions)
-                .WithMany(e => e.ChannelRoles)
-                .UsingEntity<PermissionsOfChannelRole>(
-                    l => l.HasOne<ChannelPermission>()
-                        .WithMany()
-                        .HasForeignKey(e => e.PermissionId),
-                    r => r.HasOne<ChannelRole>()
-                        .WithMany()
-                        .HasForeignKey(e => e.ChannelRoleId)
-                );
+               .HasMany(x => x.Permissions)
+               .WithOne(x => x.ChannelRole)
+               .HasForeignKey(x => x.ChannelRoleId)
+               .OnDelete(DeleteBehavior.Cascade);
             
             modelBuilder.Entity<Channel>()
                .HasMany(x => x.ChannelRoles)
                .WithOne(x => x.Channel)
                .HasForeignKey(x => x.ChannelId)
-               .OnDelete(DeleteBehavior.NoAction);
+               .OnDelete(DeleteBehavior.Cascade);
         }
 
         public override int SaveChanges()

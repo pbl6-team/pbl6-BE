@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PBL6.Application.Contract.Users.Dtos;
 using PBL6.Application.Contract.Workspaces;
 using PBL6.Application.Contract.Workspaces.Dtos;
 
@@ -9,11 +8,13 @@ namespace PBL6.API.Controllers.Workspaces
     [Produces("application/json")]
     [Route("api/[controller]")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public class WorkspaceController : Controller
     {
         private readonly IWorkspaceService _workspaceService;
 
-        public WorkspaceController(IWorkspaceService workspaceService) => _workspaceService = workspaceService;
+        public WorkspaceController(IWorkspaceService workspaceService) =>
+            _workspaceService = workspaceService;
 
         /// <summary>
         /// API để tạo workspace - cần đăng nhập
@@ -29,7 +30,7 @@ namespace PBL6.API.Controllers.Workspaces
         [Authorize]
         public async Task<IActionResult> Create([FromForm] CreateWorkspaceDto input)
         {
-            return Ok(new {Id = await _workspaceService.AddAsync(input)});
+            return Ok(new { Id = await _workspaceService.AddAsync(input) });
         }
 
         /// <summary>
@@ -44,9 +45,12 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
-        public async Task<IActionResult> Update([FromRoute] Guid workspaceId, [FromBody] UpdateWorkspaceDto input)
+        public async Task<IActionResult> Update(
+            [FromRoute] Guid workspaceId,
+            [FromBody] UpdateWorkspaceDto input
+        )
         {
-            return Ok(new {Id = await _workspaceService.UpdateAsync(workspaceId, input)});
+            return Ok(new { Id = await _workspaceService.UpdateAsync(workspaceId, input) });
         }
 
         /// <summary>
@@ -61,9 +65,12 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
-        public async Task<IActionResult> UpdateAvatar([FromRoute] Guid workspaceId, [FromForm] UpdateAvatarWorkspaceDto input)
+        public async Task<IActionResult> UpdateAvatar(
+            [FromRoute] Guid workspaceId,
+            [FromForm] UpdateAvatarWorkspaceDto input
+        )
         {
-            return Ok(new {Id = await _workspaceService.UpdateAvatarAsync(workspaceId, input)});
+            return Ok(new { Id = await _workspaceService.UpdateAvatarAsync(workspaceId, input) });
         }
 
         /// <summary>
@@ -79,7 +86,7 @@ namespace PBL6.API.Controllers.Workspaces
         [Authorize]
         public async Task<IActionResult> Delete([FromRoute] Guid workspaceId)
         {
-            return Ok(new {Id = await _workspaceService.DeleteAsync(workspaceId)});
+            return Ok(new { Id = await _workspaceService.DeleteAsync(workspaceId) });
         }
 
         /// <summary>
@@ -141,9 +148,14 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
-        public async Task<IActionResult> AddMember([FromRoute] Guid workspaceId, [FromRoute] Guid userId)
+        public async Task<IActionResult> AddMember(
+            [FromRoute] Guid workspaceId,
+            [FromRoute] Guid userId
+        )
         {
-            return Ok(new {Id = await _workspaceService.AddMemberToWorkspaceAsync(workspaceId, userId)});
+            return Ok(
+                new { Id = await _workspaceService.AddMemberToWorkspaceAsync(workspaceId, userId) }
+            );
         }
 
         /// <summary>
@@ -158,9 +170,162 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [Authorize]
-        public async Task<IActionResult> RemoveMember([FromRoute] Guid workspaceId, [FromRoute] Guid userId)
+        public async Task<IActionResult> RemoveMember(
+            [FromRoute] Guid workspaceId,
+            [FromRoute] Guid userId
+        )
         {
-            return Ok(new {Id = await _workspaceService.RemoveMemberFromWorkspaceAsync(workspaceId, userId)});
+            return Ok(
+                new
+                {
+                    Id = await _workspaceService.RemoveMemberFromWorkspaceAsync(workspaceId, userId)
+                }
+            );
+        }
+
+        /// <summary>
+        /// API Get list roles of workspace theo id - cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpGet("{workspaceId}/roles")]
+        [ProducesResponseType(
+            StatusCodes.Status200OK,
+            Type = typeof(IEnumerable<WorkspaceRoleDto>)
+        )]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize]
+        public async Task<IActionResult> GetRoles([FromRoute] Guid workspaceId)
+        {
+            return Ok(await _workspaceService.GetRolesAsync(workspaceId));
+        }
+
+        /// <summary>
+        /// API Get list permission of workspace by id - cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <param name="workspaceId">Id của workspace</param>
+        /// <param name="roleId">Id của workspace</param>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpGet("{workspaceId}/roles/{roleId}/permissions")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<PermissionDto>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize]
+        public async Task<IActionResult> GetPermissionsByWorkspaceRoleId(
+            [FromRoute] Guid workspaceId,
+            [FromRoute] Guid roleId
+        )
+        {
+            return Ok(
+                await _workspaceService.GetPermissionsByWorkspaceRoleIdAsync(workspaceId, roleId)
+            );
+        }
+
+        /// <summary>
+        /// API Get list active permission - cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpGet("permissions")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<PermissionDto>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize]
+        public async Task<IActionResult> GetPermissions()
+        {
+            return Ok(await _workspaceService.GetPermissions());
+        }
+
+        /// <summary>
+        /// API Update role of workspace - cần đăng nhập
+        /// </summary>
+        /// <param name="workspaceId"></param>
+        /// <param name="roleId"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        /// <response code="200">Update thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpPut("{workspaceId}/roles/{roleId}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [Authorize]
+        public async Task<IActionResult> UpdateRole(
+            [FromRoute] Guid workspaceId,
+            [FromRoute] Guid roleId,
+            [FromBody] CreateUpdateWorkspaceRoleDto input
+        )
+        {
+            await _workspaceService.UpdateRoleAsync(workspaceId, roleId, input);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// API add role to workspace - cần đăng nhập
+        /// </summary>
+        /// <param name="workspaceId"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        /// <response code="200">Add thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpPost("{workspaceId}/roles")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [Authorize]
+        public async Task<IActionResult> AddRole(
+            [FromRoute] Guid workspaceId,
+            [FromBody] CreateUpdateWorkspaceRoleDto input
+        )
+        {
+            return Created(
+                "",
+                new { Id = await _workspaceService.AddRoleAsync(workspaceId, input) }
+            );
+        }
+
+        /// <summary>
+        /// API delete role of workspace - cần đăng nhập
+        /// </summary>
+        /// <param name="workspaceId"></param>
+        /// <param name="roleId"></param>
+        /// <returns></returns>
+        /// <response code="200">Delete thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpDelete("{workspaceId}/roles/{roleId}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [Authorize]
+        public async Task<IActionResult> DeleteRole(
+            [FromRoute] Guid workspaceId,
+            [FromRoute] Guid roleId
+        )
+        {
+            await _workspaceService.DeleteRoleAsync(workspaceId, roleId);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// API set role to user - cần đăng nhập
+        /// </summary>
+        /// <param name="workspaceId"></param>
+        /// <param name="userId"></param>
+        /// <param name="role"></param>
+        /// <returns></returns>
+        /// <response code="200">Delete thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpPut("{workspaceId}/users/{userId}/roles")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [Authorize]
+        public async Task<IActionResult> SetRole(
+            [FromRoute] Guid workspaceId,
+            [FromRoute] Guid userId,
+            [FromBody] SetRoleDto role
+        )
+        {
+            await _workspaceService.SetRoleAsync(workspaceId, userId, role.Id);
+            return NoContent();
         }
     }
 }

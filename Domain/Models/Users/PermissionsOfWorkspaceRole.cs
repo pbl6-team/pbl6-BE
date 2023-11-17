@@ -9,11 +9,12 @@ namespace PBL6.Domain.Models.Users
     {
         [Required]
         public Guid WorkspaceRoleId { get; set; }
-        
+
         [Required]
         public Guid PermissionId { get; set; }
 
-        [Required]
-        public bool IsEnable { get; set; }
+        public WorkspacePermission Permission { get; set; }
+
+        public WorkspaceRole WorkspaceRole { get; set; }
     }
 }
