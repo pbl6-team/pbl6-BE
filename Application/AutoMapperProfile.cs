@@ -7,6 +7,7 @@ using PBL6.Domain.Models.Users;
 using PBL6.Application.Contract.Workspaces.Dtos;
 using PBL6.Application.Contract.Channels.Dtos;
 using System.Data.Common;
+using PBL6.Application.Contract.Users.Dtos;
 
 namespace PBL6.Application
 {
@@ -29,7 +30,13 @@ namespace PBL6.Application
                 )
                 .ForMember(
                     x => x.Members,
-                    opt => opt.MapFrom(src => new {Id = src.Members.Select(x => x.User), FirstName = src.Members.Select(x => x.User.Information.FirstName), LastName = src.Members.Select(x => x.User.Information.LastName), Picture = src.Members.Select(x => x.User.Information.Picture)})
+                    opt => opt.MapFrom(src => src.Members.Select(m => new UserDto
+                    {
+                        Id = m.UserId,
+                        FirstName = m.User.Information.FirstName,
+                        LastName = m.User.Information.LastName,
+                        Picture = m.User.Information.Picture
+                    }))
                 );
             CreateMap<CreateWorkspaceDto, Workspace>();
             CreateMap<CreateWorkspaceDto, WorkspaceDto>();

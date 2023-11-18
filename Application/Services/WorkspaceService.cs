@@ -135,9 +135,17 @@ namespace PBL6.Application.Services
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var workspaces = await _unitOfwork.Workspaces
                     .Queryable()
-                    .Include(x => x.Channels.Where(c => !c.IsDeleted))
-                    .Include(x => x.Members.AsQueryable().Include(m => m.User).ThenInclude(u => u.Information).Where(m => !m.IsDeleted))
+                    .Include(x => x.Channels)
+                    .Include(x => x.Members)
+                    .ThenInclude(m => m.User)
+                    .ThenInclude(u => u.Information)
                     .ToListAsync();
+
+                workspaces.ForEach(w =>
+                {
+                    w.Channels = w.Channels.Where(c => !c.IsDeleted).ToList();
+                    w.Members = w.Members.Where(m => !m.IsDeleted).ToList();
+                });
 
                 var userId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
                 workspaces = workspaces.Where(x => x.Members.Any(m => m.UserId == userId)).ToList();
