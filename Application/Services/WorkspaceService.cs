@@ -192,6 +192,9 @@ namespace PBL6.Application.Services
                     .ThenInclude(u => u.Information)
                     .FirstOrDefaultAsync(x => x.Id == workspaceId);
 
+                workspace.Channels = workspace.Channels.Where(c => !c.IsDeleted).ToList();
+                workspace.Members = workspace.Members.Where(m => !m.IsDeleted).ToList();
+
                 if (workspace is null)
                     throw new NotFoundException<Workspace>(workspaceId.ToString());
                 var userId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
