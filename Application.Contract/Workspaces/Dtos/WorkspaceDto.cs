@@ -1,3 +1,5 @@
+using PBL6.Application.Contract.Users.Dtos;
+
 namespace PBL6.Application.Contract.Workspaces.Dtos
 {
     public class WorkspaceDto : FullAuditedDto
@@ -10,7 +12,7 @@ namespace PBL6.Application.Contract.Workspaces.Dtos
  
         public Guid OwnerId { get; set; }
  
-        public IEnumerable<Guid> Members { get; set; }
+        public IEnumerable<UserDto> Members { get; set; }
  
         public IEnumerable<Guid> Channels { get; set; }
     }
