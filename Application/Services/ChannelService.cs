@@ -31,10 +31,19 @@ public class ChannelService : BaseService, IChannelService
             var channel = _mapper.Map<Channel>(createUpdateChannelDto);
             var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
 
-            var workspace = await _unitOfwork.Workspaces.FindAsync(channel.WorkspaceId);
+            var workspace = await _unitOfwork.Workspaces.Queryable()
+                .Include(x => x.Members.Where(m => !m.IsDeleted))
+                .Where(x => x.Id == channel.WorkspaceId)
+                .FirstOrDefaultAsync();
+
             if (workspace is null)
             {
                 throw new NotFoundException<Workspace>(channel.WorkspaceId.ToString());
+            }
+
+            if (!await _unitOfwork.Workspaces.CheckIsMemberAsync(channel.WorkspaceId, currentUserId))
+            {
+                throw new ForbidException();
             }
 
             if (channel.Description is null)
@@ -48,6 +57,12 @@ public class ChannelService : BaseService, IChannelService
             {
                 new() { UserId = currentUserId, AddBy = currentUserId }
             };
+
+            if (currentUserId != workspace.OwnerId)
+            {
+                channel.ChannelMembers.Add(new ChannelMember { UserId = workspace.OwnerId, AddBy = currentUserId });
+            }
+            
             channel.CategoryId = Guid.Empty;
             channel = await _unitOfwork.Channels.AddAsync(channel);
             await _unitOfwork.SaveChangeAsync();
@@ -83,6 +98,11 @@ public class ChannelService : BaseService, IChannelService
             if (channel is null)
             {
                 throw new NotFoundException<Channel>(channelId.ToString());
+            }
+
+            if (!await _unitOfwork.Channels.CheckIsMemberAsync(channelId, currentUserId))
+            {
+                throw new ForbidException();
             }
 
             var workspace = await _unitOfwork.Workspaces
@@ -155,10 +175,20 @@ public class ChannelService : BaseService, IChannelService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var channel = await _unitOfwork.Channels.FindAsync(channelId);
+            var channel = await _unitOfwork.Channels.Queryable()
+                .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
+                .Where(x => x.Id == channelId)
+                .FirstOrDefaultAsync();
 
             if (channel is null)
                 throw new NotFoundException<Channel>(channelId.ToString());
+            
+            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+
+            if (!await _unitOfwork.Channels.CheckIsMemberAsync(channelId, currentUserId))
+            {
+                throw new ForbidException();
+            }
 
             await _unitOfwork.Channels.DeleteAsync(channel);
             await _unitOfwork.SaveChangeAsync();
@@ -208,10 +238,18 @@ public class ChannelService : BaseService, IChannelService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+
+            var isMember = await _unitOfwork.Workspaces.CheckIsMemberAsync(workspaceId, currentUserId);
+            if (!isMember)
+            {
+                throw new ForbidException();
+            }
+
             var channels = await _unitOfwork.Channels
                 .Queryable()
                 .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
-                .Where(x => x.WorkspaceId == workspaceId)
+                .Where(x => x.WorkspaceId == workspaceId && x.ChannelMembers.Any(c => c.UserId == currentUserId))
                 .ToListAsync();
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return _mapper.Map<IEnumerable<ChannelDto>>(channels);
@@ -243,6 +281,13 @@ public class ChannelService : BaseService, IChannelService
             if (channel is null)
                 throw new NotFoundException<Channel>(channelId.ToString());
 
+            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+
+            if (!await _unitOfwork.Channels.CheckIsMemberAsync(channelId, currentUserId))
+            {
+                throw new ForbidException();
+            }
+
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return _mapper.Map<ChannelDto>(channel);
         }
@@ -271,6 +316,9 @@ public class ChannelService : BaseService, IChannelService
                 .Where(x => x.Name.Contains(channelName))
                 .ToListAsync();
 
+            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+            channels = channels.Where(x => x.ChannelMembers.Any(c => c.UserId == currentUserId)).ToList();
+            
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return _mapper.Map<IEnumerable<ChannelDto>>(channels);
         }
@@ -376,6 +424,11 @@ public class ChannelService : BaseService, IChannelService
             {
                 throw new NotFoundException<Channel>(channelId.ToString());
             }
+            
+            if (!await _unitOfwork.Channels.CheckIsMemberAsync(channelId, currentUserId))
+            {
+                throw new ForbidException();
+            }
 
             var member = channel.ChannelMembers.FirstOrDefault(x => x.UserId == userId);
             if (member is null)
@@ -437,12 +490,22 @@ public class ChannelService : BaseService, IChannelService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var channel = await _unitOfwork.Channels.FindAsync(channelId);
+            var channel = await _unitOfwork.Channels.Queryable()
+                .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
+                .Where(x => x.Id == channelId)
+                .FirstOrDefaultAsync();
+            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+
             if (channel is null)
             {
                 throw new NotFoundException<Channel>(channelId.ToString());
             }
-
+            
+            if (!await _unitOfwork.Channels.CheckIsMemberAsync(channelId, currentUserId))
+            {
+                throw new ForbidException();
+            }
+            
             if (updateChannelDto.Description is null)
             {
                 updateChannelDto.Description = string.Empty;
