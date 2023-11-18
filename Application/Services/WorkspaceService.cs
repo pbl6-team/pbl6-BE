@@ -183,10 +183,13 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+                
                 var workspace = await _unitOfwork.Workspaces
                     .Queryable()
-                    .Include(x => x.Channels.Where(c => !c.IsDeleted))
-                    .Include(x => x.Members.Where(m => !m.IsDeleted))
+                    .Include(x => x.Channels)
+                    .Include(x => x.Members)
+                    .ThenInclude(m => m.User)
+                    .ThenInclude(u => u.Information)
                     .FirstOrDefaultAsync(x => x.Id == workspaceId);
 
                 if (workspace is null)
@@ -231,6 +234,8 @@ namespace PBL6.Application.Services
                     .Queryable()
                     .Include(x => x.Channels.Where(c => !c.IsDeleted))
                     .Include(x => x.Members.Where(m => !m.IsDeleted))
+                    .ThenInclude(m => m.User)
+                    .ThenInclude(u => u.Information)
                     .Where(x => x.Name.Contains(workspaceName))
                     .ToListAsync();
 
