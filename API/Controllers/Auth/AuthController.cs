@@ -37,13 +37,11 @@ namespace PBL6.API.Controllers.Workspaces
         /// <response code="200">Xác thực email thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpPost("verify-register")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]
         [AuthorizeFilter]
         public async Task<IActionResult> VerifyRegister(VerifyRegisterDto input)
         {
-            await _authService.VerifyRegisterAsync(input);
-            
-            return Ok();
+            return Ok(await _authService.VerifyRegisterAsync(input));
         }
 
         /// <summary>
@@ -126,6 +124,20 @@ namespace PBL6.API.Controllers.Workspaces
             await _authService.ForgotPasswordAsync(forgotPasswordRequest);
 
             return Ok();
+        }
+
+        /// <summary>
+        /// API get token use refresh token
+        /// </summary>
+        /// <param name="refreshToken"></param>
+        /// <returns></returns>
+        /// <response code="200">Lấy token thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpPost("refresh-token")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]
+        public async Task<IActionResult> RefreshToken(string refreshToken)
+        {
+            return Ok(await _authService.RefreshTokenAsync(refreshToken));
         }
     }
 }

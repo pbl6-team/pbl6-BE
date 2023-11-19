@@ -51,6 +51,13 @@ namespace PBL6.Infrastructure.Repositories
             );
         }
 
+        public Task<bool> CheckIsOwnerAsync(Guid workspaceId, Guid userId)
+        {
+            return  _apiDbContext.Workspaces.AnyAsync(
+                x => x.Id == workspaceId && x.OwnerId == userId
+            );            
+        }
+
         public async Task<WorkspaceMember> GetMemberByUserId(Guid workspaceId, Guid userId)
         {
             return await _apiDbContext.WorkspaceMembers.FirstOrDefaultAsync(

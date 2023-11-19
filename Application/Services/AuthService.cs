@@ -125,7 +125,12 @@ namespace PBL6.Application.Services
 
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
-                return new UserRegisterResponse { Token = token, TokenTimeOut = userToken.TimeOut, Email = userInput.Email };
+                return new UserRegisterResponse
+                {
+                    Token = token,
+                    TokenTimeOut = userToken.TimeOut,
+                    Email = userInput.Email
+                };
             }
             catch (Exception e)
             {
@@ -140,7 +145,7 @@ namespace PBL6.Application.Services
             }
         }
 
-        public async Task VerifyRegisterAsync(VerifyRegisterDto verifyRegisterDto)
+        public async Task<TokenData> VerifyRegisterAsync(VerifyRegisterDto verifyRegisterDto)
         {
             var method = GetActualAsyncMethodName();
             try
@@ -162,9 +167,50 @@ namespace PBL6.Application.Services
                         ) ?? throw new InvalidOtpException();
                 userToken.ValidTo = DateTimeOffset.UtcNow;
                 userToken.User.IsActive = true;
+
+                // add new token and refresh token
+                var claimData = new ClaimData
+                {
+                    UserId = userToken.UserId,
+                    Email = userToken.User.Email,
+                    Username = userToken.User.Username,
+                    IsActive = userToken.User.IsActive
+                };
+                var refreshToken = SecurityFunction.GenerateRandomString();
+                var token = SecurityFunction.GenerateToken(claimData, _config);
+                var newUserToken = await _unitOfwork.UserTokens.AddAsync(
+                    new()
+                    {
+                        UserId = userToken.UserId,
+                        Token = token,
+                        Otp = null,
+                        ValidTo = DateTimeOffset.UtcNow.AddMinutes(
+                            int.Parse(_config["OtpTimeOut"] ?? CommonConfig.OtpTimeOut)
+                        ),
+                        TimeOut = DateTimeOffset.UtcNow.AddMinutes(
+                            int.Parse(_config["TokenTimeOut"] ?? CommonConfig.OtpTimeOut)
+                        ),
+                        RefreshTokenTimeOut = DateTimeOffset.UtcNow.AddMinutes(
+                            int.Parse(_config["RefreshTokenTimeOut"] ?? CommonConfig.OtpTimeOut)
+                        ),
+                        RefreshToken = refreshToken
+                    }
+                );
+
                 await _unitOfwork.SaveChangeAsync();
 
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+                return new TokenData
+                {
+                    UserId = newUserToken.UserId,
+                    Email = newUserToken.User.Email,
+                    Token = newUserToken.Token,
+                    TokenTimeOut = newUserToken.TimeOut,
+                    RefreshToken = newUserToken.RefreshToken,
+                    RefreshTokenTimeout = (DateTimeOffset)newUserToken.RefreshTokenTimeOut,
+                    TokenType = JwtBearerDefaults.AuthenticationScheme
+                };
             }
             catch (Exception e)
             {
@@ -573,6 +619,61 @@ namespace PBL6.Application.Services
                     e.Message
                 );
 
+                throw;
+            }
+        }
+
+        public async Task<TokenData> RefreshTokenAsync(string refreshToken)
+        {
+            var method = GetActualAsyncMethodName();
+            try
+            {
+                _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+                var now = DateTimeOffset.UtcNow;
+                var userToken =
+                    _unitOfwork.UserTokens
+                        .Queryable()
+                        .Include(x => x.User)
+                        .FirstOrDefault(
+                            x =>
+                                x.RefreshToken == refreshToken
+                                && x.RefreshTokenTimeOut >= now
+                                && x.TimeOut < now
+                        ) ?? throw new BadRequestException("Invalid refresh token");
+                var claimData = new ClaimData
+                {
+                    UserId = userToken.UserId,
+                    Email = userToken.User.Email,
+                    Username = userToken.User.Username,
+                    IsActive = userToken.User.IsActive
+                };
+                var token = SecurityFunction.GenerateToken(claimData, _config);
+                userToken.Token = token;
+                userToken.TimeOut = DateTimeOffset.UtcNow.AddMinutes(
+                    int.Parse(_config["TokenTimeOut"] ?? CommonConfig.OtpTimeOut)
+                );
+                await _unitOfwork.UserTokens.UpdateAsync(userToken);
+                await _unitOfwork.SaveChangeAsync();
+                _logger.LogInformation("[{_className}][{method}] End", _className, method);
+                return new TokenData
+                {
+                    UserId = userToken.UserId,
+                    Email = userToken.User.Email,
+                    Token = token,
+                    TokenTimeOut = userToken.TimeOut,
+                    RefreshToken = refreshToken,
+                    RefreshTokenTimeout = (DateTimeOffset)userToken.RefreshTokenTimeOut,
+                    TokenType = JwtBearerDefaults.AuthenticationScheme
+                };
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation(
+                    "[{_className}][{method}] Error: {message}",
+                    _className,
+                    method,
+                    e.Message
+                );
                 throw;
             }
         }
