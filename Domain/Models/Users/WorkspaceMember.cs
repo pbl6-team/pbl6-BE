@@ -24,7 +24,7 @@ namespace PBL6.Domain.Models.Users
         public Guid AddBy { get; set; }
 
         public Guid? RoleId { get; set; }
-
+        
         public WorkspaceRole WorkspaceRole { get; set; }
     }
 }

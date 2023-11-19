@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PBL6.Application.Contract.Channels;
@@ -333,6 +332,39 @@ public class ChannelService : BaseService, IChannelService
 
             throw;
         }
+    }
+
+    public async Task<IEnumerable<PermissionDto>> GetPermissionOfUser(Guid channelId, Guid userId)
+    {
+        var method = GetActualAsyncMethodName();
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var isExist = await _unitOfwork.Channels.CheckIsExistAsync(channelId);
+        if (!isExist)
+        {
+            throw new NotFoundException<Channel>(channelId.ToString());
+        }
+        var isMember = _unitOfwork.Channels.CheckIsMemberAsync(channelId, userId);
+        if (!isMember.Result)
+        {
+            throw new ForbidException();
+        }
+        var isOwner = await _unitOfwork.Channels.CheckIsOwnerAsync(channelId, userId);
+
+        var permissions = await _unitOfwork.ChannelMembers.GetPermissionOfUser(
+            channelId,
+            userId
+        );
+        if (isOwner)
+        {
+            permissions = permissions.Concat(
+                await _unitOfwork.ChannelPermissions
+                    .Queryable()
+                    .Where(x => !x.IsDeleted && x.IsActive)
+                    .ToListAsync()
+            );
+        }
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
+        return _mapper.Map<IEnumerable<PermissionDto>>(permissions);
     }
 
     public async Task<IEnumerable<PermissionDto>> GetPermissions()

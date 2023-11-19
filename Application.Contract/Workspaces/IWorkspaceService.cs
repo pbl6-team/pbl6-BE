@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Http;
 using PBL6.Application.Contract.Workspaces.Dtos;
 
 namespace PBL6.Application.Contract.Workspaces
 {
     public interface IWorkspaceService
     {
+        Task<bool> IsExistAsync(Guid workspaceId);
         Task<WorkspaceDto> GetByIdAsync(Guid workspaceId);
         Task<IEnumerable<WorkspaceDto>> GetByNameAsync(string workspaceName);
         Task<IEnumerable<WorkspaceDto>> GetAllAsync();
@@ -21,5 +21,6 @@ namespace PBL6.Application.Contract.Workspaces
         Task<IEnumerable<PermissionDto>> GetPermissions();
         Task DeleteRoleAsync(Guid workspaceId, Guid roleId);
         Task SetRoleAsync(Guid workspaceId, Guid userId, Guid roleId);
+        Task<IEnumerable<PermissionDto>> GetPermissionOfUser(Guid workspaceId, Guid userId);
     }
 }

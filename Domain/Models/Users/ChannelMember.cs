@@ -21,6 +21,8 @@ namespace PBL6.Domain.Models.Users
 
         public Guid? RoleId { get; set; }
 
+        public ChannelRole ChannelRole { get; set; }
+
         public Channel Channel { get; set; }
 
         public User User { get; set; }

@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc.Filters;
-using PBL6.Application.Contract.Workspaces;
+using PBL6.Application.Contract.Channels;
 using PBL6.Common.Exceptions;
 using PBL6.Common.Functions;
 using PBL6.Domain.Models.Users;
@@ -7,31 +7,31 @@ using PBL6.Domain.Models.Users;
 namespace PBL6.API.Filters
 {
     [AttributeUsage(AttributeTargets.All)]
-    public class WorkspaceFilter : Attribute, IAsyncAuthorizationFilter
+    public class ChannelFilter : Attribute, IAsyncAuthorizationFilter
     {
         private readonly string _policyName;
 
-        public WorkspaceFilter(string policyName)
+        public ChannelFilter(string policyName)
         {
             _policyName = policyName;
         }
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
-            var workspaceId = GetValue(context, "workspace-id");
-            if (string.IsNullOrEmpty(workspaceId))
+            var channelId = GetValue(context, "channel-id");
+            if (string.IsNullOrEmpty(channelId))
             {
-                throw new Exception("workspace-id is required");
+                throw new Exception("channel-id is required");
             }
 
-            var workspaceService =
-                context.HttpContext.RequestServices.GetService<IWorkspaceService>();
+            var channelService =
+                context.HttpContext.RequestServices.GetService<IChannelService>();
 
             var userId = context.HttpContext.User.Claims
                 .FirstOrDefault(x => x.Type == CustomClaimTypes.UserId)
                 ?.Value;
-            var permissions = await workspaceService.GetPermissionOfUser(
-                Guid.Parse(workspaceId),
+            var permissions = await channelService.GetPermissionOfUser(
+                Guid.Parse(channelId),
                 Guid.Parse(userId)
             );
             if (!permissions.Any(x => x.Code == _policyName))

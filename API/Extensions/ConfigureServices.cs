@@ -111,6 +111,24 @@ namespace PBL6.API.Extensions
                 Schema = new OpenApiSchema() { Type = "string", Default = new OpenApiString("5J0jCR1dAkvDt3YVoahpux0eawahkQB9") },
                 Required = true
             });
+
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "workspace-id",
+                In = ParameterLocation.Header,
+                Description = "ID của workspace",
+                Schema = new OpenApiSchema() { Type = "string", Default = new OpenApiString(Guid.Empty.ToString()) },
+                Required = false
+            });
+
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "channel-id",
+                In = ParameterLocation.Header,
+                Description = "ID của channel",
+                Schema = new OpenApiSchema() { Type = "string", Default = new OpenApiString(Guid.Empty.ToString()) },
+                Required = false
+            });
         }
     }
 }
