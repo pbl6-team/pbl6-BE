@@ -3,6 +3,7 @@ using PBL6.API.Filters;
 using PBL6.Application.Contract.Channels;
 using PBL6.Application.Contract.Channels.Dtos;
 using PBL6.Application.Contract.Workspaces.Dtos;
+using PBL6.Common.Consts;
 
 namespace PBL6.API.Controllers.Channels
 {
@@ -28,6 +29,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
         [AuthorizeFilter]
+        [WorkspaceFilter(WorkSpacePolicy.CREATE_UPDATE_CHANNEL)]
         public async Task<IActionResult> Create([FromBody] CreateChannelDto input)
         {
             return Ok(new { Id = await _channelService.AddAsync(input) });
@@ -45,6 +47,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [AuthorizeFilter]
+        [WorkspaceFilter(WorkSpacePolicy.CREATE_UPDATE_CHANNEL)]
         public async Task<IActionResult> Update(
             [FromRoute] Guid channelId,
             [FromBody] UpdateChannelDto input
@@ -64,6 +67,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [AuthorizeFilter]
+        [WorkspaceFilter(WorkSpacePolicy.DELETE_CHANNEL)]
         public async Task<IActionResult> Delete([FromRoute] Guid channelId)
         {
             return Ok(new { Id = await _channelService.DeleteAsync(channelId) });
@@ -129,6 +133,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [ChannelFilter(ChannelPolicy.INVITE_MEMBER)]
         public async Task<IActionResult> AddMemberToChannel(
             [FromRoute] Guid channelId,
             [FromRoute] Guid userId
@@ -151,6 +156,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [ChannelFilter(ChannelPolicy.DELETE_MEMBER)]
         public async Task<IActionResult> RemoveMemberFromChannel(
             [FromRoute] Guid channelId,
             [FromRoute] Guid userId

@@ -34,7 +34,7 @@ namespace PBL6.Infrastructure.Repositories
             );
         }
 
-        private async Task<bool> CheckIsExistAsync(Guid channelId)
+        public async Task<bool> CheckIsExistAsync(Guid channelId)
         {
             return await _apiDbContext.Channels.AnyAsync(x => x.Id == channelId);
         }
@@ -75,6 +75,13 @@ namespace PBL6.Infrastructure.Repositories
             return _apiDbContext.ChannelRoles
                 .Where(x => x.ChannelId == channelId && !x.IsDeleted)
                 .AsEnumerable();
+        }
+
+        public async Task<bool> CheckIsOwnerAsync(Guid channelId, Guid userId)
+        {
+            return await _apiDbContext.Channels.AnyAsync(
+                x => x.Id == channelId && x.OwnerId == userId
+            );
         }
     }
 }

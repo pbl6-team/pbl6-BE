@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using PBL6.API.Filters;
 using PBL6.Application.Contract.Workspaces;
 using PBL6.Application.Contract.Workspaces.Dtos;
+using PBL6.Common.Consts;
 
 namespace PBL6.API.Controllers.Workspaces
 {
@@ -149,6 +150,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [AuthorizeFilter]
+        [WorkspaceFilter(WorkSpacePolicy.INVITE_MEMBER)]
         public async Task<IActionResult> AddMember(
             [FromRoute] Guid workspaceId,
             [FromRoute] Guid userId
@@ -171,6 +173,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [AuthorizeFilter]
+        [WorkspaceFilter(WorkSpacePolicy.DELETE_MEMBER)]
         public async Task<IActionResult> RemoveMember(
             [FromRoute] Guid workspaceId,
             [FromRoute] Guid userId

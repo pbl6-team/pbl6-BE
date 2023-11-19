@@ -11,5 +11,6 @@ namespace PBL6.Domain.Data.Users
         Task<WorkspaceRole> AddRoleAsync(Guid workspaceId, WorkspaceRole role);
         Task<WorkspaceRole> GetRoleById(Guid workspaceId, Guid roleId);
         Task<WorkspaceMember> GetMemberByUserId(Guid workspaceId, Guid userId);
+        Task<bool> CheckIsOwnerAsync(Guid workspaceId, Guid userId);
     }
 }

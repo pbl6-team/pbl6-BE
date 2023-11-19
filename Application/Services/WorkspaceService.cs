@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PBL6.Application.Contract.Channels;
@@ -695,6 +694,52 @@ namespace PBL6.Application.Services
                 .Queryable()
                 .Where(x => !x.IsDeleted && x.IsActive);
             await Task.CompletedTask;
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+            return _mapper.Map<IEnumerable<PermissionDto>>(permissions);
+        }
+
+        public async Task<bool> IsExistAsync(Guid workspaceId)
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var isExist = await _unitOfwork.Workspaces.CheckIsExistAsync(workspaceId);
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+            return isExist;
+        }
+
+        public async Task<IEnumerable<PermissionDto>> GetPermissionOfUser(
+            Guid workspaceId,
+            Guid userId
+        )
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var isExist = await _unitOfwork.Workspaces.CheckIsExistAsync(workspaceId);
+            if (!isExist)
+            {
+                throw new NotFoundException<Workspace>(workspaceId.ToString());
+            }
+            var isMember = await _unitOfwork.Workspaces.CheckIsMemberAsync(workspaceId, userId);
+            if (!isMember)
+            {
+                throw new ForbidException();
+            }
+            var isOwner = await _unitOfwork.Workspaces.CheckIsOwnerAsync(workspaceId, userId);
+
+            var permissions = await _unitOfwork.WorkspaceMembers.GetPermissionOfUser(
+                workspaceId,
+                userId
+            );
+            if (isOwner)
+            {
+                permissions = permissions.Concat(
+                    await _unitOfwork.WorkspacePermissions
+                        .Queryable()
+                        .Where(x => !x.IsDeleted && x.IsActive)
+                        .ToListAsync()
+                );
+            }
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
             return _mapper.Map<IEnumerable<PermissionDto>>(permissions);
