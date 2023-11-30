@@ -86,6 +86,53 @@ public class UserController : ControllerBase
     {
         await _userService.UpdateAsync(userId, input);
         return Ok(new { Id = userId });
+    }
 
+    /// <summary>
+    /// API Get user by id - cần đăng nhập
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    /// <response code="200">Get thành công</response>
+    /// <response code="400">Có lỗi xảy ra</response>
+    [HttpGet("{userId}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserDto2))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [AuthorizeFilter]
+    public async Task<IActionResult> GetById([FromRoute] Guid userId)
+    {
+        return Ok(await _userService.GetByIdAsync(userId));
+    }
+
+    /// <summary>
+    /// API Search user by name - cần đăng nhập
+    /// </summary>
+    /// <param name="fullName"></param>
+    /// <returns></returns>
+    /// <response code="200">Get thành công</response>
+    /// <response code="400">Có lỗi xảy ra</response>
+    [HttpGet("search/name/{fullName}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDto2>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [AuthorizeFilter]
+    public async Task<IActionResult> SearchByName([FromRoute] string fullName)
+    {
+        return Ok(await _userService.SearchByNameAsync(fullName));
+    }
+
+    /// <summary>
+    /// API Search user by email - cần đăng nhập
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns></returns>
+    /// <response code="200">Get thành công</response>
+    /// <response code="400">Có lỗi xảy ra</response>
+    [HttpGet("search/email/{email}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDto2>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [AuthorizeFilter]
+    public async Task<IActionResult> SearchByEmail([FromRoute] string email)
+    {
+        return Ok(await _userService.SearchByEmailAsync(email));
     }
 }
