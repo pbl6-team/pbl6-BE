@@ -61,7 +61,7 @@ public class ChannelService : BaseService, IChannelService
             {
                 channel.ChannelMembers.Add(new ChannelMember { UserId = workspace.OwnerId, AddBy = currentUserId });
             }
-            
+
             channel.CategoryId = Guid.Empty;
             channel = await _unitOfwork.Channels.AddAsync(channel);
             await _unitOfwork.SaveChangeAsync();
@@ -82,7 +82,7 @@ public class ChannelService : BaseService, IChannelService
         }
     }
 
-    public async Task<Guid> AddMemberToChannelAsync(Guid channelId, Guid userId)
+    public async Task<Guid> AddMemberToChannelAsync(Guid channelId, List<Guid> userIds)
     {
         var method = GetActualAsyncMethodName();
         try
@@ -103,32 +103,34 @@ public class ChannelService : BaseService, IChannelService
             {
                 throw new ForbidException();
             }
-
-            var workspace = await _unitOfwork.Workspaces
-                .Queryable()
-                .Include(x => x.Members.Where(m => !m.IsDeleted))
-                .Where(w => w.Id == channel.WorkspaceId)
-                .FirstOrDefaultAsync();
-            if (!workspace.Members.Any(x => x.UserId == userId))
+            foreach (var userId in userIds)
             {
-                throw new Exception("User is not in the workspace of this channel");
+                var workspace = await _unitOfwork.Workspaces
+                    .Queryable()
+                    .Include(x => x.Members.Where(m => !m.IsDeleted))
+                    .Where(w => w.Id == channel.WorkspaceId)
+                    .FirstOrDefaultAsync();
+                if (!workspace.Members.Any(x => x.UserId == userId))
+                {
+                    throw new Exception($"User {userId} is not in the workspace of this channel");
+                }
+
+                var user = await _unitOfwork.Users.FindAsync(userId);
+                if (user is null)
+                {
+                    throw new NotFoundException<User>(userId.ToString());
+                }
+
+                var member = channel.ChannelMembers.FirstOrDefault(x => x.UserId == userId);
+                if (member is not null)
+                {
+                    throw new Exception($"User {userId} is already in this channel");
+                }
+
+                var channelMember = new ChannelMember { UserId = userId, AddBy = currentUserId };
+
+                channel.ChannelMembers.Add(channelMember);
             }
-
-            var user = await _unitOfwork.Users.FindAsync(userId);
-            if (user is null)
-            {
-                throw new NotFoundException<User>(userId.ToString());
-            }
-
-            var member = channel.ChannelMembers.FirstOrDefault(x => x.UserId == userId);
-            if (member is not null)
-            {
-                throw new Exception("User is already in this channel");
-            }
-
-            var channelMember = new ChannelMember { UserId = userId, AddBy = currentUserId };
-
-            channel.ChannelMembers.Add(channelMember);
             await _unitOfwork.SaveChangeAsync();
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
@@ -181,7 +183,7 @@ public class ChannelService : BaseService, IChannelService
 
             if (channel is null)
                 throw new NotFoundException<Channel>(channelId.ToString());
-            
+
             var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
 
             if (!await _unitOfwork.Channels.CheckIsMemberAsync(channelId, currentUserId))
@@ -317,7 +319,7 @@ public class ChannelService : BaseService, IChannelService
 
             var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
             channels = channels.Where(x => x.ChannelMembers.Any(c => c.UserId == currentUserId)).ToList();
-            
+
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return _mapper.Map<IEnumerable<ChannelDto>>(channels);
         }
@@ -439,7 +441,7 @@ public class ChannelService : BaseService, IChannelService
         );
     }
 
-    public async Task<Guid> RemoveMemberFromChannelAsync(Guid channelId, Guid userId)
+    public async Task<Guid> RemoveMemberFromChannelAsync(Guid channelId, List<Guid> userIds)
     {
         var method = GetActualAsyncMethodName();
         try
@@ -456,19 +458,21 @@ public class ChannelService : BaseService, IChannelService
             {
                 throw new NotFoundException<Channel>(channelId.ToString());
             }
-            
+
             if (!await _unitOfwork.Channels.CheckIsMemberAsync(channelId, currentUserId))
             {
                 throw new ForbidException();
             }
-
-            var member = channel.ChannelMembers.FirstOrDefault(x => x.UserId == userId);
-            if (member is null)
+            foreach (var userId in userIds)
             {
-                throw new Exception("User is not in this channel");
-            }
+                var member = channel.ChannelMembers.FirstOrDefault(x => x.UserId == userId);
+                if (member is null)
+                {
+                    throw new Exception($"User {userId} is not in this channel");
+                }
 
-            await _unitOfwork.ChannelMembers.DeleteAsync(member);
+                await _unitOfwork.ChannelMembers.DeleteAsync(member);
+            }
             await _unitOfwork.SaveChangeAsync();
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
@@ -532,12 +536,12 @@ public class ChannelService : BaseService, IChannelService
             {
                 throw new NotFoundException<Channel>(channelId.ToString());
             }
-            
+
             if (!await _unitOfwork.Channels.CheckIsMemberAsync(channelId, currentUserId))
             {
                 throw new ForbidException();
             }
-            
+
             if (updateChannelDto.Description is null)
             {
                 updateChannelDto.Description = string.Empty;

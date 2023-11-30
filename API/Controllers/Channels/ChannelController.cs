@@ -125,22 +125,22 @@ namespace PBL6.API.Controllers.Channels
         /// API Add member to a channel - cần đăng nhập
         /// </summary>
         /// <param name="channelId"></param>
-        /// <param name="userId"></param>
+        /// <param name="userIds"></param>
         /// <returns></returns>
         /// <response code="200">Thêm thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpPost("{channelId}/members/{userId}")]
+        [HttpPost("{channelId}/members")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
         [ChannelFilter(ChannelPolicy.INVITE_MEMBER)]
         public async Task<IActionResult> AddMemberToChannel(
             [FromRoute] Guid channelId,
-            [FromRoute] Guid userId
+            [FromBody] List<Guid> userIds
         )
         {
             return Ok(
-                new { Id = await _channelService.AddMemberToChannelAsync(channelId, userId) }
+                new { Id = await _channelService.AddMemberToChannelAsync(channelId, userIds) }
             );
         }
 
@@ -148,22 +148,22 @@ namespace PBL6.API.Controllers.Channels
         /// API remove member from channel - cần đăng nhập
         /// </summary>
         /// <param name="channelId"></param>
-        /// <param name="userId"></param>
+        /// <param name="userIds"></param>
         /// <returns></returns>
         /// <response code="200">Xoá thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpDelete("{channelId}/members/{userId}")]
+        [HttpDelete("{channelId}/members")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
         [ChannelFilter(ChannelPolicy.DELETE_MEMBER)]
         public async Task<IActionResult> RemoveMemberFromChannel(
             [FromRoute] Guid channelId,
-            [FromRoute] Guid userId
+            [FromBody] List<Guid> userIds
         )
         {
             return Ok(
-                new { Id = await _channelService.RemoveMemberFromChannelAsync(channelId, userId) }
+                new { Id = await _channelService.RemoveMemberFromChannelAsync(channelId, userIds) }
             );
         }
 

@@ -11,8 +11,8 @@ namespace PBL6.Application.Contract.Channels
         Task<Guid> UpdateAsync(Guid channelId, UpdateChannelDto updateChannelDto);
         Task<Guid> AddAsync(CreateChannelDto createUpdateChannelDto);
         Task<Guid> DeleteAsync(Guid channelId);
-        Task<Guid> AddMemberToChannelAsync(Guid channelId, Guid userId);
-        Task<Guid> RemoveMemberFromChannelAsync(Guid channelId, Guid userId);
+        Task<Guid> AddMemberToChannelAsync(Guid channelId, List<Guid> userIds);
+        Task<Guid> RemoveMemberFromChannelAsync(Guid channelId, List<Guid> userIds);
         Task<object> GetRolesAsync(Guid channelId);
         Task<IEnumerable<PermissionDto>> GetPermissionsAsync(Guid channelId, Guid roleId);
         Task<IEnumerable<PermissionDto>> GetPermissions();

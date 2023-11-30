@@ -142,22 +142,22 @@ namespace PBL6.API.Controllers.Workspaces
         /// API Add member to workspace - cần đăng nhập
         /// </summary>
         /// <param name="workspaceId"></param>
-        /// <param name="userId"></param>
+        /// <param name="userIds"></param>
         /// <returns></returns>
         /// <response code="200">Add thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpPost("{workspaceId}/members/{userId}")]
+        [HttpPost("{workspaceId}/members")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [AuthorizeFilter]
         [WorkspaceFilter(WorkSpacePolicy.INVITE_MEMBER)]
         public async Task<IActionResult> AddMember(
             [FromRoute] Guid workspaceId,
-            [FromRoute] Guid userId
+            [FromBody] List<Guid> userIds
         )
         {
             return Ok(
-                new { Id = await _workspaceService.AddMemberToWorkspaceAsync(workspaceId, userId) }
+                new { Id = await _workspaceService.AddMemberToWorkspaceAsync(workspaceId, userIds) }
             );
         }
 
@@ -165,24 +165,24 @@ namespace PBL6.API.Controllers.Workspaces
         /// API Remove member from workspace - cần đăng nhập
         /// </summary>
         /// <param name="workspaceId"></param>
-        /// <param name="userId"></param>
+        /// <param name="userIds"></param>
         /// <returns></returns>
         /// <response code="200">Remove thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpDelete("{workspaceId}/members/{userId}")]
+        [HttpDelete("{workspaceId}/members")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [AuthorizeFilter]
         [WorkspaceFilter(WorkSpacePolicy.DELETE_MEMBER)]
         public async Task<IActionResult> RemoveMember(
             [FromRoute] Guid workspaceId,
-            [FromRoute] Guid userId
+            [FromBody] List<Guid> userIds
         )
         {
             return Ok(
                 new
                 {
-                    Id = await _workspaceService.RemoveMemberFromWorkspaceAsync(workspaceId, userId)
+                    Id = await _workspaceService.RemoveMemberFromWorkspaceAsync(workspaceId, userIds)
                 }
             );
         }
