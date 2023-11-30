@@ -509,6 +509,44 @@ namespace PBL6.Application.Services
             );
         }
 
+        public async Task<WorkspaceRoleDto> GetRoleAsync(Guid workspaceId, Guid roleId)
+        {
+            var method = GetActualAsyncMethodName();
+            var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var isMember = await _unitOfwork.Workspaces.CheckIsMemberAsync(workspaceId, userId);
+            if (!isMember)
+            {
+                throw new ForbidException();
+            }
+
+            var isExistRole = await _unitOfwork.Workspaces.CheckIsExistRole(workspaceId, roleId);
+            if (!isExistRole)
+            {
+                throw new NotFoundException<WorkspaceRole>(roleId.ToString());
+            }
+
+            var role = await _unitOfwork.Workspaces.GetRoleById(workspaceId, roleId);
+            var roleDto = _mapper.Map<WorkspaceRoleDto>(role);
+            roleDto.Permissions.ForEach(x => x.IsEnabled = true);
+
+            var activePermissions = _unitOfwork.WorkspacePermissions
+                .Queryable()
+                .Where(x => !x.IsDeleted && x.IsActive);
+
+            roleDto.Permissions.AddRange(
+                _mapper.Map<List<PermissionDto>>(
+                    activePermissions.Where(
+                        x => !roleDto.Permissions.Select(x => x.Id).Contains(x.Id)
+                    )
+                )
+            );
+
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+            return roleDto;
+        }
+
         public async Task<Guid> AddRoleAsync(Guid workspaceId, CreateUpdateWorkspaceRoleDto input)
         {
             var method = GetActualAsyncMethodName();

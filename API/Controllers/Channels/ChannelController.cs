@@ -219,6 +219,26 @@ namespace PBL6.API.Controllers.Channels
         }
 
         /// <summary>
+        /// API Get role infor - cần đăng nhập
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <param name="roleId"></param>
+        /// <returns></returns>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpGet("{channelId}/roles/{roleId}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelRoleDto))]
+        [AuthorizeFilter]
+        public async Task<IActionResult> GetRole(
+            [FromRoute] Guid channelId,
+            [FromRoute] Guid roleId
+        )
+        {
+            return Ok(await _channelService.GetRoleAsync(channelId, roleId));
+        }
+
+        /// <summary>
         /// API Update role of channel - cần đăng nhập
         /// </summary>
         /// <param name="channelId"></param>

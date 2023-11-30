@@ -423,7 +423,47 @@ public class ChannelService : BaseService, IChannelService
         return permissionDtos;
     }
 
-    public async Task<object> GetRolesAsync(Guid channelId)
+    public async Task<ChannelRoleDto> GetRoleAsync(Guid channelId, Guid roleId)
+    {
+        var method = GetActualAsyncMethodName();
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var isMember = await _unitOfwork.Channels.CheckIsMemberAsync(
+            channelId,
+            Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException())
+        );
+        if (!isMember)
+        {
+            throw new ForbidException();
+        }
+
+        var isExistRole = await _unitOfwork.Channels.CheckIsExistRole(channelId, roleId);
+        if (!isExistRole)
+        {
+            throw new NotFoundException<ChannelRole>(roleId.ToString());
+        }
+
+        var channelRole = await _unitOfwork.Channels.GetRoleById(channelId, roleId);
+        var channelRoleDto = _mapper.Map<ChannelRoleDto>(channelRole);
+        channelRoleDto.Permissions.ForEach(x => x.IsEnabled = true);
+
+        var activePermissions = _unitOfwork.ChannelPermissions
+            .Queryable()
+            .Where(x => !x.IsDeleted && x.IsActive);
+
+        channelRoleDto.Permissions.AddRange(
+            _mapper.Map<List<PermissionDto>>(
+                activePermissions.Where(
+                    x => !channelRoleDto.Permissions.Select(x => x.Id).Contains(x.Id)
+                )
+            )
+        );
+
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+        return channelRoleDto;
+    }
+
+    public async Task<IEnumerable<ChannelRoleDto>> GetRolesAsync(Guid channelId)
     {
         var method = GetActualAsyncMethodName();
         var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());

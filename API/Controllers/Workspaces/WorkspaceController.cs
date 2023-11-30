@@ -243,6 +243,26 @@ namespace PBL6.API.Controllers.Workspaces
         }
 
         /// <summary>
+        /// API Get role of workspace by id - cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <param name="workspaceId">Id của workspace</param>
+        /// <param name="roleId">Id của workspace</param>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpGet("{workspaceId}/roles/{roleId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(WorkspaceRoleDto))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [AuthorizeFilter]
+        public async Task<IActionResult> GetRole(
+            [FromRoute] Guid workspaceId,
+            [FromRoute] Guid roleId
+        )
+        {
+            return Ok(await _workspaceService.GetRoleAsync(workspaceId, roleId));
+        }
+
+        /// <summary>
         /// API Update role of workspace - cần đăng nhập
         /// </summary>
         /// <param name="workspaceId"></param>
