@@ -48,21 +48,6 @@ namespace PBL6.API.Filters
                 var claims = jwtToken.Claims;
                 var userId = claims.FirstOrDefault(x => x.Type == CustomClaimTypes.UserId)?.Value;
                 var email = claims.FirstOrDefault(x => x.Type == CustomClaimTypes.Email)?.Value;
-                var isVerified = claims.FirstOrDefault(x => x.Type == CustomClaimTypes.IsActive)?.Value;
-                if (context.HttpContext.Request.Path.Value.Contains("verify-register"))
-                {
-                    if (isVerified == "True")
-                    {
-                        throw new UnauthorizedException("Account is verified");
-                    }
-                }
-                else
-                {
-                    if (isVerified == "False")
-                    {
-                        throw new UnauthorizedException("Account is not verified");
-                    }
-                }
                 var identity = new ClaimsIdentity(context.HttpContext.User.Identity);
                 identity.AddClaim(new Claim(CustomClaimTypes.UserId, userId));
                 identity.AddClaim(new Claim(CustomClaimTypes.Email, email));
@@ -71,10 +56,8 @@ namespace PBL6.API.Filters
                 context.HttpContext.User = principal;
                 await Task.CompletedTask;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                if (e is UnauthorizedException)
-                    throw;
                 throw new UnauthorizedException("Invalid token");
             }
         }

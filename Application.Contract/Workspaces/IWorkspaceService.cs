@@ -21,6 +21,6 @@ namespace PBL6.Application.Contract.Workspaces
         Task<IEnumerable<PermissionDto>> GetPermissions();
         Task DeleteRoleAsync(Guid workspaceId, Guid roleId);
         Task SetRoleAsync(Guid workspaceId, Guid userId, Guid roleId);
-        Task<IEnumerable<PermissionDto>> GetPermissionOfUser(Guid workspaceId, Guid userId);
+        Task<WorkspaceRoleDto> GetRoleAsync(Guid workspaceId, Guid roleId);
     }
 }
