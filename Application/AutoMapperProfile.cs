@@ -8,6 +8,7 @@ using PBL6.Application.Contract.Workspaces.Dtos;
 using PBL6.Application.Contract.Channels.Dtos;
 using System.Data.Common;
 using PBL6.Application.Contract.Users.Dtos;
+using Application.Contract.Users.Dtos;
 
 namespace PBL6.Application
 {
@@ -87,6 +88,23 @@ namespace PBL6.Application
             CreateMap<ChannelPermission, PermissionDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(x => x.IsEnabled, opt => opt.MapFrom(src => false));
+
+            CreateMap<User, UserDto2>()
+                .ForMember(x => x.FirstName, opt => opt.MapFrom(src => src.Information.FirstName))
+                .ForMember(x => x.LastName, opt => opt.MapFrom(src => src.Information.LastName))
+                .ForMember(x => x.Gender, opt => opt.MapFrom(src => src.Information.Gender))
+                .ForMember(x => x.Phone, opt => opt.MapFrom(src => src.Information.Phone))
+                .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.Information.BirthDay))
+                .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.Information.Picture));
+
+            CreateMap<UpdateUserDto, User>()
+                .ForPath(x => x.Information.FirstName, opt => opt.MapFrom(src => src.FirstName))
+                .ForPath(x => x.Information.LastName, opt => opt.MapFrom(src => src.LastName))
+                .ForMember(x => x.Email, opt => opt.MapFrom(src => src.Email))
+                .ForPath(x => x.Information.Gender, opt => opt.MapFrom(src => src.Gender))
+                .ForPath(x => x.Information.Phone, opt => opt.MapFrom(src => src.Phone))
+                .ForPath(x => x.Information.BirthDay, opt => opt.MapFrom(src => src.BirthDay));
+
         }
     }
 }

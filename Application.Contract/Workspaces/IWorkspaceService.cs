@@ -12,8 +12,8 @@ namespace PBL6.Application.Contract.Workspaces
         Task<Guid> UpdateAvatarAsync(Guid workspaceId, UpdateAvatarWorkspaceDto updateAvatarWorkspaceDto);
         Task<Guid> AddAsync(CreateWorkspaceDto createWorkspaceDto);
         Task<Guid> DeleteAsync(Guid workspaceId);
-        Task<Guid> AddMemberToWorkspaceAsync(Guid workspaceId, Guid userId);
-        Task<Guid> RemoveMemberFromWorkspaceAsync(Guid workspaceId, Guid userId);
+        Task<Guid> AddMemberToWorkspaceAsync(Guid workspaceId, List<Guid> userIds);
+        Task<Guid> RemoveMemberFromWorkspaceAsync(Guid workspaceId, List<Guid> userIds);
         Task<IEnumerable<WorkspaceRoleDto>> GetRolesAsync(Guid workspaceId);
         Task UpdateRoleAsync(Guid workspaceId, Guid roleId, CreateUpdateWorkspaceRoleDto input);
         Task<Guid> AddRoleAsync(Guid workspaceId, CreateUpdateWorkspaceRoleDto input);

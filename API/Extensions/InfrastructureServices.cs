@@ -1,3 +1,4 @@
+using Application.Services;
 using PBL6.API.Services;
 using PBL6.Application.Contract.Channels;
 using PBL6.Application.Contract.Common;
@@ -24,6 +25,7 @@ namespace PBL6.API.Extensions
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IWorkspaceService, WorkspaceService>();
             services.AddScoped<IChannelService, ChannelService>();
+            services.AddScoped<IUserService, UserService>();
             
             services.AddTransient<IMailService, MailService>();
             services.AddTransient<IFileService, FileService>();
