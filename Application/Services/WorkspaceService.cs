@@ -182,7 +182,7 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                
+
                 var workspace = await _unitOfwork.Workspaces
                     .Queryable()
                     .Include(x => x.Channels)
@@ -361,7 +361,7 @@ namespace PBL6.Application.Services
             }
         }
 
-        public async Task<Guid> AddMemberToWorkspaceAsync(Guid workspaceId, Guid userId)
+        public async Task<Guid> AddMemberToWorkspaceAsync(Guid workspaceId, List<Guid> userIds)
         {
             var method = GetActualAsyncMethodName();
             try
@@ -382,28 +382,29 @@ namespace PBL6.Application.Services
                 {
                     throw new ForbidException();
                 }
-
-                var user = await _unitOfwork.Users.FindAsync(userId);
-                if (user is null)
+                foreach (var userId in userIds)
                 {
-                    throw new NotFoundException<User>(userId.ToString());
+                    var user = await _unitOfwork.Users.FindAsync(userId);
+                    if (user is null)
+                    {
+                        throw new NotFoundException<User>(userId.ToString());
+                    }
+
+                    if (!user.IsActive)
+                    {
+                        throw new Exception("User is not active yet");
+                    }
+
+                    var member = workspace.Members.FirstOrDefault(x => x.UserId == userId);
+                    if (member is not null)
+                    {
+                        throw new Exception("User is already a member of this workspace");
+                    }
+
+                    workspace.Members.Add(
+                        new WorkspaceMember { UserId = userId, AddBy = currentUserId }
+                    );
                 }
-
-                if (!user.IsActive)
-                {
-                    throw new Exception("User is not active yet");
-                }
-
-                var member = workspace.Members.FirstOrDefault(x => x.UserId == userId);
-                if (member is not null)
-                {
-                    throw new Exception("User is already a member of this workspace");
-                }
-
-                workspace.Members.Add(
-                    new WorkspaceMember { UserId = userId, AddBy = currentUserId }
-                );
-
                 await _unitOfwork.Workspaces.UpdateAsync(workspace);
                 await _unitOfwork.SaveChangeAsync();
 
@@ -423,7 +424,7 @@ namespace PBL6.Application.Services
             }
         }
 
-        public async Task<Guid> RemoveMemberFromWorkspaceAsync(Guid workspaceId, Guid userId)
+        public async Task<Guid> RemoveMemberFromWorkspaceAsync(Guid workspaceId, List<Guid> userIds)
         {
             var method = GetActualAsyncMethodName();
             try
@@ -446,31 +447,32 @@ namespace PBL6.Application.Services
                 {
                     throw new ForbidException();
                 }
-
-                var member = workspace.Members.FirstOrDefault(x => x.UserId == userId);
-                if (member is null)
+                foreach (var userId in userIds)
                 {
-                    throw new Exception("User is not a member of this workspace");
-                }
-
-                await _unitOfwork.WorkspaceMembers.DeleteAsync(member);
-
-                var channels = await _unitOfwork.Channels
-                    .Queryable()
-                    .Include(c => c.ChannelMembers.Where(m => !m.IsDeleted))
-                    .Where(x => x.WorkspaceId == workspaceId)
-                    .ToListAsync();
-                foreach (var channel in channels)
-                {
-                    var channelMember = channel.ChannelMembers.FirstOrDefault(
-                        x => x.UserId == userId
-                    );
-                    if (channelMember is not null)
+                    var member = workspace.Members.FirstOrDefault(x => x.UserId == userId);
+                    if (member is null)
                     {
-                        await _unitOfwork.ChannelMembers.DeleteAsync(channelMember);
+                        throw new Exception($"User {userId} is not a member of this workspace");
+                    }
+
+                    await _unitOfwork.WorkspaceMembers.DeleteAsync(member);
+
+                    var channels = await _unitOfwork.Channels
+                        .Queryable()
+                        .Include(c => c.ChannelMembers.Where(m => !m.IsDeleted))
+                        .Where(x => x.WorkspaceId == workspaceId)
+                        .ToListAsync();
+                    foreach (var channel in channels)
+                    {
+                        var channelMember = channel.ChannelMembers.FirstOrDefault(
+                            x => x.UserId == userId
+                        );
+                        if (channelMember is not null)
+                        {
+                            await _unitOfwork.ChannelMembers.DeleteAsync(channelMember);
+                        }
                     }
                 }
-
                 await _unitOfwork.SaveChangeAsync();
 
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
