@@ -2,13 +2,15 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using PBL6.Common.Exceptions;
 using PBL6.Common.Functions;
 
-namespace PBL6.API.Filters
+namespace PBL6.Application.Filters
 {
-    [AttributeUsage(AttributeTargets.All)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class AuthorizeFilter : Attribute, IAsyncAuthorizationFilter
     {
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
@@ -20,7 +22,14 @@ namespace PBL6.API.Filters
                 var token = GetValue(context, "Authorization");
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new UnauthorizedException("Token is required");
+                    if (context.HttpContext.Request.Path.StartsWithSegments("/chathub"))
+                    {
+                        token = context.HttpContext.Request.Query["access_token"];
+                    }
+                    else
+                    {
+                        throw new UnauthorizedException("Token is required");
+                    }
                 }
 
                 if (token.ToString().StartsWith("Bearer "))
@@ -48,7 +57,9 @@ namespace PBL6.API.Filters
                 var claims = jwtToken.Claims;
                 var userId = claims.FirstOrDefault(x => x.Type == CustomClaimTypes.UserId)?.Value;
                 var email = claims.FirstOrDefault(x => x.Type == CustomClaimTypes.Email)?.Value;
-                var isVerified = claims.FirstOrDefault(x => x.Type == CustomClaimTypes.IsActive)?.Value;
+                var isVerified = claims
+                    .FirstOrDefault(x => x.Type == CustomClaimTypes.IsActive)
+                    ?.Value;
                 if (context.HttpContext.Request.Path.Value.Contains("verify-register"))
                 {
                     if (isVerified == "True")
@@ -84,8 +95,6 @@ namespace PBL6.API.Filters
             try
             {
                 var apiKeyHeader = context.HttpContext.Request.Headers[key].ToString();
-                if (string.IsNullOrEmpty(apiKeyHeader))
-                    apiKeyHeader = context.HttpContext.Request.Query[key].ToString();
                 if (string.IsNullOrEmpty(apiKeyHeader))
                     apiKeyHeader = context.HttpContext.Request.Cookies[key].ToString();
                 return apiKeyHeader;

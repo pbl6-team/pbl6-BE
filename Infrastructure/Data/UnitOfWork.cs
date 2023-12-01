@@ -21,6 +21,7 @@ namespace PBL6.Infrastructure.Data
         public IWorkspacePermissionRepository WorkspacePermissions { get; }
         public IChannelPermissionRepository ChannelPermissions { get; }
         public IChannelRoleRepository ChannelRoles { get; }
+        public IMessageRepository Messages { get; }
 
         public UnitOfWork(ApiDbContext apiDbContext, ILoggerFactory loggerFactory)
         {
@@ -38,6 +39,7 @@ namespace PBL6.Infrastructure.Data
             WorkspacePermissions = new WorkspacePermissionRepository(apiDbContext, logger);
             ChannelPermissions = new ChannelPermissionRepository(apiDbContext, logger);
             ChannelRoles = new ChannelRoleRepository(apiDbContext, logger);
+            Messages = new MessageRepository(apiDbContext, logger);
         }
 
         public async Task SaveChangeAsync()

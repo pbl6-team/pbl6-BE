@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PBL6.Application.Contract.Examples.Dtos;
 using PBL6.Application.Contract.Examples;
-using PBL6.API.Filters;
+using PBL6.Application.Filters;
 
 namespace PBL6.API.Controllers
 {

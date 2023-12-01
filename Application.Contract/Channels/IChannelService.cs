@@ -22,5 +22,6 @@ namespace PBL6.Application.Contract.Channels
         Task SetRoleToUserAsync(Guid channelId, Guid userId, Guid role);
         Task<ChannelRoleDto> GetRoleAsync(Guid channelId, Guid roleId);
         Task<IEnumerable<PermissionDto>> GetPermissionOfUser(Guid channelId, Guid userId);
+        Task<IEnumerable<Guid>> GetChannelsOfUserAsync(Guid userId);
     }
 }

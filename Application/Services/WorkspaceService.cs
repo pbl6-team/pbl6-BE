@@ -72,8 +72,8 @@ namespace PBL6.Application.Services
                     new() { UserId = userId, AddBy = userId }
                 };
 
-                workspace = await _unitOfwork.Workspaces.AddAsync(workspace);
-                await _unitOfwork.SaveChangeAsync();
+                workspace = await _unitOfWork.Workspaces.AddAsync(workspace);
+                await _unitOfWork.SaveChangeAsync();
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
                 return workspace.Id;
@@ -97,18 +97,18 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                var workspace = await _unitOfwork.Workspaces.Queryable().Include(x => x.Members.Where(m => !m.IsDeleted)).FirstOrDefaultAsync(x => x.Id == workspaceId);
+                var workspace = await _unitOfWork.Workspaces.Queryable().Include(x => x.Members.Where(m => !m.IsDeleted)).FirstOrDefaultAsync(x => x.Id == workspaceId);
                 if (workspace is null)
                     throw new NotFoundException<Workspace>(workspaceId.ToString());
 
                 var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
 
-                if (!await _unitOfwork.Workspaces.CheckIsMemberAsync(workspaceId, currentUserId))
+                if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, currentUserId))
                     throw new ForbidException();
 
 
-                await _unitOfwork.Workspaces.DeleteAsync(workspace);
-                await _unitOfwork.SaveChangeAsync();
+                await _unitOfWork.Workspaces.DeleteAsync(workspace);
+                await _unitOfWork.SaveChangeAsync();
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
                 return workspace.Id;
@@ -132,7 +132,7 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                var workspaces = await _unitOfwork.Workspaces
+                var workspaces = await _unitOfWork.Workspaces
                     .Queryable()
                     .Include(x => x.Channels)
                     .Include(x => x.Members)
@@ -183,7 +183,7 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
 
-                var workspace = await _unitOfwork.Workspaces
+                var workspace = await _unitOfWork.Workspaces
                     .Queryable()
                     .Include(x => x.Channels)
                     .Include(x => x.Members)
@@ -198,7 +198,7 @@ namespace PBL6.Application.Services
                     throw new NotFoundException<Workspace>(workspaceId.ToString());
                 var userId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
 
-                if (!await _unitOfwork.Workspaces.CheckIsMemberAsync(workspaceId, userId))
+                if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, userId))
                     throw new ForbidException();
 
                 var channels = await _channelService.GetAllChannelsOfAWorkspaceAsync(workspace.Id);
@@ -232,7 +232,7 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                var workspaces = await _unitOfwork.Workspaces
+                var workspaces = await _unitOfWork.Workspaces
                     .Queryable()
                     .Include(x => x.Channels.Where(c => !c.IsDeleted))
                     .Include(x => x.Members.Where(m => !m.IsDeleted))
@@ -279,12 +279,12 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var userId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
-                var workspace = await _unitOfwork.Workspaces.Queryable().Include(x => x.Members.Where(m => !m.IsDeleted)).FirstOrDefaultAsync(x => x.Id == workspaceId);
+                var workspace = await _unitOfWork.Workspaces.Queryable().Include(x => x.Members.Where(m => !m.IsDeleted)).FirstOrDefaultAsync(x => x.Id == workspaceId);
 
                 if (workspace is null)
                     throw new NotFoundException<Workspace>(workspaceId.ToString());
 
-                if (!await _unitOfwork.Workspaces.CheckIsMemberAsync(workspaceId, userId))
+                if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, userId))
                     throw new ForbidException();
 
                 if (updateWorkspaceDto.Description is null)
@@ -293,8 +293,8 @@ namespace PBL6.Application.Services
                 }
 
                 _mapper.Map(updateWorkspaceDto, workspace);
-                await _unitOfwork.Workspaces.UpdateAsync(workspace);
-                await _unitOfwork.SaveChangeAsync();
+                await _unitOfWork.Workspaces.UpdateAsync(workspace);
+                await _unitOfWork.SaveChangeAsync();
 
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
                 return workspace.Id;
@@ -322,12 +322,12 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var userId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
-                var workspace = await _unitOfwork.Workspaces.Queryable().Include(x => x.Members.Where(m => !m.IsDeleted)).FirstOrDefaultAsync(x => x.Id == workspaceId);
+                var workspace = await _unitOfWork.Workspaces.Queryable().Include(x => x.Members.Where(m => !m.IsDeleted)).FirstOrDefaultAsync(x => x.Id == workspaceId);
 
                 if (workspace is null)
                     throw new NotFoundException<Workspace>(workspaceId.ToString());
 
-                if (!await _unitOfwork.Workspaces.CheckIsMemberAsync(workspaceId, userId))
+                if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, userId))
                     throw new ForbidException();
 
                 if (updateAvatarWorkspaceDto.Avatar is not null)
@@ -341,8 +341,8 @@ namespace PBL6.Application.Services
                 {
                     workspace.AvatarUrl = CommonConsts.DEFAULT_WORKSPACE_AVATAR;
                 }
-                await _unitOfwork.Workspaces.UpdateAsync(workspace);
-                await _unitOfwork.SaveChangeAsync();
+                await _unitOfWork.Workspaces.UpdateAsync(workspace);
+                await _unitOfWork.SaveChangeAsync();
 
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
@@ -368,7 +368,7 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
-                var workspace = await _unitOfwork.Workspaces
+                var workspace = await _unitOfWork.Workspaces
                     .Queryable()
                     .Include(x => x.Members.Where(m => !m.IsDeleted))
                     .FirstOrDefaultAsync(x => x.Id == workspaceId);
@@ -378,13 +378,13 @@ namespace PBL6.Application.Services
                     throw new NotFoundException<Workspace>(workspaceId.ToString());
                 }
 
-                if (!await _unitOfwork.Workspaces.CheckIsMemberAsync(workspaceId, currentUserId))
+                if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, currentUserId))
                 {
                     throw new ForbidException();
                 }
                 foreach (var userId in userIds)
                 {
-                    var user = await _unitOfwork.Users.FindAsync(userId);
+                    var user = await _unitOfWork.Users.FindAsync(userId);
                     if (user is null)
                     {
                         throw new NotFoundException<User>(userId.ToString());
@@ -405,8 +405,8 @@ namespace PBL6.Application.Services
                         new WorkspaceMember { UserId = userId, AddBy = currentUserId }
                     );
                 }
-                await _unitOfwork.Workspaces.UpdateAsync(workspace);
-                await _unitOfwork.SaveChangeAsync();
+                await _unitOfWork.Workspaces.UpdateAsync(workspace);
+                await _unitOfWork.SaveChangeAsync();
 
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
@@ -431,7 +431,7 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
 
-                var workspace = await _unitOfwork.Workspaces
+                var workspace = await _unitOfWork.Workspaces
                     .Queryable()
                     .Include(x => x.Members.Where(m => !m.IsDeleted))
                     .FirstOrDefaultAsync(x => x.Id == workspaceId);
@@ -443,7 +443,7 @@ namespace PBL6.Application.Services
 
                 var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
 
-                if (!await _unitOfwork.Workspaces.CheckIsMemberAsync(workspaceId, currentUserId))
+                if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, currentUserId))
                 {
                     throw new ForbidException();
                 }
@@ -455,9 +455,9 @@ namespace PBL6.Application.Services
                         throw new Exception($"User {userId} is not a member of this workspace");
                     }
 
-                    await _unitOfwork.WorkspaceMembers.DeleteAsync(member);
+                    await _unitOfWork.WorkspaceMembers.DeleteAsync(member);
 
-                    var channels = await _unitOfwork.Channels
+                    var channels = await _unitOfWork.Channels
                         .Queryable()
                         .Include(c => c.ChannelMembers.Where(m => !m.IsDeleted))
                         .Where(x => x.WorkspaceId == workspaceId)
@@ -469,11 +469,11 @@ namespace PBL6.Application.Services
                         );
                         if (channelMember is not null)
                         {
-                            await _unitOfwork.ChannelMembers.DeleteAsync(channelMember);
+                            await _unitOfWork.ChannelMembers.DeleteAsync(channelMember);
                         }
                     }
                 }
-                await _unitOfwork.SaveChangeAsync();
+                await _unitOfWork.SaveChangeAsync();
 
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
@@ -496,7 +496,7 @@ namespace PBL6.Application.Services
             var method = GetActualAsyncMethodName();
             var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var isMember = await _unitOfwork.Workspaces.CheckIsMemberAsync(workspaceId, userId);
+            var isMember = await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, userId);
             if (!isMember)
             {
                 throw new ForbidException();
@@ -505,7 +505,7 @@ namespace PBL6.Application.Services
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
             return _mapper.Map<IEnumerable<WorkspaceRoleDto>>(
-                await _unitOfwork.Workspaces.GetRoles(workspaceId)
+                await _unitOfWork.Workspaces.GetRoles(workspaceId)
             );
         }
 
@@ -514,23 +514,23 @@ namespace PBL6.Application.Services
             var method = GetActualAsyncMethodName();
             var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var isMember = await _unitOfwork.Workspaces.CheckIsMemberAsync(workspaceId, userId);
+            var isMember = await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, userId);
             if (!isMember)
             {
                 throw new ForbidException();
             }
 
-            var isExistRole = await _unitOfwork.Workspaces.CheckIsExistRole(workspaceId, roleId);
+            var isExistRole = await _unitOfWork.Workspaces.CheckIsExistRole(workspaceId, roleId);
             if (!isExistRole)
             {
                 throw new NotFoundException<WorkspaceRole>(roleId.ToString());
             }
 
-            var role = await _unitOfwork.Workspaces.GetRoleById(workspaceId, roleId);
+            var role = await _unitOfWork.Workspaces.GetRoleById(workspaceId, roleId);
             var roleDto = _mapper.Map<WorkspaceRoleDto>(role);
             roleDto.Permissions.ForEach(x => x.IsEnabled = true);
 
-            var activePermissions = _unitOfwork.WorkspacePermissions
+            var activePermissions = _unitOfWork.WorkspacePermissions
                 .Queryable()
                 .Where(x => !x.IsDeleted && x.IsActive);
 
@@ -552,16 +552,16 @@ namespace PBL6.Application.Services
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
             var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
-            var isMember = await _unitOfwork.Workspaces.CheckIsMemberAsync(workspaceId, userId);
+            var isMember = await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, userId);
             if (!isMember)
             {
                 throw new ForbidException();
             }
 
             var role = _mapper.Map<WorkspaceRole>(input);
-            role = await _unitOfwork.Workspaces.AddRoleAsync(workspaceId, role);
+            role = await _unitOfWork.Workspaces.AddRoleAsync(workspaceId, role);
 
-            await _unitOfwork.SaveChangeAsync();
+            await _unitOfWork.SaveChangeAsync();
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
@@ -577,21 +577,21 @@ namespace PBL6.Application.Services
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
             var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
-            var isMember = await _unitOfwork.Workspaces.CheckIsMemberAsync(workspaceId, userId);
+            var isMember = await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, userId);
             if (!isMember)
             {
                 throw new ForbidException();
             }
-            var isExistRole = await _unitOfwork.Workspaces.CheckIsExistRole(workspaceId, roleId);
+            var isExistRole = await _unitOfWork.Workspaces.CheckIsExistRole(workspaceId, roleId);
             if (!isExistRole)
             {
                 throw new NotFoundException<WorkspaceRole>(roleId.ToString());
             }
 
-            var role = await _unitOfwork.Workspaces.GetRoleById(workspaceId, roleId);
+            var role = await _unitOfWork.Workspaces.GetRoleById(workspaceId, roleId);
             _mapper.Map(input, role);
-            await _unitOfwork.WorkspaceRoles.UpdateAsync(role);
-            await _unitOfwork.SaveChangeAsync();
+            await _unitOfWork.WorkspaceRoles.UpdateAsync(role);
+            await _unitOfWork.SaveChangeAsync();
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
         }
@@ -603,16 +603,16 @@ namespace PBL6.Application.Services
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var isMember = await _unitOfwork.Workspaces.CheckIsMemberAsync(
+            var isMember = await _unitOfWork.Workspaces.CheckIsMemberAsync(
                 workspaceId,
                 Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException())
             );
-            var isExistRole = await _unitOfwork.Workspaces.CheckIsExistRole(workspaceId, roleId);
+            var isExistRole = await _unitOfWork.Workspaces.CheckIsExistRole(workspaceId, roleId);
             if (!isExistRole)
             {
                 throw new NotFoundException<WorkspaceRole>(roleId.ToString());
             }
-            var workspaceRole = await _unitOfwork.Workspaces.GetRoleById(workspaceId, roleId);
+            var workspaceRole = await _unitOfWork.Workspaces.GetRoleById(workspaceId, roleId);
 
             var permissions = workspaceRole.Permissions
                 .Where(x => !x.IsDeleted && x.Permission.IsActive)
@@ -620,7 +620,7 @@ namespace PBL6.Application.Services
             var permissionDtos = _mapper.Map<List<PermissionDto>>(permissions);
             permissionDtos.ForEach(x => x.IsEnabled = true);
 
-            var activePermissions = _unitOfwork.WorkspacePermissions
+            var activePermissions = _unitOfWork.WorkspacePermissions
                 .Queryable()
                 .Where(x => !x.IsDeleted && x.IsActive);
 
@@ -639,7 +639,7 @@ namespace PBL6.Application.Services
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var isMember = await _unitOfwork.Workspaces.CheckIsMemberAsync(
+            var isMember = await _unitOfWork.Workspaces.CheckIsMemberAsync(
                 workspaceId,
                 Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException())
             );
@@ -647,14 +647,14 @@ namespace PBL6.Application.Services
             {
                 throw new ForbidException();
             }
-            var isExistRole = await _unitOfwork.Workspaces.CheckIsExistRole(workspaceId, roleId);
+            var isExistRole = await _unitOfWork.Workspaces.CheckIsExistRole(workspaceId, roleId);
             if (!isExistRole)
             {
                 throw new NotFoundException<WorkspaceRole>(roleId.ToString());
             }
-            var workspaceRole = await _unitOfwork.Workspaces.GetRoleById(workspaceId, roleId);
-            await _unitOfwork.WorkspaceRoles.DeleteAsync(workspaceRole, isHardDelete: true);
-            await _unitOfwork.SaveChangeAsync();
+            var workspaceRole = await _unitOfWork.Workspaces.GetRoleById(workspaceId, roleId);
+            await _unitOfWork.WorkspaceRoles.DeleteAsync(workspaceRole, isHardDelete: true);
+            await _unitOfWork.SaveChangeAsync();
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
         }
 
@@ -662,7 +662,7 @@ namespace PBL6.Application.Services
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var isMember = await _unitOfwork.Workspaces.CheckIsMemberAsync(
+            var isMember = await _unitOfWork.Workspaces.CheckIsMemberAsync(
                 workspaceId,
                 Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException())
             );
@@ -670,20 +670,20 @@ namespace PBL6.Application.Services
             {
                 throw new ForbidException();
             }
-            var isExistRole = await _unitOfwork.Workspaces.CheckIsExistRole(workspaceId, roleId);
+            var isExistRole = await _unitOfWork.Workspaces.CheckIsExistRole(workspaceId, roleId);
             if (!isExistRole)
             {
                 throw new NotFoundException<WorkspaceRole>(roleId.ToString());
             }
-            isMember = await _unitOfwork.Workspaces.CheckIsMemberAsync(workspaceId, userId);
+            isMember = await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, userId);
             if (!isMember)
             {
                 throw new NotFoundException<WorkspaceMember>(userId.ToString());
             }
-            var member = await _unitOfwork.Workspaces.GetMemberByUserId(workspaceId, userId);
+            var member = await _unitOfWork.Workspaces.GetMemberByUserId(workspaceId, userId);
             member.RoleId = roleId;
-            await _unitOfwork.WorkspaceMembers.UpdateAsync(member);
-            await _unitOfwork.SaveChangeAsync();
+            await _unitOfWork.WorkspaceMembers.UpdateAsync(member);
+            await _unitOfWork.SaveChangeAsync();
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
         }
 
@@ -692,7 +692,7 @@ namespace PBL6.Application.Services
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
 
-            var permissions = _unitOfwork.WorkspacePermissions
+            var permissions = _unitOfWork.WorkspacePermissions
                 .Queryable()
                 .Where(x => !x.IsDeleted && x.IsActive);
             await Task.CompletedTask;
@@ -705,7 +705,7 @@ namespace PBL6.Application.Services
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var isExist = await _unitOfwork.Workspaces.CheckIsExistAsync(workspaceId);
+            var isExist = await _unitOfWork.Workspaces.CheckIsExistAsync(workspaceId);
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return isExist;
         }
@@ -717,26 +717,26 @@ namespace PBL6.Application.Services
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var isExist = await _unitOfwork.Workspaces.CheckIsExistAsync(workspaceId);
+            var isExist = await _unitOfWork.Workspaces.CheckIsExistAsync(workspaceId);
             if (!isExist)
             {
                 throw new NotFoundException<Workspace>(workspaceId.ToString());
             }
-            var isMember = await _unitOfwork.Workspaces.CheckIsMemberAsync(workspaceId, userId);
+            var isMember = await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, userId);
             if (!isMember)
             {
                 throw new ForbidException();
             }
-            var isOwner = await _unitOfwork.Workspaces.CheckIsOwnerAsync(workspaceId, userId);
+            var isOwner = await _unitOfWork.Workspaces.CheckIsOwnerAsync(workspaceId, userId);
 
-            var permissions = await _unitOfwork.WorkspaceMembers.GetPermissionOfUser(
+            var permissions = await _unitOfWork.WorkspaceMembers.GetPermissionOfUser(
                 workspaceId,
                 userId
             );
             if (isOwner)
             {
                 permissions = permissions.Concat(
-                    await _unitOfwork.WorkspacePermissions
+                    await _unitOfWork.WorkspacePermissions
                         .Queryable()
                         .Where(x => !x.IsDeleted && x.IsActive)
                         .ToListAsync()

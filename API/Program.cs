@@ -1,6 +1,7 @@
 using PBL6.API.Middlewares;
 using PBL6.API.Extensions;
 using PBL6.Common;
+using PBL6.Application.SignalR.ChatHub;
 
 namespace PBL6.API
 {
@@ -41,6 +42,7 @@ namespace PBL6.API
             app.Map("/", () => Results.Redirect("/swagger"));
             app.MapControllers();
             app.UseCors("CorsPolicy");
+            app.MapHub<ChatHub>("/chatHub");
 
             app.Run();
         }

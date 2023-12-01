@@ -32,8 +32,8 @@ namespace PBL6.Infrastructure.Data
                     IsActive = true,
                     Information = new()
                     {
-                        FirstName = "",
-                        LastName = "",
+                        FirstName = "User",
+                        LastName = "Test",
                         BirthDay = DateTimeOffset.Now,
                         Phone = "",
                         Gender = true,
