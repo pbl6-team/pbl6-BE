@@ -41,6 +41,8 @@ namespace PBL6.Infrastructure.Data
         public DbSet<ChannelRole> ChannelRoles { get; set; }
         public DbSet<ChannelPermission> ChannelPermissions { get; set; }
         public DbSet<PermissionsOfChannelRole> PermissionsOfChanelRoles { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<MessageTracking> MessageTrackings { get; set; }
 
         public ApiDbContext() { }
 
@@ -129,37 +131,55 @@ namespace PBL6.Infrastructure.Data
                .HasMany(x => x.Members)
                .WithOne(x => x.Workspace)
                .HasForeignKey(x => x.WorkspaceId)
-               .OnDelete(DeleteBehavior.Cascade);
+               .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Workspace>()
                .HasMany(x => x.WorkspaceRoles)
                .WithOne(x => x.Workspace)
                .HasForeignKey(x => x.WorkspaceId)
-               .OnDelete(DeleteBehavior.Cascade);
+               .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<WorkspaceRole>()
                .HasMany(x => x.Members)
                .WithOne(x => x.WorkspaceRole)
                .HasForeignKey(x => x.RoleId)
-               .OnDelete(DeleteBehavior.Cascade);
+               .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<WorkspaceRole>()
                .HasMany(x => x.Permissions)
                .WithOne(x => x.WorkspaceRole)
                .HasForeignKey(x => x.WorkspaceRoleId)
-               .OnDelete(DeleteBehavior.Cascade);
+               .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ChannelRole>()
                .HasMany(x => x.Permissions)
                .WithOne(x => x.ChannelRole)
                .HasForeignKey(x => x.ChannelRoleId)
-               .OnDelete(DeleteBehavior.Cascade);
+               .OnDelete(DeleteBehavior.NoAction);
             
             modelBuilder.Entity<Channel>()
                .HasMany(x => x.ChannelRoles)
                .WithOne(x => x.Channel)
                .HasForeignKey(x => x.ChannelId)
-               .OnDelete(DeleteBehavior.Cascade);
+               .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Message>()
+                .HasMany(x => x.Children)
+                .WithOne(x => x.Parent)
+                .HasForeignKey(x => x.ParentId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Message>()
+                .HasMany(x => x.MessageTrackings)
+                .WithOne(x => x.Message)
+                .HasForeignKey(x => x.MessageId)
+                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Message>()
+                .HasOne(x => x.Sender)
+                .WithMany()
+                .HasForeignKey(x => x.CreatedBy)
+                .OnDelete(DeleteBehavior.NoAction);
+
         }
 
         public override int SaveChanges()
@@ -245,7 +265,7 @@ namespace PBL6.Infrastructure.Data
                 {
                     user = _context.HttpContext.User;
                 }
-                if (user != null && user.Identity != null && user.Identity.IsAuthenticated)
+                if (user != null && user.Identity != null)
                 {
                     var identity = user.Identity as ClaimsIdentity;
                     accountId = Guid.Parse(identity.Claims.Where(p => p.Type == CustomClaimTypes.UserId).FirstOrDefault()?.Value);

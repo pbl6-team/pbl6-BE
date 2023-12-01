@@ -27,12 +27,12 @@ public class UserService : BaseService, IUserService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var users = await _unitOfwork.Users.Queryable()
+            var users = await _unitOfWork.Users.Queryable()
                                    .Include(x => x.Information)
                                    .Where(x => !x.IsDeleted)
                                    .ToListAsync();
 
-            users = users.Where(x => _unitOfwork.Workspaces.CheckIsMemberAsync(workspaceId, x.Id).Result).ToList();
+            users = users.Where(x => _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, x.Id).Result).ToList();
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return _mapper.Map<IEnumerable<UserDto2>>(users);
@@ -56,12 +56,12 @@ public class UserService : BaseService, IUserService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var users = await _unitOfwork.Users.Queryable()
+            var users = await _unitOfWork.Users.Queryable()
                                            .Include(x => x.Information)
                                            .Where(x => !x.IsDeleted)
                                            .ToListAsync();
 
-            users = users.Where(x => _unitOfwork.Channels.CheckIsMemberAsync(channelId, x.Id).Result).ToList();
+            users = users.Where(x => _unitOfWork.Channels.CheckIsMemberAsync(channelId, x.Id).Result).ToList();
             
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return _mapper.Map<IEnumerable<UserDto2>>(users);
@@ -85,7 +85,7 @@ public class UserService : BaseService, IUserService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var user = await _unitOfwork.Users.Queryable()
+            var user = await _unitOfWork.Users.Queryable()
                                               .Include(x => x.Information)
                                               .FirstOrDefaultAsync(x => !x.IsDeleted && x.Id == userId);
             if (updateUserDto.FirstName == null)
@@ -112,7 +112,7 @@ public class UserService : BaseService, IUserService
 
             if (updateUserDto.Email != user.Email)
             {
-                var isExist = await _unitOfwork.Users.Queryable()
+                var isExist = await _unitOfWork.Users.Queryable()
                                                      .AnyAsync(x => !x.IsDeleted && x.Email == updateUserDto.Email);
                 if (isExist)
                 {
@@ -121,8 +121,8 @@ public class UserService : BaseService, IUserService
             }
 
             _mapper.Map(updateUserDto, user);
-            await _unitOfwork.Users.UpdateAsync(user);
-            await _unitOfwork.SaveChangeAsync();
+            await _unitOfWork.Users.UpdateAsync(user);
+            await _unitOfWork.SaveChangeAsync();
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return user.Id;
@@ -147,15 +147,15 @@ public class UserService : BaseService, IUserService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var user = _unitOfwork.Users.Queryable()
+            var user = _unitOfWork.Users.Queryable()
                                         .Include(x => x.Information)
                                         .FirstOrDefault(x => !x.IsDeleted && x.Id == userId);
             user.Information.Picture = await _fileService.UploadImageToImgbb(
                 updateUserPictureDto.Picture,
                 user.Id);
 
-            await _unitOfwork.Users.UpdateAsync(user);
-            await _unitOfwork.SaveChangeAsync();
+            await _unitOfWork.Users.UpdateAsync(user);
+            await _unitOfWork.SaveChangeAsync();
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
             return user.Id;
@@ -180,7 +180,7 @@ public class UserService : BaseService, IUserService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var users = await _unitOfwork.Users.Queryable()
+            var users = await _unitOfWork.Users.Queryable()
                                                .Include(x => x.Information)
                                                .Where(x => !x.IsDeleted && (x.Information.LastName + " " + x.Information.FirstName).ToUpper().Contains(fullName.ToUpper()))
                                                .ToListAsync();
@@ -206,7 +206,7 @@ public class UserService : BaseService, IUserService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var users = await _unitOfwork.Users.Queryable()
+            var users = await _unitOfWork.Users.Queryable()
                                                .Include(x => x.Information)
                                                .Where(x => !x.IsDeleted && x.Email.ToUpper().Contains(email.ToUpper()))
                                                .ToListAsync();
@@ -232,7 +232,7 @@ public class UserService : BaseService, IUserService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var user = await _unitOfwork.Users.Queryable()
+            var user = await _unitOfWork.Users.Queryable()
                                               .Include(x => x.Information)
                                               .FirstOrDefaultAsync(x => !x.IsDeleted && x.Id == userId);
             _logger.LogInformation("[{_className}][{method}] End", _className, method);

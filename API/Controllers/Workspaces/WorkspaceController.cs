@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using PBL6.API.Filters;
+using PBL6.Application.Filters;
 using PBL6.Application.Contract.Workspaces;
 using PBL6.Application.Contract.Workspaces.Dtos;
 using PBL6.Common.Consts;

@@ -9,6 +9,7 @@ using PBL6.Application.Contract.Channels.Dtos;
 using System.Data.Common;
 using PBL6.Application.Contract.Users.Dtos;
 using Application.Contract.Users.Dtos;
+using PBL6.Application.Contract.Chats.Dtos;
 
 namespace PBL6.Application
 {
@@ -31,13 +32,20 @@ namespace PBL6.Application
                 )
                 .ForMember(
                     x => x.Members,
-                    opt => opt.MapFrom(src => src.Members.Select(m => new UserDto
-                    {
-                        Id = m.UserId,
-                        FirstName = m.User.Information.FirstName,
-                        LastName = m.User.Information.LastName,
-                        Picture = m.User.Information.Picture
-                    }))
+                    opt =>
+                        opt.MapFrom(
+                            src =>
+                                src.Members.Select(
+                                    m =>
+                                        new UserDto
+                                        {
+                                            Id = m.UserId,
+                                            FirstName = m.User.Information.FirstName,
+                                            LastName = m.User.Information.LastName,
+                                            Picture = m.User.Information.Picture
+                                        }
+                                )
+                        )
                 );
             CreateMap<CreateWorkspaceDto, Workspace>();
             CreateMap<CreateWorkspaceDto, WorkspaceDto>();
@@ -68,7 +76,10 @@ namespace PBL6.Application
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Permission.Id))
                 .ForMember(x => x.Name, opt => opt.MapFrom(src => src.Permission.Name))
                 .ForMember(x => x.Code, opt => opt.MapFrom(src => src.Permission.Code))
-                .ForMember(x => x.Description, opt => opt.MapFrom(src => src.Permission.Description));
+                .ForMember(
+                    x => x.Description,
+                    opt => opt.MapFrom(src => src.Permission.Description)
+                );
             CreateMap<WorkspacePermission, PermissionDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(x => x.IsEnabled, opt => opt.MapFrom(src => false));
@@ -84,7 +95,10 @@ namespace PBL6.Application
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Permission.Id))
                 .ForMember(x => x.Name, opt => opt.MapFrom(src => src.Permission.Name))
                 .ForMember(x => x.Code, opt => opt.MapFrom(src => src.Permission.Code))
-                .ForMember(x => x.Description, opt => opt.MapFrom(src => src.Permission.Description));
+                .ForMember(
+                    x => x.Description,
+                    opt => opt.MapFrom(src => src.Permission.Description)
+                );
             CreateMap<ChannelPermission, PermissionDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(x => x.IsEnabled, opt => opt.MapFrom(src => false));
@@ -105,6 +119,55 @@ namespace PBL6.Application
                 .ForPath(x => x.Information.Phone, opt => opt.MapFrom(src => src.Phone))
                 .ForPath(x => x.Information.BirthDay, opt => opt.MapFrom(src => src.BirthDay));
 
+
+            CreateMap<Message, MessageDto>()
+                .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(x => x.IsEdited, opt => opt.MapFrom(src => src.UpdatedAt != null))
+                .ForMember(x => x.SendAt, opt => opt.MapFrom(src => src.CreatedAt))
+                .ForMember(x => x.IsChannel, opt => opt.MapFrom(src => src.ToChannelId != null))
+                .ForMember(
+                    x => x.SenderAvatar,
+                    opt => opt.MapFrom(src => src.Sender.Information.Picture)
+                )
+                .ForMember(
+                    x => x.SenderName,
+                    opt =>
+                        opt.MapFrom(
+                            src =>
+                                src.Sender.Information.FirstName
+                                + " "
+                                + src.Sender.Information.LastName
+                        )
+                )
+                .ForMember(
+                    x => x.Reaction,
+                    opt =>
+                        opt.MapFrom(
+                            src => string.Join(",", src.MessageTrackings.Select(x => x.Reaction))
+                        )
+                )
+                .ForMember(
+                    x => x.Readers,
+                    opt =>
+                        opt.MapFrom(
+                            src =>
+                                src.MessageTrackings
+                                    .Where(x => x.ReadTime != null)
+                                    .Select(
+                                        x =>
+                                            new Reader
+                                            {
+                                                Id = x.UserId,
+                                                Name =
+                                                    x.User.Information.FirstName
+                                                    + " "
+                                                    + x.User.Information.LastName,
+                                                Avatar = x.User.Information.Picture,
+                                                ReadTime = x.ReadTime.Value
+                                            }
+                                    )
+                        )
+                );
         }
     }
 }

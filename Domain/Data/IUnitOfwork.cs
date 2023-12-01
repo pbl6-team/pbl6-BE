@@ -16,6 +16,7 @@ namespace PBL6.Domain.Data
         IWorkspacePermissionRepository WorkspacePermissions { get; }
         IChannelPermissionRepository ChannelPermissions { get; }
         IChannelRoleRepository ChannelRoles { get; }
+        IMessageRepository Messages { get; }
 
         Task SaveChangeAsync();
         Task<IDbContextTransaction> BeginTransactionAsync();

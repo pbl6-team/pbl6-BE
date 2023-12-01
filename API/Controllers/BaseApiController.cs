@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using PBL6.API.Filters;
+using PBL6.Application.Filters;
 
 namespace PBL6.API.Controllers
 {

@@ -409,7 +409,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Examples", (string)null);
+                    b.ToTable("Examples");
                 });
 
             modelBuilder.Entity("PBL6.Domain.Models.Users.Channel", b =>
@@ -663,6 +663,92 @@ namespace Infrastructure.Migrations
                     b.HasIndex("ChannelPermissionId");
 
                     b.ToTable("ChannelRoles", "Chat");
+                });
+
+            modelBuilder.Entity("PBL6.Domain.Models.Users.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ToChannelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ToUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("ToChannelId");
+
+                    b.ToTable("Messages", "Chat");
+                });
+
+            modelBuilder.Entity("PBL6.Domain.Models.Users.MessageTracking", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedTime")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reaction")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("ReadTime")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("MessageTrackings");
                 });
 
             modelBuilder.Entity("PBL6.Domain.Models.Users.Notification", b =>
@@ -1428,7 +1514,7 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PBL6.Domain.Models.Users.ChannelRole", null)
+                    b.HasOne("PBL6.Domain.Models.Users.ChannelRole", "ChannelRole")
                         .WithMany("Members")
                         .HasForeignKey("ChannelRoleId");
 
@@ -1439,6 +1525,8 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Channel");
+
+                    b.Navigation("ChannelRole");
 
                     b.Navigation("User");
                 });
@@ -1456,6 +1544,48 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("ChannelPermissionId");
 
                     b.Navigation("Channel");
+                });
+
+            modelBuilder.Entity("PBL6.Domain.Models.Users.Message", b =>
+                {
+                    b.HasOne("PBL6.Domain.Models.Users.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("PBL6.Domain.Models.Users.Message", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("PBL6.Domain.Models.Users.Channel", "ToChannel")
+                        .WithMany("ChannelMessages")
+                        .HasForeignKey("ToChannelId");
+
+                    b.Navigation("Parent");
+
+                    b.Navigation("Sender");
+
+                    b.Navigation("ToChannel");
+                });
+
+            modelBuilder.Entity("PBL6.Domain.Models.Users.MessageTracking", b =>
+                {
+                    b.HasOne("PBL6.Domain.Models.Users.Message", "Message")
+                        .WithMany("MessageTrackings")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("PBL6.Domain.Models.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Message");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("PBL6.Domain.Models.Users.PermissionsOfChannelRole", b =>
@@ -1564,7 +1694,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("PBL6.Domain.Models.Users.WorkspaceRole", "WorkspaceRole")
                         .WithMany("Members")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("PBL6.Domain.Models.Users.User", "User")
                         .WithMany()
@@ -1614,6 +1744,8 @@ namespace Infrastructure.Migrations
                 {
                     b.Navigation("ChannelMembers");
 
+                    b.Navigation("ChannelMessages");
+
                     b.Navigation("ChannelRoles");
                 });
 
@@ -1627,6 +1759,13 @@ namespace Infrastructure.Migrations
                     b.Navigation("Members");
 
                     b.Navigation("Permissions");
+                });
+
+            modelBuilder.Entity("PBL6.Domain.Models.Users.Message", b =>
+                {
+                    b.Navigation("Children");
+
+                    b.Navigation("MessageTrackings");
                 });
 
             modelBuilder.Entity("PBL6.Domain.Models.Users.Notification", b =>

@@ -83,5 +83,23 @@ namespace PBL6.Infrastructure.Repositories
                 x => x.Id == channelId && x.OwnerId == userId
             );
         }
+
+        public Task<IEnumerable<ChannelPermission>> GetPermissionsOfUser(
+            Guid channelId,
+            Guid userId
+        )
+        {
+            var query = _apiDbContext.Channels
+                .Include(x => x.ChannelMembers)
+                .ThenInclude(x => x.ChannelRole)
+                .ThenInclude(x => x.Permissions)
+                .ThenInclude(x => x.Permission)
+                .Where(x => x.Id == channelId && x.ChannelMembers.Any(x => x.UserId == userId))
+                .SelectMany(x => x.ChannelMembers.Select(x => x.ChannelRole))
+                .SelectMany(x => x.Permissions)
+                .Select(x => x.Permission);
+
+            return Task.FromResult(query.AsEnumerable());
+        }
     }
 }

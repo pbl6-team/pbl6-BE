@@ -27,5 +27,7 @@ namespace PBL6.Domain.Models.Users
         public ICollection<ChannelMember> ChannelMembers { get; set; }
 
         public ICollection<ChannelRole> ChannelRoles { get; set; }
+
+        public ICollection<Message> ChannelMessages { get; set; }
     }
 }

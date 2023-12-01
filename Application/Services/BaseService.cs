@@ -15,7 +15,7 @@ namespace PBL6.Application.Services
         protected readonly ICurrentUserService _currentUser;
         protected readonly IMapper _mapper;
         protected readonly ILogger<BaseService> _logger;
-        protected readonly IUnitOfWork _unitOfwork;
+        protected readonly IUnitOfWork _unitOfWork;
         protected readonly IWebHostEnvironment _hostingEnvironment;
         protected readonly IFileService _fileService;
 
@@ -28,7 +28,7 @@ namespace PBL6.Application.Services
             _logger = serviceProvider.GetService<ILogger<BaseService>>();
             _currentUser = serviceProvider.GetService<ICurrentUserService>();
             _mapper = serviceProvider.GetService<IMapper>();
-            _unitOfwork = serviceProvider.GetService<IUnitOfWork>();
+            _unitOfWork = serviceProvider.GetService<IUnitOfWork>();
             _hostingEnvironment = serviceProvider.GetService<IWebHostEnvironment>();
             _fileService = serviceProvider.GetService<IFileService>();
         }

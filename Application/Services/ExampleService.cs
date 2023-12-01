@@ -30,8 +30,8 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var example = _mapper.Map<Example>(createUpdateExampleDto);
-                example = await _unitOfwork.Examples.AddAsync(example);
-                await _unitOfwork.SaveChangeAsync();
+                example = await _unitOfWork.Examples.AddAsync(example);
+                await _unitOfWork.SaveChangeAsync();
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
                 return example.Id;
@@ -51,11 +51,11 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                var example = await _unitOfwork.Examples.FindAsync(id);
+                var example = await _unitOfWork.Examples.FindAsync(id);
                 if (example is not null)
                 {
-                    await _unitOfwork.Examples.DeleteAsync(example);
-                    await _unitOfwork.SaveChangeAsync();
+                    await _unitOfWork.Examples.DeleteAsync(example);
+                    await _unitOfWork.SaveChangeAsync();
                 }
                 else
                 {
@@ -79,7 +79,7 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                var examples = await _unitOfwork.Examples.Queryable().ToListAsync();
+                var examples = await _unitOfWork.Examples.Queryable().ToListAsync();
                 await Task.CompletedTask;
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
@@ -99,7 +99,7 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                var example = await _unitOfwork.Examples.FindAsync(id);
+                var example = await _unitOfWork.Examples.FindAsync(id);
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
                 return _mapper.Map<ExampleDto>(example);
@@ -118,7 +118,7 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                var example = await _unitOfwork.Examples.GetExampleByName(name);
+                var example = await _unitOfWork.Examples.GetExampleByName(name);
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
                 return _mapper.Map<ExampleDto>(example);
@@ -137,12 +137,12 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                var example = await _unitOfwork.Examples.FindAsync(id);
+                var example = await _unitOfWork.Examples.FindAsync(id);
                 if (example is not null)
                 {
                     _mapper.Map(exampleDto, example);
-                    await _unitOfwork.Examples.UpdateAsync(example);
-                    await _unitOfwork.SaveChangeAsync();
+                    await _unitOfWork.Examples.UpdateAsync(example);
+                    await _unitOfWork.SaveChangeAsync();
                 }
                 else
                 {
