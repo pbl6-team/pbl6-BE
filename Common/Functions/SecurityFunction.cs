@@ -75,6 +75,7 @@ namespace PBL6.Common.Functions
                     new(CustomClaimTypes.Email, claimData.Email),
                     new(CustomClaimTypes.Username, claimData.Username),
                     new(CustomClaimTypes.IsActive, claimData.IsActive.ToString()),
+                    new(CustomClaimTypes.IsAdmin, claimData.IsAdmin.ToString()),
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(int.Parse(configuration["TokenTimeOut"]!)),
                 Issuer = myIssuer,
@@ -85,33 +86,6 @@ namespace PBL6.Common.Functions
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
-
-
-        // public static string GenerateToken(string userId, string email, IConfiguration configuration)
-        // {
-        //     var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:SecretKey"]!));
-        //     // var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-        //     var myIssuer = configuration["Jwt:Issuer"];
-        //     var myAudience = configuration["Jwt:Audience"];
-
-        //     var tokenHandler = new JwtSecurityTokenHandler();
-        //     var tokenDescriptor = new SecurityTokenDescriptor
-        //     {
-        //         Subject = new ClaimsIdentity(new Claim[]
-        //         {
-        //             new(ClaimTypes.NameIdentifier, userId),
-        //             new(ClaimTypes.Email, email),
-        //         }),
-        //         Expires = DateTime.UtcNow.AddMinutes(int.Parse(configuration["TokenTimeOut"]!)),
-        //         Issuer = myIssuer,
-        //         Audience = myAudience,
-        //         SigningCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature)
-        //     };
-
-        //     var token = tokenHandler.CreateToken(tokenDescriptor);
-        //     return tokenHandler.WriteToken(token);
-        // }
 
         public static async Task<GoogleJsonWebSignature.Payload> VerifyGoogleToken(string oauthCode, IConfiguration configuration)
         {
@@ -146,6 +120,7 @@ namespace PBL6.Common.Functions
         public string Email { get; set; }
         public string Username { get; set; }
         public bool IsActive { get; set; }
+        public bool IsAdmin { get; set; }
     }
 
     public static class CustomClaimTypes
@@ -154,5 +129,7 @@ namespace PBL6.Common.Functions
         public const string Email = "Email";
         public const string Username = "Username";
         public const string IsActive = "IsActive";
+        public const string IsAdmin = "IsAdmin";
+        public const string IsRoot = "IsRoot";
     }
 }

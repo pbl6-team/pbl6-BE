@@ -12,7 +12,7 @@ namespace PBL6.Application.Contract.Users.Dtos
 
         public string RefreshToken { get; set; }
 
-        public DateTimeOffset RefreshTokenTimeout { get; set; }
+        public DateTimeOffset RefreshTokenTimeOut { get; set; }
 
         public string TokenType { get; set; }
     }

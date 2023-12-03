@@ -16,5 +16,7 @@ namespace PBL6.API.Services
         public string UserId => _httpContextAccessor.HttpContext?.User?.FindFirstValue(CustomClaimTypes.UserId);
 
         public string Email => _httpContextAccessor.HttpContext?.User?.FindFirstValue(CustomClaimTypes.Email);
+
+        public bool IsAdmin => _httpContextAccessor.HttpContext?.User?.FindFirstValue(CustomClaimTypes.IsAdmin) == "true";
     }
 }
