@@ -1,5 +1,4 @@
 using AutoMapper;
-using PBL6.Application.Contract.Examples.Dtos;
 using PBL6.Application.Contract;
 using PBL6.Domain.Models;
 using PBL6.Domain.Models.Common;
@@ -19,10 +18,6 @@ namespace PBL6.Application
         {
             CreateMap<AuditedEntity, AuditedDto>();
             CreateMap<FullAuditedEntity, FullAuditedDto>().IncludeBase<AuditedEntity, AuditedDto>();
-
-            CreateMap<Example, ExampleDto>().IncludeBase<FullAuditedEntity, FullAuditedDto>();
-            CreateMap<CreateUpdateExampleDto, Example>();
-            CreateMap<CreateUpdateExampleDto, ExampleDto>();
 
             CreateMap<Workspace, WorkspaceDto>()
                 .IncludeBase<FullAuditedEntity, FullAuditedDto>()
@@ -66,7 +61,8 @@ namespace PBL6.Application
             CreateMap<UpdateChannelDto, ChannelDto>();
 
             CreateMap<WorkspaceRole, WorkspaceRoleDto>()
-                .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id));
+                .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(x => x.NumberOfMembers, opt => opt.MapFrom(src => src.Members.Count));
             CreateMap<CreateUpdatePermissionDto, PermissionsOfWorkspaceRole>()
                 .ForMember(x => x.PermissionId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(x => x.Id, opt => opt.Ignore());
@@ -85,7 +81,8 @@ namespace PBL6.Application
                 .ForMember(x => x.IsEnabled, opt => opt.MapFrom(src => false));
 
             CreateMap<ChannelRole, ChannelRoleDto>()
-                .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id));
+                .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(x => x.NumberOfMembers, opt => opt.MapFrom(src => src.Members.Count));
             CreateMap<CreateUpdatePermissionDto, PermissionsOfChannelRole>()
                 .ForMember(x => x.PermissionId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(x => x.Id, opt => opt.Ignore());
@@ -104,11 +101,12 @@ namespace PBL6.Application
                 .ForMember(x => x.IsEnabled, opt => opt.MapFrom(src => false));
 
             CreateMap<User, UserDto2>()
+                .ForMember(x => x.Username, opt => opt.MapFrom(src => src.Username))
                 .ForMember(x => x.FirstName, opt => opt.MapFrom(src => src.Information.FirstName))
                 .ForMember(x => x.LastName, opt => opt.MapFrom(src => src.Information.LastName))
                 .ForMember(x => x.Gender, opt => opt.MapFrom(src => src.Information.Gender))
                 .ForMember(x => x.Phone, opt => opt.MapFrom(src => src.Information.Phone))
-                .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.Information.BirthDay))
+                .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.Information.BirthDay.ToString("MM-dd-yyyy")))
                 .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.Information.Picture));
 
             CreateMap<UpdateUserDto, User>()

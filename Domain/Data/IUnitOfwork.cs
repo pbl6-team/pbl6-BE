@@ -5,7 +5,6 @@ namespace PBL6.Domain.Data
 {
     public interface IUnitOfWork
     {
-        IExampleRepository Examples { get; }
         IUserRepository Users { get; }
         IUserTokenRepository UserTokens { get; }
         IWorkspaceRepository Workspaces { get; }

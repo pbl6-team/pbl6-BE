@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Application.Contract.Users.Dtos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PBL6.Application.Contract.Channels;
@@ -660,4 +661,60 @@ public class ChannelService : BaseService, IChannelService
 
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
     }
+
+
+    public async Task<IEnumerable<UserDto2>> GetMembersbyRoleIdAsync(Guid channelId, Guid roleid)
+    {
+        var method = GetActualAsyncMethodName();
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var isRoleExist = await _unitOfWork.Channels.CheckIsExistRole(channelId, roleid);
+        var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
+        if (!isRoleExist)
+        {
+            throw new NotFoundException<ChannelRole>(roleid.ToString());
+        }
+        var isMember = await _unitOfWork.Channels.CheckIsMemberAsync(channelId, currentUserId);
+
+        if (!isMember)
+        {
+            throw new ForbidException();
+        }
+
+        var members = await _unitOfWork.ChannelMembers
+            .Queryable()
+            .Include(x => x.User)
+            .ThenInclude(x => x.Information)
+            .Where(x => x.ChannelId == channelId && x.RoleId == roleid)
+            .ToListAsync();
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
+        return _mapper.Map<IEnumerable<UserDto2>>(members.Select(x => x.User));
+    }
+
+    public async Task<IEnumerable<UserDto2>> GetMembersWithoutRoleAsync(Guid channelId)
+    {
+        var method = GetActualAsyncMethodName();
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var isExist = await _unitOfWork.Channels.CheckIsExistAsync(channelId);
+        var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
+        if (!isExist)
+        {
+            throw new NotFoundException<Channel>(channelId.ToString());
+        }
+        
+        var isMember = await _unitOfWork.Channels.CheckIsMemberAsync(channelId, currentUserId);
+        if (!isMember)
+        {
+            throw new ForbidException();
+        }
+
+        var members = await _unitOfWork.ChannelMembers
+            .Queryable()
+            .Include(x => x.User)
+            .ThenInclude(x => x.Information)
+            .Where(x => x.ChannelId == channelId && x.RoleId == null)
+            .ToListAsync();
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
+        return _mapper.Map<IEnumerable<UserDto2>>(members.Select(x => x.User));
+    }
+
 }
