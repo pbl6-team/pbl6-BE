@@ -3,6 +3,7 @@ using PBL6.Application.Filters;
 using PBL6.Application.Contract.Workspaces;
 using PBL6.Application.Contract.Workspaces.Dtos;
 using PBL6.Common.Consts;
+using Application.Contract.Users.Dtos;
 
 namespace PBL6.API.Controllers.Workspaces
 {
@@ -203,6 +204,39 @@ namespace PBL6.API.Controllers.Workspaces
         public async Task<IActionResult> GetRoles([FromRoute] Guid workspaceId)
         {
             return Ok(await _workspaceService.GetRolesAsync(workspaceId));
+        }
+
+        /// <summary>
+        /// API Get list members theo role id - cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <param name="workspaceId">Id của workspace</param>
+        /// <param name="roleId">Id của role</param>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpGet("{workspaceId}/roles/{roleId}/members")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDto2>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [AuthorizeFilter]
+        public async Task<IActionResult> GetMembersByRoleId([FromRoute] Guid workspaceId, [FromRoute] Guid roleId)
+        {
+            return Ok(await _workspaceService.GetMembersbyRoleIdAsync(workspaceId, roleId));
+        }
+
+        /// <summary>
+        /// API Get list members chưa có role - cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <param name="workspaceId">Id của workspace</param>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpGet("{workspaceId}/members/withoutrole")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDto2>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [AuthorizeFilter]
+        public async Task<IActionResult> GetMembersWithoutRole([FromRoute] Guid workspaceId)
+        {
+            return Ok(await _workspaceService.GetMembersWithoutRoleAsync(workspaceId));
         }
 
         /// <summary>

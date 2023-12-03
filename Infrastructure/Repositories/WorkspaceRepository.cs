@@ -81,6 +81,7 @@ namespace PBL6.Infrastructure.Repositories
             await Task.CompletedTask;
             return _apiDbContext.WorkspaceRoles
                 .Where(x => x.WorkspaceId == workspaceId && !x.IsDeleted)
+                .Include(x => x.Members)
                 .AsEnumerable();
         }
     }

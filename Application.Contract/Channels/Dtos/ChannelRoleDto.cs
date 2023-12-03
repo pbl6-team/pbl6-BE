@@ -12,6 +12,8 @@ namespace PBL6.Application.Contract.Channels.Dtos
         
         public string Color { get; set; }
 
+        public int NumberOfMembers { get; set; }
+
         public List<PermissionDto> Permissions { get; set; }
     }
 }

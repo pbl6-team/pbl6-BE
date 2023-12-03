@@ -16,7 +16,6 @@ namespace PBL6.Infrastructure.Data
     {
         private IHttpContextAccessor _context;
         // Admins
-        public DbSet<Example> Examples { get; set; }
         public DbSet<Function> Functions { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<AdminAccount> AdminAccounts { get; set; }
@@ -156,6 +155,12 @@ namespace PBL6.Infrastructure.Data
                .WithOne(x => x.ChannelRole)
                .HasForeignKey(x => x.ChannelRoleId)
                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ChannelRole>()
+                .HasMany(x => x.Members)
+                .WithOne(x => x.ChannelRole)
+                .HasForeignKey(x => x.RoleId)
+                .OnDelete(DeleteBehavior.NoAction);
             
             modelBuilder.Entity<Channel>()
                .HasMany(x => x.ChannelRoles)
