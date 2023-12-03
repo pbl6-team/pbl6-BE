@@ -4,6 +4,7 @@ using PBL6.Application.Contract.Channels;
 using PBL6.Application.Contract.Channels.Dtos;
 using PBL6.Application.Contract.Workspaces.Dtos;
 using PBL6.Common.Consts;
+using Application.Contract.Users.Dtos;
 
 namespace PBL6.API.Controllers.Channels
 {
@@ -181,6 +182,39 @@ namespace PBL6.API.Controllers.Channels
         public async Task<IActionResult> GetRoles([FromRoute] Guid channelId)
         {
             return Ok(await _channelService.GetRolesAsync(channelId));
+        }
+
+        /// <summary>
+        /// API Get list members theo role id - cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <param name="channelId">Id của channel</param>
+        /// <param name="roleId">Id của role</param>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpGet("{channelId}/roles/{roleId}/members")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDto2>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [AuthorizeFilter]
+        public async Task<IActionResult> GetMembersByRoleId([FromRoute] Guid channelId, [FromRoute] Guid roleId)
+        {
+            return Ok(await _channelService.GetMembersbyRoleIdAsync(channelId, roleId));
+        }
+
+        /// <summary>
+        /// API Get list members chưa có role - cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <param name="channelId">Id của channel</param>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpGet("{channelId}/members/withoutrole")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDto2>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [AuthorizeFilter]
+        public async Task<IActionResult> GetMembersWithoutRole([FromRoute] Guid channelId)
+        {
+            return Ok(await _channelService.GetMembersWithoutRoleAsync(channelId));
         }
 
         /// <summary>

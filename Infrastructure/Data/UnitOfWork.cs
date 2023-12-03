@@ -10,7 +10,6 @@ namespace PBL6.Infrastructure.Data
     {
         private readonly ApiDbContext _apiDbContext;
 
-        public IExampleRepository Examples { get; }
         public IUserRepository Users { get; }
         public IUserTokenRepository UserTokens { get; }
         public IWorkspaceRepository Workspaces { get; }
@@ -28,7 +27,6 @@ namespace PBL6.Infrastructure.Data
             _apiDbContext = apiDbContext;
             var logger = loggerFactory.CreateLogger("logs");
 
-            Examples = new ExampleRepository(apiDbContext, logger);
             Users = new UserRepository(apiDbContext, logger);
             UserTokens = new UserTokenRepository(apiDbContext, logger);
             Workspaces = new WorkspaceRepository(apiDbContext, logger);

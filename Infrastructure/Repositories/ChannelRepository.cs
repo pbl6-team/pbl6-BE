@@ -74,6 +74,7 @@ namespace PBL6.Infrastructure.Repositories
             await Task.CompletedTask;
             return _apiDbContext.ChannelRoles
                 .Where(x => x.ChannelId == channelId && !x.IsDeleted)
+                .Include(x => x.Members)
                 .AsEnumerable();
         }
 
