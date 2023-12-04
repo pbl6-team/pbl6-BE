@@ -628,7 +628,7 @@ public class ChannelService : BaseService, IChannelService
         }
     }
 
-    public async Task SetRoleToUserAsync(Guid channelId, Guid userId, Guid roleId)
+    public async Task SetRoleToUserAsync(Guid channelId, Guid userId, Guid? roleId)
     {
         var method = GetActualAsyncMethodName();
         _logger.LogInformation("[{_className}][{method}] Start", _className, method);
@@ -640,11 +640,12 @@ public class ChannelService : BaseService, IChannelService
         {
             throw new ForbidException();
         }
-        var isExistRole = await _unitOfWork.Channels.CheckIsExistRole(channelId, roleId);
+        var isExistRole = roleId is null || await _unitOfWork.Channels.CheckIsExistRole(channelId, roleId.Value);
         if (!isExistRole)
         {
             throw new NotFoundException<ChannelRole>(roleId.ToString());
         }
+        
         isMember = await _unitOfWork.Channels.CheckIsMemberAsync(channelId, userId);
         if (!isMember)
         {
