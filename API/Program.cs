@@ -1,7 +1,7 @@
 using PBL6.API.Middlewares;
 using PBL6.API.Extensions;
 using PBL6.Common;
-using PBL6.Application.SignalR.ChatHub;
+using PBL6.Application.Hubs;
 
 namespace PBL6.API
 {
@@ -19,7 +19,7 @@ namespace PBL6.API
             var app = builder.Build();
             StartupState.Instance.Services = app.Services;
             StartupState.Instance.Configuration = builder.Configuration;
-            
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger(options =>

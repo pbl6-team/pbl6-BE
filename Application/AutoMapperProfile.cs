@@ -5,7 +5,6 @@ using PBL6.Domain.Models.Common;
 using PBL6.Domain.Models.Users;
 using PBL6.Application.Contract.Workspaces.Dtos;
 using PBL6.Application.Contract.Channels.Dtos;
-using System.Data.Common;
 using PBL6.Application.Contract.Users.Dtos;
 using Application.Contract.Users.Dtos;
 using PBL6.Application.Contract.Chats.Dtos;
@@ -123,6 +122,7 @@ namespace PBL6.Application
                 .ForMember(x => x.IsEdited, opt => opt.MapFrom(src => src.UpdatedAt != null))
                 .ForMember(x => x.SendAt, opt => opt.MapFrom(src => src.CreatedAt))
                 .ForMember(x => x.IsChannel, opt => opt.MapFrom(src => src.ToChannelId != null))
+                .ForMember(x => x.ReceiverId, opt => opt.MapFrom(src => src.ToChannelId ?? src.ToUserId))
                 .ForMember(
                     x => x.SenderAvatar,
                     opt => opt.MapFrom(src => src.Sender.Information.Picture)

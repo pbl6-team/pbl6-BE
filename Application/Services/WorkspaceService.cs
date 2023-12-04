@@ -408,7 +408,6 @@ namespace PBL6.Application.Services
                 }
                 await _unitOfWork.Workspaces.UpdateAsync(workspace);
                 await _unitOfWork.SaveChangeAsync();
-
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
                 return workspace.Id;
