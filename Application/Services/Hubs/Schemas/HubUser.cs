@@ -1,4 +1,4 @@
-namespace PBL6.Application.SignalR.ChatHub.Schemas
+namespace PBL6.Application.Hubs.Schemas
 {
     public class HubUser
     {

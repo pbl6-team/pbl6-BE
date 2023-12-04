@@ -11,11 +11,11 @@ using PBL6.Application.Contract.Channels;
 using PBL6.Application.Contract.Chats;
 using PBL6.Application.Contract.Chats.Dtos;
 using PBL6.Application.Contract.Common;
-using PBL6.Application.SignalR.ChatHub.Schemas;
+using PBL6.Application.Hubs.Schemas;
 using PBL6.Common.Exceptions;
 using PBL6.Common.Functions;
 
-namespace PBL6.Application.SignalR.ChatHub
+namespace PBL6.Application.Hubs
 {
     public class ChatHub : Hub
     {
@@ -24,17 +24,16 @@ namespace PBL6.Application.SignalR.ChatHub
         private readonly IChannelService _channelService;
         private readonly IChatService _chatService;
 
-        private static readonly ConcurrentDictionary<Guid, HubUser> Users = new();
+        public static readonly ConcurrentDictionary<Guid, HubUser> Users = new();
 
-        private const string ERROR = "Error";
-        private const string SUCCESS = "Success";
-        private const string RECEIVE_MESSAGE = "ReceiveMessage";
-        private const string UPDATE_MESSAGE = "UpdateMessage";
-        private const string DELETE_MESSAGE = "DeleteMessage";
-        private const string ADD_USER_TO_CHANNEL = "AddUserToChannel";
-        private const string REMOVE_USER_FROM_CHANNEL = "RemoveUserFromChannel";
-        private const string ADD_USER_TO_WORKSPACE = "AddUserToWorkspace";
-        private const string REMOVE_USER_FROM_WORKSPACE = "RemoveUserFromWorkspace";
+        public const string ERROR = "Error";
+        public const string RECEIVE_MESSAGE = "ReceiveMessage";
+        public const string UPDATE_MESSAGE = "UpdateMessage";
+        public const string DELETE_MESSAGE = "DeleteMessage";
+        public const string ADD_USER_TO_CHANNEL = "AddUserToChannel";
+        public const string REMOVE_USER_FROM_CHANNEL = "RemoveUserFromChannel";
+        public const string ADD_USER_TO_WORKSPACE = "AddUserToWorkspace";
+        public const string REMOVE_USER_FROM_WORKSPACE = "RemoveUserFromWorkspace";
 
         public ChatHub(
             IHubContext<ChatHub> hubContext,
@@ -154,7 +153,7 @@ namespace PBL6.Application.SignalR.ChatHub
             }
         }
 
-        public async Task SendMessageAsync(SendMessageDto input)
+        public async Task<Guid?> SendMessageAsync(SendMessageDto input)
         {
             try
             {
@@ -163,14 +162,12 @@ namespace PBL6.Application.SignalR.ChatHub
                     throw new UnauthorizedException("User is not authorized");
                 }
                 var messageDto = await _chatService.SendMessageAsync(input);
-                await Clients.Caller.SendAsync(SUCCESS, messageDto);
 
                 if (input.IsChannel)
                 {
                     await _hubContext.Clients
                         .Group(input.ReceiverId.ToString())
                         .SendAsync(RECEIVE_MESSAGE, messageDto);
-                    return;
                 }
                 else
                 {
@@ -182,14 +179,16 @@ namespace PBL6.Application.SignalR.ChatHub
                             .SendAsync(RECEIVE_MESSAGE, messageDto);
                     }
                 }
+                return messageDto.Id;
             }
             catch (Exception exception)
             {
                 HandleException(exception);
+                return null;
             }
         }
 
-        public async Task UpdateMessageAsync(UpdateMessageDto input)
+        public async Task<Guid?> UpdateMessageAsync(UpdateMessageDto input)
         {
             try
             {
@@ -198,14 +197,12 @@ namespace PBL6.Application.SignalR.ChatHub
                     throw new UnauthorizedException("User is not authorized");
                 }
                 var messageDto = await _chatService.UpdateMessageAsync(input);
-                await Clients.Caller.SendAsync(SUCCESS, messageDto);
 
                 if (input.IsChannel)
                 {
                     await _hubContext.Clients
                         .Group(messageDto.ReceiverId.ToString())
                         .SendAsync(UPDATE_MESSAGE, messageDto, messageDto.ReceiverId);
-                    return;
                 }
                 else
                 {
@@ -225,21 +222,22 @@ namespace PBL6.Application.SignalR.ChatHub
                             .SendAsync(UPDATE_MESSAGE, messageDto);
                     }
                 }
+                return messageDto.Id;
             }
             catch (Exception exception)
             {
                 HandleException(exception);
+                return null;
             }
         }
 
-        public async Task DeleteMessageAsync(Guid id, bool isDeleteEveryone = false)
+        public async Task<Guid?> DeleteMessageAsync(Guid id, bool isDeleteEveryone = false)
         {
             try
             {
                 if (_currentUserService.UserId is null)
                 {
-                    await Clients.Caller.SendAsync(ERROR, "User is not authorized");
-                    return;
+                    throw new UnauthorizedException("User is not authorized");
                 }
                 var messageDto = await _chatService.DeleteMessageAsync(id, isDeleteEveryone);
                 if (isDeleteEveryone)
@@ -249,7 +247,6 @@ namespace PBL6.Application.SignalR.ChatHub
                         await _hubContext.Clients
                             .Group(messageDto.ReceiverId.ToString())
                             .SendAsync(DELETE_MESSAGE, messageDto, messageDto.ReceiverId);
-                        return;
                     }
                     else
                     {
@@ -272,10 +269,12 @@ namespace PBL6.Application.SignalR.ChatHub
                             .SendAsync(DELETE_MESSAGE, messageDto);
                     }
                 }
+                return messageDto.Id;
             }
             catch (Exception exception)
             {
                 HandleException(exception);
+                return null;
             }
         }
 
@@ -299,11 +298,6 @@ namespace PBL6.Application.SignalR.ChatHub
         {
             try
             {
-                if (_currentUserService.UserId is null)
-                {
-                    throw new UnauthorizedException("User is not authorized");
-                }
-
                 foreach (var userId in userIds)
                 {
                     Users.TryGetValue(userId, out var hubUser);
@@ -411,6 +405,14 @@ namespace PBL6.Application.SignalR.ChatHub
             {
                 HandleException(exception);
             }
+        }
+
+        public static Task<IEnumerable<string>> GetConnectionsByUserId(Guid userId)
+        {
+            Users.TryGetValue(userId, out var hubUser);
+            return Task.FromResult(
+                hubUser?.ConnectionIds.AsEnumerable() ?? Enumerable.Empty<string>()
+            );
         }
     }
 }

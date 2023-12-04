@@ -1,10 +1,12 @@
 using System.Runtime.CompilerServices;
 using Application.Contract.Users.Dtos;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PBL6.Application.Contract.Channels;
 using PBL6.Application.Contract.Channels.Dtos;
 using PBL6.Application.Contract.Workspaces.Dtos;
+using PBL6.Application.Hubs;
 using PBL6.Common.Exceptions;
 using PBL6.Domain.Models.Users;
 
@@ -138,6 +140,8 @@ public class ChannelService : BaseService, IChannelService
                 channel.ChannelMembers.Add(channelMember);
             }
             await _unitOfWork.SaveChangeAsync();
+            await AddUsersToChannelHub(channelId, userIds);
+
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
             return channelId;
@@ -152,6 +156,37 @@ public class ChannelService : BaseService, IChannelService
             );
 
             throw;
+        }
+    }
+
+    private async Task AddUsersToChannelHub(Guid channelId, List<Guid> userIds)
+    {
+        try
+        {
+            foreach (var userId in userIds)
+            {
+                var connectionIds = await ChatHub.GetConnectionsByUserId(userId);
+                if (connectionIds is not null)
+                {
+                    foreach (var connectionId in connectionIds)
+                    {
+                        await _chatHub.Groups.AddToGroupAsync(connectionId, channelId.ToString());
+                    }
+
+                    await _chatHub.Clients
+                        .Clients(connectionIds)
+                        .SendAsync(ChatHub.ADD_USER_TO_CHANNEL, channelId);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation(
+                "[{_className}][{method}] Error: {message}",
+                _className,
+                "AddUsersToChannelHubs",
+                e.Message
+            );
         }
     }
 
@@ -332,7 +367,9 @@ public class ChannelService : BaseService, IChannelService
                 .ToListAsync();
 
             var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
-            channels = channels.Where(x => x.ChannelMembers.Any(c => c.UserId == currentUserId)).ToList();
+            channels = channels
+                .Where(x => x.ChannelMembers.Any(c => c.UserId == currentUserId))
+                .ToList();
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return _mapper.Map<IEnumerable<ChannelDto>>(channels);
@@ -539,6 +576,8 @@ public class ChannelService : BaseService, IChannelService
                 await _unitOfWork.ChannelMembers.DeleteAsync(member);
             }
             await _unitOfWork.SaveChangeAsync();
+            await RemoveUsersFromChannelHub(channelId, userIds);           
+
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
             return channel.Id;
@@ -553,6 +592,39 @@ public class ChannelService : BaseService, IChannelService
             );
 
             throw;
+        }
+    }
+
+    private async Task RemoveUsersFromChannelHub(Guid channelId, List<Guid> userIds)
+    {
+        try
+        {
+            foreach (var userId in userIds)
+            {
+                var connectionIds = await ChatHub.GetConnectionsByUserId(userId);
+                if (connectionIds is not null)
+                {
+                    await _chatHub.Clients
+                        .Clients(connectionIds)
+                        .SendAsync(ChatHub.REMOVE_USER_FROM_CHANNEL, channelId);
+                    foreach (var connectionId in connectionIds)
+                    {
+                        await _chatHub.Groups.RemoveFromGroupAsync(
+                            connectionId,
+                            channelId.ToString()
+                        );
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation(
+                "[{_className}][{method}] Error: {message}",
+                _className,
+                "RemoveUsersFromChannelHubs",
+                e.Message
+            );
         }
     }
 

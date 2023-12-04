@@ -2,12 +2,9 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using PBL6.Application;
-using PBL6.Application.Filters;
-using PBL6.Application.SignalR.ChatHub;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace PBL6.API.Extensions
