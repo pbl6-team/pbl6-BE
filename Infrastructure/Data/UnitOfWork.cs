@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using PBL6.Domain.Data;
+using PBL6.Domain.Data.Admins;
 using PBL6.Domain.Data.Users;
 using PBL6.Infrastructure.Repositories;
 
@@ -21,6 +22,8 @@ namespace PBL6.Infrastructure.Data
         public IChannelPermissionRepository ChannelPermissions { get; }
         public IChannelRoleRepository ChannelRoles { get; }
         public IMessageRepository Messages { get; }
+        public IAdminRepository Admins { get; }
+        public IAdminTokenRepository AdminTokens { get; }
 
         public UnitOfWork(ApiDbContext apiDbContext, ILoggerFactory loggerFactory)
         {
@@ -38,6 +41,8 @@ namespace PBL6.Infrastructure.Data
             ChannelPermissions = new ChannelPermissionRepository(apiDbContext, logger);
             ChannelRoles = new ChannelRoleRepository(apiDbContext, logger);
             Messages = new MessageRepository(apiDbContext, logger);
+            Admins = new AdminRepository(apiDbContext, logger);
+            AdminTokens = new AdminTokenRepository(apiDbContext, logger);
         }
 
         public async Task SaveChangeAsync()

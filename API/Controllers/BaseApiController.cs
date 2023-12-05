@@ -7,7 +7,7 @@ namespace PBL6.API.Controllers
     [Produces("application/json")]
     [TypeFilter(typeof(ApiKeyFilterAttribute))]
     [ApiController]
-    public class BaseApiController : ControllerBase
-    {
-    }
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public class BaseApiController : ControllerBase { }
 }

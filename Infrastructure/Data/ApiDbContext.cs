@@ -20,6 +20,7 @@ namespace PBL6.Infrastructure.Data
         public DbSet<Role> Roles { get; set; }
         public DbSet<AdminAccount> AdminAccounts { get; set; }
         public DbSet<AdminInfo> AdminInfos { get; set; }
+        public DbSet<AdminToken> AdminTokens { get; set; }
 
         // Users
         public DbSet<User> Users { get; set; }

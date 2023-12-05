@@ -57,6 +57,7 @@ namespace PBL6.Application.Filters
                 var claims = jwtToken.Claims;
                 var userId = claims.FirstOrDefault(x => x.Type == CustomClaimTypes.UserId)?.Value;
                 var email = claims.FirstOrDefault(x => x.Type == CustomClaimTypes.Email)?.Value;
+                var IsAdmin = claims.FirstOrDefault(x => x.Type == CustomClaimTypes.IsAdmin)?.Value;
                 var isVerified = claims
                     .FirstOrDefault(x => x.Type == CustomClaimTypes.IsActive)
                     ?.Value;
@@ -77,6 +78,7 @@ namespace PBL6.Application.Filters
                 var identity = new ClaimsIdentity(context.HttpContext.User.Identity);
                 identity.AddClaim(new Claim(CustomClaimTypes.UserId, userId));
                 identity.AddClaim(new Claim(CustomClaimTypes.Email, email));
+                identity.AddClaim(new Claim(CustomClaimTypes.IsAdmin, IsAdmin));
 
                 var principal = new ClaimsPrincipal(identity);
                 context.HttpContext.User = principal;
@@ -90,7 +92,7 @@ namespace PBL6.Application.Filters
             }
         }
 
-        public static string GetValue(AuthorizationFilterContext context, string key)
+        static string GetValue(AuthorizationFilterContext context, string key)
         {
             try
             {

@@ -97,6 +97,7 @@ namespace PBL6.Application.Services
                         Email = existedUser.Email,
                         Username = existedUser.Username,
                         IsActive = existedUser.IsActive,
+                        IsAdmin = false
                     };
                 var token = SecurityFunction.GenerateToken(claimData, _config);
                 var userToken = await _unitOfWork.UserTokens.AddAsync(
@@ -174,7 +175,8 @@ namespace PBL6.Application.Services
                     UserId = userToken.UserId,
                     Email = userToken.User.Email,
                     Username = userToken.User.Username,
-                    IsActive = userToken.User.IsActive
+                    IsActive = userToken.User.IsActive,
+                    IsAdmin = false
                 };
                 var refreshToken = SecurityFunction.GenerateRandomString();
                 var token = SecurityFunction.GenerateToken(claimData, _config);
@@ -208,7 +210,7 @@ namespace PBL6.Application.Services
                     Token = newUserToken.Token,
                     TokenTimeOut = newUserToken.TimeOut,
                     RefreshToken = newUserToken.RefreshToken,
-                    RefreshTokenTimeout = (DateTimeOffset)newUserToken.RefreshTokenTimeOut,
+                    RefreshTokenTimeOut = (DateTimeOffset)newUserToken.RefreshTokenTimeOut,
                     TokenType = JwtBearerDefaults.AuthenticationScheme
                 };
             }
@@ -265,6 +267,7 @@ namespace PBL6.Application.Services
                         Email = existedUser.Email,
                         Username = existedUser.Username,
                         IsActive = existedUser.IsActive,
+                        IsAdmin = false
                     };
 
                 var token = SecurityFunction.GenerateToken(claimData, _config);
@@ -315,7 +318,7 @@ namespace PBL6.Application.Services
             }
         }
 
-        public async Task<TokenData> SigninAsync(UserLoginDto userLogin)
+        public async Task<TokenData> SignInAsync(UserLoginDto userLogin)
         {
             var method = GetActualAsyncMethodName();
             try
@@ -344,8 +347,9 @@ namespace PBL6.Application.Services
                         Email = existedUser.Email,
                         Username = existedUser.Username,
                         IsActive = existedUser.IsActive,
+                        IsAdmin = false
                     };
-                var refresshToken = SecurityFunction.GenerateRandomString();
+                var refreshToken = SecurityFunction.GenerateRandomString();
                 var token = SecurityFunction.GenerateToken(claimData, _config);
                 var userToken = await _unitOfWork.UserTokens.AddAsync(
                     new()
@@ -362,7 +366,7 @@ namespace PBL6.Application.Services
                         RefreshTokenTimeOut = DateTimeOffset.UtcNow.AddMinutes(
                             int.Parse(_config["RefreshTokenTimeOut"] ?? CommonConfig.OtpTimeOut)
                         ),
-                        RefreshToken = refresshToken
+                        RefreshToken = refreshToken
                     }
                 );
 
@@ -376,8 +380,8 @@ namespace PBL6.Application.Services
                     Email = existedUser.Email,
                     Token = token,
                     TokenTimeOut = userToken.TimeOut,
-                    RefreshToken = refresshToken,
-                    RefreshTokenTimeout = (DateTimeOffset)userToken.RefreshTokenTimeOut,
+                    RefreshToken = refreshToken,
+                    RefreshTokenTimeOut = (DateTimeOffset)userToken.RefreshTokenTimeOut,
                     TokenType = JwtBearerDefaults.AuthenticationScheme
                 };
             }
@@ -445,8 +449,9 @@ namespace PBL6.Application.Services
                         Email = existedUser.Email,
                         Username = existedUser.Username,
                         IsActive = existedUser.IsActive,
+                        IsAdmin = false
                     };
-                var refresshToken = SecurityFunction.GenerateRandomString();
+                var refreshToken = SecurityFunction.GenerateRandomString();
                 var token = SecurityFunction.GenerateToken(claimData, _config);
                 var userToken = await _unitOfWork.UserTokens.AddAsync(
                     new()
@@ -463,7 +468,7 @@ namespace PBL6.Application.Services
                         RefreshTokenTimeOut = DateTimeOffset.UtcNow.AddMinutes(
                             int.Parse(_config["RefreshTokenTimeOut"] ?? CommonConfig.OtpTimeOut)
                         ),
-                        RefreshToken = refresshToken
+                        RefreshToken = refreshToken
                     }
                 );
 
@@ -477,8 +482,8 @@ namespace PBL6.Application.Services
                     Email = existedUser.Email,
                     Token = token,
                     TokenTimeOut = userToken.TimeOut,
-                    RefreshToken = refresshToken,
-                    RefreshTokenTimeout = (DateTimeOffset)userToken.RefreshTokenTimeOut,
+                    RefreshToken = refreshToken,
+                    RefreshTokenTimeOut = (DateTimeOffset)userToken.RefreshTokenTimeOut,
                     TokenType = JwtBearerDefaults.AuthenticationScheme
                 };
             }
@@ -645,7 +650,8 @@ namespace PBL6.Application.Services
                     UserId = userToken.UserId,
                     Email = userToken.User.Email,
                     Username = userToken.User.Username,
-                    IsActive = userToken.User.IsActive
+                    IsActive = userToken.User.IsActive,
+                    IsAdmin = false
                 };
                 var token = SecurityFunction.GenerateToken(claimData, _config);
                 userToken.Token = token;
@@ -662,7 +668,7 @@ namespace PBL6.Application.Services
                     Token = token,
                     TokenTimeOut = userToken.TimeOut,
                     RefreshToken = refreshToken,
-                    RefreshTokenTimeout = (DateTimeOffset)userToken.RefreshTokenTimeOut,
+                    RefreshTokenTimeOut = (DateTimeOffset)userToken.RefreshTokenTimeOut,
                     TokenType = JwtBearerDefaults.AuthenticationScheme
                 };
             }

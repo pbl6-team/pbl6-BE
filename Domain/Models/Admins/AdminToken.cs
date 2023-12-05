@@ -7,23 +7,25 @@ namespace PBL6.Domain.Models.Admins
     [Table("AdminTokens", Schema = "Admin")]
     public class AdminToken : FullAuditedEntity
     {
-
-
         public Guid AdminId { get; set; }
 
-        [StringLength(255)]
+        [StringLength(1000)]
         public string Token { get; set; }
 
         public DateTimeOffset TimeOut { get; set; }
 
         [StringLength(255)]
         public string RefreshToken { get; set; }
+        
+        public DateTimeOffset? RefreshTokenTimeOut { get; set; }
 
         [StringLength(50)]
         public string IpAddress { get; set; }
 
         [StringLength(50)]
-        public string OTP { get; set; }
+        public string Otp { get; set; }
+
+        public short? OtpType { get; set; }
 
         public DateTimeOffset ValidTo { get; set; }
 

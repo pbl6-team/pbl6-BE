@@ -54,7 +54,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokenData))]
         public async Task<IActionResult> Login(UserLoginDto input)
         {
-            return Ok(await _authService.SigninAsync(input));
+            return Ok(await _authService.SignInAsync(input));
         }
 
         /// <summary>

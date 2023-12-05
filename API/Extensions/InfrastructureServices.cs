@@ -27,6 +27,7 @@ namespace PBL6.API.Extensions
             services.AddScoped<IChannelService, ChannelService>();
             services.AddScoped<IChatService, ChatService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<Application.Contract.Admins.IAuthService, Application.Services.Admins.AuthService>();
             
             services.AddTransient<IMailService, MailService>();
             services.AddTransient<IFileService, FileService>();

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore.Storage;
+using PBL6.Domain.Data.Admins;
 using PBL6.Domain.Data.Users;
 
 namespace PBL6.Domain.Data
@@ -16,6 +17,8 @@ namespace PBL6.Domain.Data
         IChannelPermissionRepository ChannelPermissions { get; }
         IChannelRoleRepository ChannelRoles { get; }
         IMessageRepository Messages { get; }
+        IAdminRepository Admins { get; }
+        IAdminTokenRepository AdminTokens { get; }
 
         Task SaveChangeAsync();
         Task<IDbContextTransaction> BeginTransactionAsync();

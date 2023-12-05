@@ -1,7 +1,7 @@
-using System;
 using Microsoft.EntityFrameworkCore;
 using PBL6.Common.Enum;
 using PBL6.Common.Functions;
+using PBL6.Domain.Models.Admins;
 using PBL6.Domain.Models.Users;
 
 namespace PBL6.Infrastructure.Data
@@ -12,13 +12,20 @@ namespace PBL6.Infrastructure.Data
         {
             context.Database.EnsureCreated();
 
-            if (context.Users.Any())
+            if (!context.Users.Any())
             {
-                return;
+                await SeedUsers(context);
             }
 
-            await SeedUsers(context);
-            await SeedPermissions(context);
+            if (!context.WorkspacePermissions.Any())
+            {
+                await SeedPermissions(context);
+            }
+
+            if (!context.AdminAccounts.Any())
+            {
+                await SeedAdminAccount(context);
+            }
         }
 
         public static async Task SeedUsers(ApiDbContext context)
@@ -70,6 +77,26 @@ namespace PBL6.Infrastructure.Data
                     new () { Code = "DELETE_MEMBER", Name = "Delete member", Description = "Delete member", IsActive = true },
                     new () { Code = "CREATE_UPDATE_ROLE", Name = "Create/update member role", Description = "Create/update member role", IsActive = true },
                     new () { Code = "DELETE_OTHER_PEOPLE'S_MESSAGE", Name = "Delete other people's messages", Description = "Delete other people's messages", IsActive = true }
+                }
+            );
+            await context.SaveChangesAsync();
+        }
+
+        public static async Task SeedAdminAccount(ApiDbContext context)
+        {
+            await context.AdminAccounts.AddAsync(new AdminAccount
+                {
+                    Username = "root",
+                    Password = SecurityFunction.HashPassword("Root@123", "123"),
+                    PasswordSalt = "123",
+                    Email = "Root@fira.com",
+                    IsActive = true,
+                    Information = new ()
+                    {
+                        FirstName = "Root",
+                        LastName = "Root",
+                        BirthDate = DateTimeOffset.Now,
+                    }
                 }
             );
             await context.SaveChangesAsync();

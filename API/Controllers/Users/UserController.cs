@@ -7,8 +7,6 @@ namespace API.Controllers.Users;
 
 [ApiController]
 [Route("api/[controller]")]
-[ProducesResponseType(StatusCodes.Status400BadRequest)]
-[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 public class UserController : ControllerBase
 {
 
