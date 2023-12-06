@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 using Application.Contract.Users.Dtos;
-using Microsoft.AspNetCore.SignalR;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PBL6.Application.Contract.Channels;
@@ -140,7 +140,7 @@ public class ChannelService : BaseService, IChannelService
                 channel.ChannelMembers.Add(channelMember);
             }
             await _unitOfWork.SaveChangeAsync();
-            await AddUsersToChannelHub(channelId, userIds);
+            _backgroundJobClient.Enqueue(() => AddUsersToChannelHub(channelId, userIds));
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
@@ -156,37 +156,6 @@ public class ChannelService : BaseService, IChannelService
             );
 
             throw;
-        }
-    }
-
-    private async Task AddUsersToChannelHub(Guid channelId, List<Guid> userIds)
-    {
-        try
-        {
-            foreach (var userId in userIds)
-            {
-                var connectionIds = await ChatHub.GetConnectionsByUserId(userId);
-                if (connectionIds is not null)
-                {
-                    foreach (var connectionId in connectionIds)
-                    {
-                        await _chatHub.Groups.AddToGroupAsync(connectionId, channelId.ToString());
-                    }
-
-                    await _chatHub.Clients
-                        .Clients(connectionIds)
-                        .SendAsync(ChatHub.ADD_USER_TO_CHANNEL, channelId);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            _logger.LogInformation(
-                "[{_className}][{method}] Error: {message}",
-                _className,
-                "AddUsersToChannelHubs",
-                e.Message
-            );
         }
     }
 
@@ -576,7 +545,7 @@ public class ChannelService : BaseService, IChannelService
                 await _unitOfWork.ChannelMembers.DeleteAsync(member);
             }
             await _unitOfWork.SaveChangeAsync();
-            await RemoveUsersFromChannelHub(channelId, userIds);           
+            _backgroundJobClient.Enqueue(() => RemoveUsersFromChannelHub(channelId, userIds));           
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
@@ -595,39 +564,6 @@ public class ChannelService : BaseService, IChannelService
         }
     }
 
-    private async Task RemoveUsersFromChannelHub(Guid channelId, List<Guid> userIds)
-    {
-        try
-        {
-            foreach (var userId in userIds)
-            {
-                var connectionIds = await ChatHub.GetConnectionsByUserId(userId);
-                if (connectionIds is not null)
-                {
-                    await _chatHub.Clients
-                        .Clients(connectionIds)
-                        .SendAsync(ChatHub.REMOVE_USER_FROM_CHANNEL, channelId);
-                    foreach (var connectionId in connectionIds)
-                    {
-                        await _chatHub.Groups.RemoveFromGroupAsync(
-                            connectionId,
-                            channelId.ToString()
-                        );
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            _logger.LogInformation(
-                "[{_className}][{method}] Error: {message}",
-                _className,
-                "RemoveUsersFromChannelHubs",
-                e.Message
-            );
-        }
-    }
-
     public async Task SetRoleToUserAsync(Guid channelId, Guid userId, Guid? roleId)
     {
         var method = GetActualAsyncMethodName();
@@ -640,12 +576,13 @@ public class ChannelService : BaseService, IChannelService
         {
             throw new ForbidException();
         }
-        var isExistRole = roleId is null || await _unitOfWork.Channels.CheckIsExistRole(channelId, roleId.Value);
+        var isExistRole =
+            roleId is null || await _unitOfWork.Channels.CheckIsExistRole(channelId, roleId.Value);
         if (!isExistRole)
         {
             throw new NotFoundException<ChannelRole>(roleId.ToString());
         }
-        
+
         isMember = await _unitOfWork.Channels.CheckIsMemberAsync(channelId, userId);
         if (!isMember)
         {
@@ -735,13 +672,14 @@ public class ChannelService : BaseService, IChannelService
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
     }
 
-
     public async Task<IEnumerable<UserDto2>> GetMembersbyRoleIdAsync(Guid channelId, Guid roleid)
     {
         var method = GetActualAsyncMethodName();
         _logger.LogInformation("[{_className}][{method}] Start", _className, method);
         var isRoleExist = await _unitOfWork.Channels.CheckIsExistRole(channelId, roleid);
-        var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
+        var currentUserId = Guid.Parse(
+            _currentUser.UserId ?? throw new UnauthorizedAccessException()
+        );
         if (!isRoleExist)
         {
             throw new NotFoundException<ChannelRole>(roleid.ToString());
@@ -768,12 +706,14 @@ public class ChannelService : BaseService, IChannelService
         var method = GetActualAsyncMethodName();
         _logger.LogInformation("[{_className}][{method}] Start", _className, method);
         var isExist = await _unitOfWork.Channels.CheckIsExistAsync(channelId);
-        var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
+        var currentUserId = Guid.Parse(
+            _currentUser.UserId ?? throw new UnauthorizedAccessException()
+        );
         if (!isExist)
         {
             throw new NotFoundException<Channel>(channelId.ToString());
         }
-        
+
         var isMember = await _unitOfWork.Channels.CheckIsMemberAsync(channelId, currentUserId);
         if (!isMember)
         {
@@ -789,5 +729,4 @@ public class ChannelService : BaseService, IChannelService
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
         return _mapper.Map<IEnumerable<UserDto2>>(members.Select(x => x.User));
     }
-
 }
