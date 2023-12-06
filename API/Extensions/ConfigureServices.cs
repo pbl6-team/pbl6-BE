@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
+using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Microsoft.OpenApi.Any;
@@ -62,6 +63,12 @@ namespace PBL6.API.Extensions
             services.AddAutoMapper(typeof(AutoMapperProfile));
             services.AddHttpContextAccessor();
             services.AddSignalR();
+
+            services.AddHangfire(x =>
+            {
+                x.UseSqlServerStorage(configuration.GetConnectionString("DefaultConnection"));
+            });
+            services.AddHangfireServer();
 
             // Add Swagger
             services.AddSwaggerGen(options =>

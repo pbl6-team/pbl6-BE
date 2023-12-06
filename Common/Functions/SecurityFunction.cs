@@ -121,6 +121,7 @@ namespace PBL6.Common.Functions
         public string Username { get; set; }
         public bool IsActive { get; set; }
         public bool IsAdmin { get; set; }
+        public bool Avatar { get; set; }
     }
 
     public static class CustomClaimTypes
@@ -131,5 +132,6 @@ namespace PBL6.Common.Functions
         public const string IsActive = "IsActive";
         public const string IsAdmin = "IsAdmin";
         public const string IsRoot = "IsRoot";
+        public const string Avatar = "Avatar";
     }
 }

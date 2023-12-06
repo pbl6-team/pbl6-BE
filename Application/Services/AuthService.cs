@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -117,12 +118,12 @@ namespace PBL6.Application.Services
                 );
 
                 await _unitOfWork.SaveChangeAsync();
-                await _mailService.Send(
+                _backgroundJobClient.Enqueue(() =>  _mailService.Send(
                     userInput.Email,
-                    MailConsts.SignUp.Subject,
-                    MailConsts.SignUp.Template,
+                    MailConst.SignUp.Subject,
+                    MailConst.SignUp.Template,
                     OTP
-                );
+                ));
 
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
@@ -287,21 +288,21 @@ namespace PBL6.Application.Services
                     }
                 );
                 await _unitOfWork.SaveChangeAsync();
-                var subject = MailConsts.SignUp.Subject;
-                var template = MailConsts.SignUp.Template;
+                var subject = MailConst.SignUp.Subject;
+                var template = MailConst.SignUp.Template;
                 switch ((getOtpDto.OtpType))
                 {
                     case ((short)OTP_TYPE.CHANGE_PASSWORD):
-                        subject = MailConsts.ChangePassword.Subject;
-                        template = MailConsts.ChangePassword.Template;
+                        subject = MailConst.ChangePassword.Subject;
+                        template = MailConst.ChangePassword.Template;
                         break;
                     case ((short)OTP_TYPE.FORGOT_PASSWORD):
-                        subject = MailConsts.ForgotPassword.Subject;
-                        template = MailConsts.ForgotPassword.Template;
+                        subject = MailConst.ForgotPassword.Subject;
+                        template = MailConst.ForgotPassword.Template;
                         break;
                 }
 
-                await _mailService.Send(existedUser.Email, subject, template, OTP);
+                _backgroundJobClient.Enqueue(() =>  _mailService.Send(existedUser.Email, subject, template, OTP));
 
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
             }

@@ -2,6 +2,7 @@ using PBL6.API.Middlewares;
 using PBL6.API.Extensions;
 using PBL6.Common;
 using PBL6.Application.Hubs;
+using Hangfire;
 
 namespace PBL6.API
 {
@@ -43,7 +44,8 @@ namespace PBL6.API
             app.MapControllers();
             app.UseCors("CorsPolicy");
             app.MapHub<ChatHub>("/chatHub");
-
+            app.UseHangfireDashboard();
+            
             app.Run();
         }
     }

@@ -1,6 +1,6 @@
 namespace PBL6.Common.Consts
 {
-    public static class MailConsts
+    public static class MailConst
     {
         public static class SignUp
         {
