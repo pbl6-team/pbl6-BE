@@ -1,4 +1,5 @@
 using AutoMapper;
+using Hangfire;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
@@ -20,6 +21,7 @@ namespace PBL6.Application.Services
         protected readonly IUnitOfWork _unitOfWork;
         protected readonly IWebHostEnvironment _hostingEnvironment;
         protected readonly IFileService _fileService;
+        protected readonly IBackgroundJobClient _backgroundJobClient;
         protected readonly IHubContext<ChatHub> _chatHub;
 
         public BaseService(
@@ -35,6 +37,7 @@ namespace PBL6.Application.Services
             _hostingEnvironment = serviceProvider.GetService<IWebHostEnvironment>();
             _fileService = serviceProvider.GetService<IFileService>();
             _chatHub = serviceProvider.GetService<IHubContext<ChatHub>>();
+            _backgroundJobClient =  serviceProvider.GetService<IBackgroundJobClient>();
         }
     }
 }
