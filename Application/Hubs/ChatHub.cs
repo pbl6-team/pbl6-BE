@@ -27,13 +27,13 @@ namespace PBL6.Application.Hubs
         public static readonly ConcurrentDictionary<Guid, HubUser> Users = new();
 
         public const string ERROR = "Error";
-        public const string RECEIVE_MESSAGE = "ReceiveMessage";
-        public const string UPDATE_MESSAGE = "UpdateMessage";
-        public const string DELETE_MESSAGE = "DeleteMessage";
-        public const string ADD_USER_TO_CHANNEL = "AddUserToChannel";
-        public const string REMOVE_USER_FROM_CHANNEL = "RemoveUserFromChannel";
-        public const string ADD_USER_TO_WORKSPACE = "AddUserToWorkspace";
-        public const string REMOVE_USER_FROM_WORKSPACE = "RemoveUserFromWorkspace";
+        public const string RECEIVE_MESSAGE = "receive_message";
+        public const string UPDATE_MESSAGE = "update_message";
+        public const string DELETE_MESSAGE = "delete_message";
+        public const string ADD_USER_TO_CHANNEL = "add_user_to_channel";
+        public const string REMOVE_USER_FROM_CHANNEL = "remove_user_from_channel";
+        public const string ADD_USER_TO_WORKSPACE = "add_user_to_workspace";
+        public const string REMOVE_USER_FROM_WORKSPACE = "remove_user_from_workspace";
 
         public ChatHub(
             IHubContext<ChatHub> hubContext,
