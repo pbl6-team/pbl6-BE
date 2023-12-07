@@ -110,8 +110,8 @@ namespace workspace.PBL6.Application.Services
             if (input.ToChannelId is not null)
             {
                 var isMember = await _unitOfWork.Channels.CheckIsMemberAsync(
-                    currentUserId,
-                    input.ToChannelId.Value
+                    input.ToChannelId.Value,
+                    currentUserId
                 );
                 if (!isMember)
                 {

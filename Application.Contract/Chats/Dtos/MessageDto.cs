@@ -4,6 +4,8 @@ namespace PBL6.Application.Contract.Chats.Dtos
     {
         public Guid Id { get; set; }
 
+        public Guid? ParentId { get; set; }
+
         public string Content { get; set; }
 
         public Guid SenderId { get; set; }
