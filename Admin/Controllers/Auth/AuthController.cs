@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
+using PBL6.Admin.Filters;
 using PBL6.Application.Contract.Admins;
 using PBL6.Application.Contract.Users.Dtos;
-using PBL6.Application.Filters;
 
-namespace PBL6.API.Controllers.Admins.Auth
+namespace PBL6.Admin.Controllers.Auth
 {
     [Produces("application/json")]
-    [Route("api/admin/[controller]")]
+    [Route("api/[controller]")]
     public class AuthController : BaseApiController
     {
         private readonly IAuthService _authService;

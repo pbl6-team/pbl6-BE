@@ -2,14 +2,13 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using PBL6.Common.Exceptions;
 using PBL6.Common.Functions;
 
-namespace PBL6.Application.Filters
+namespace PBL6.Admin.Filters
 {
+    [AttributeUsage(AttributeTargets.All)]
     public class AdminFilter : Attribute, IAsyncAuthorizationFilter
     {
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)

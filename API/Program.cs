@@ -1,8 +1,9 @@
 using PBL6.API.Middlewares;
-using PBL6.API.Extensions;
 using PBL6.Common;
 using PBL6.Application.Hubs;
 using Hangfire;
+using PBL6.Application;
+using PBL6.Infrastructure;
 
 namespace PBL6.API
 {
@@ -14,8 +15,8 @@ namespace PBL6.API
 
             builder.Services
                 .AddApiServices(builder.Configuration)
-                .AddInfrastructureServices(builder.Configuration)
-                .AddDataContextServices(builder.Configuration);
+                .AddApplicationServices(builder.Configuration)
+                .AddInfrastructureServices(builder.Configuration);
 
             var app = builder.Build();
             StartupState.Instance.Services = app.Services;

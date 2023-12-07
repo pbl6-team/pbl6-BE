@@ -1,8 +1,9 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using PBL6.Application.Contract.Common;
 using PBL6.Common.Functions;
 
-namespace PBL6.API.Services
+namespace PBL6.Application.Services
 {
     public class CurrentUserService : ICurrentUserService
     {

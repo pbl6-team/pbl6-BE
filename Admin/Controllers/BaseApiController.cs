@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using PBL6.API.Filters;
+using PBL6.Admin.Filters;
 
-namespace PBL6.Api.Controllers
+namespace PBL6.Admin.Controllers
 {
     [Route("api/[controller]")]
     [Produces("application/json")]

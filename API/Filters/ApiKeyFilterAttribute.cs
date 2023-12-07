@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
-namespace PBL6.Application.Filters
+namespace PBL6.API.Filters
 {
     [AttributeUsage(AttributeTargets.All)]
     public class ApiKeyFilterAttribute : Attribute, IAuthorizationFilter

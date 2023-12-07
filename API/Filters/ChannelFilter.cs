@@ -1,10 +1,9 @@
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.DependencyInjection;
 using PBL6.Application.Contract.Channels;
 using PBL6.Common.Exceptions;
 using PBL6.Common.Functions;
 
-namespace PBL6.Application.Filters
+namespace PBL6.API.Filters
 {
     [AttributeUsage(AttributeTargets.All)]
     public class ChannelFilter : Attribute, IAsyncAuthorizationFilter

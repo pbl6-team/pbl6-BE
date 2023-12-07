@@ -8,7 +8,7 @@ using Microsoft.OpenApi.Models;
 using PBL6.Application;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace PBL6.API.Extensions
+namespace PBL6.Admin
 {
     public static class ConfigureServices
     {
@@ -73,7 +73,7 @@ namespace PBL6.API.Extensions
             // Add Swagger
             services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo { Version = "v1", Title = "Fira API", });
+                options.SwaggerDoc("v1", new OpenApiInfo { Version = "v1", Title = "Fira Admin API", });
 
                 options.AddSecurityDefinition(
                     "Bearer",
@@ -131,36 +131,6 @@ namespace PBL6.API.Extensions
                         Default = new OpenApiString("5J0jCR1dAkvDt3YVoahpux0eawahkQB9")
                     },
                     Required = true
-                }
-            );
-
-            operation.Parameters.Add(
-                new OpenApiParameter
-                {
-                    Name = "workspace-id",
-                    In = ParameterLocation.Header,
-                    Description = "ID của workspace",
-                    Schema = new OpenApiSchema()
-                    {
-                        Type = "string",
-                        Default = new OpenApiString(Guid.Empty.ToString())
-                    },
-                    Required = false
-                }
-            );
-
-            operation.Parameters.Add(
-                new OpenApiParameter
-                {
-                    Name = "channel-id",
-                    In = ParameterLocation.Header,
-                    Description = "ID của channel",
-                    Schema = new OpenApiSchema()
-                    {
-                        Type = "string",
-                        Default = new OpenApiString(Guid.Empty.ToString())
-                    },
-                    Required = false
                 }
             );
         }

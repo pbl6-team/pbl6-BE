@@ -1,7 +1,7 @@
 using Application.Contract.Users.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using PBL6.Application.Contract.Users;
-using PBL6.Application.Filters;
+using PBL6.API.Filters;
 
 namespace API.Controllers.Users;
 
