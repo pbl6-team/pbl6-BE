@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using PBL6.Application.Contract.Users;
 using PBL6.Application.Contract.Users.Dtos;
-using PBL6.Application.Filters;
+using PBL6.API.Filters;
+using PBL6.Api.Controllers;
 
 namespace PBL6.API.Controllers.Workspaces
 {

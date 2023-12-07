@@ -352,3 +352,4 @@ MigrationBackup/
 .ionide/
 */Logs/log.txt
 API/Controllers/Auth/AuthController.cs
+.vscode/launch.json

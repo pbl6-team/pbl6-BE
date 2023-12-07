@@ -10,6 +10,8 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    if: github.event_name != 'push' && github.ref == 'refs/heads/develop'
+
 
     steps:
     - uses: actions/checkout@v3
@@ -25,7 +27,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
 
 
-  deploy:
+  deploy_api:
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
@@ -57,11 +59,52 @@ jobs:
           chmod 644 ~/.ssh/known_hosts
 
       - name: Publish
-        run: dotnet publish -c Release -o publish
-
+        run: dotnet publish ./API/API.csproj -c Release -o publish
+        
       - name: Deploy to Server
         run: |
-          scp -r publish/* ${{ env.SERVER_USER }}@${{ env.SERVER_IP }}:${{ env.DEPLOYMENT_PATH }}/src
+          tar -czvf publish.tar.gz ./publish/*
+          scp -r publish.tar.gz ${{ env.SERVER_USER }}@${{ env.SERVER_IP }}:${{ env.DEPLOYMENT_PATH }}/src/
           sshpass -p ${{ env.SERVER_PASSWORD }} ssh fira@firar.live 'echo "${{ env.SERVER_PASSWORD }}" | sudo -S bash ${{ env.DEPLOYMENT_PATH }}/restart.sh'
 
-  
+  deploy_admin:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+
+    env:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+      SERVER_IP: ${{ secrets.SERVER_IP }}
+      SERVER_USER: ${{ secrets.SERVER_USER }}
+      SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
+      DEPLOYMENT_PATH: /home/fira/private/fira.live/admin
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.100
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Publish
+        run: dotnet publish ./Admin/Admin.csproj -c Release -o publish
+        
+      - name: Deploy to Server
+        run: |
+          tar -czvf publish.tar.gz ./publish/*
+          scp -r publish.tar.gz ${{ env.SERVER_USER }}@${{ env.SERVER_IP }}:${{ env.DEPLOYMENT_PATH }}/src/
+          sshpass -p ${{ env.SERVER_PASSWORD }} ssh fira@firar.live 'echo "${{ env.SERVER_PASSWORD }}" | sudo -S bash ${{ env.DEPLOYMENT_PATH }}/restart.sh'
+
+          

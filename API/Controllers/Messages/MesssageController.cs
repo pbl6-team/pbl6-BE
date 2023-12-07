@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PBL6.Application.Contract.Chats;
 using PBL6.Application.Contract.Chats.Dtos;
-using PBL6.Application.Filters;
+using PBL6.API.Filters;
 
 [ApiController]
     [Route("api/[controller]")]
