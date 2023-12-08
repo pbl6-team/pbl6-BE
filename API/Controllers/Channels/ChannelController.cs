@@ -359,5 +359,25 @@ namespace PBL6.API.Controllers.Channels
             await _channelService.SetRoleToUserAsync(channelId, userId, role.Id);
             return NoContent();
         }
+
+        /// <summary>
+        /// API get user that is not in channel - cần đăng nhập
+        /// </summary>
+        /// <param name="workspaceId"></param>
+        /// <param name="channelId"></param>
+        /// <returns></returns>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpPut("workspace/{workspaceId}/channel/{channelId}/user-not-in-channel")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [AuthorizeFilter]
+        public async Task<IActionResult> GetMembersThatNotInTheChannel(
+            [FromRoute] Guid workspaceId,
+            [FromRoute] Guid channelId
+        )
+        {
+            return Ok(await _channelService.GetMembersThatNotInTheChannel(workspaceId, channelId));
+        }
     }
 }

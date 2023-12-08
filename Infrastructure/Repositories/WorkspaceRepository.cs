@@ -25,7 +25,7 @@ namespace PBL6.Infrastructure.Repositories
 
         public async Task<bool> CheckIsExistAsync(Guid id)
         {
-            return await _apiDbContext.Workspaces.AnyAsync(x => x.Id == id);
+            return await _apiDbContext.Workspaces.AnyAsync(x => !x.IsDeleted && x.Id == id);
         }
 
         public async Task<bool> CheckIsExistRole(Guid workspaceId, Guid roleId)
@@ -61,7 +61,7 @@ namespace PBL6.Infrastructure.Repositories
         public async Task<WorkspaceMember> GetMemberByUserId(Guid workspaceId, Guid userId)
         {
             return await _apiDbContext.WorkspaceMembers.FirstOrDefaultAsync(
-                x => x.WorkspaceId == workspaceId && x.UserId == userId
+                x => !x.IsDeleted && x.WorkspaceId == workspaceId && x.UserId == userId
             );
         }
 

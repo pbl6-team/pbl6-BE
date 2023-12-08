@@ -36,7 +36,7 @@ namespace PBL6.Infrastructure.Repositories
 
         public async Task<bool> CheckIsExistAsync(Guid channelId)
         {
-            return await _apiDbContext.Channels.AnyAsync(x => x.Id == channelId);
+            return await _apiDbContext.Channels.AnyAsync(x => !x.IsDeleted && x.Id == channelId);
         }
 
         public async Task<bool> CheckIsMemberAsync(Guid channelId, Guid userId)
@@ -54,7 +54,7 @@ namespace PBL6.Infrastructure.Repositories
         public async Task<ChannelMember> GetMemberByUserId(Guid channelId, Guid userId)
         {
             return await _apiDbContext.ChannelMembers.FirstOrDefaultAsync(
-                x => x.ChannelId == channelId && x.UserId == userId
+                x => !x.IsDeleted && x.ChannelId == channelId && x.UserId == userId
             );
         }
 
