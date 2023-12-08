@@ -544,7 +544,7 @@ public class ChannelService : BaseService, IChannelService
                 await _unitOfWork.ChannelMembers.DeleteAsync(member);
             }
             await _unitOfWork.SaveChangeAsync();
-            _backgroundJobClient.Enqueue(() => RemoveUsersFromChannelHub(channelId, userIds));           
+            _backgroundJobClient.Enqueue(() => RemoveUsersFromChannelHub(channelId, userIds));
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
@@ -727,5 +727,57 @@ public class ChannelService : BaseService, IChannelService
             .ToListAsync();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
         return _mapper.Map<IEnumerable<UserDto2>>(members.Select(x => x.User));
+    }
+
+    public async Task<IEnumerable<UserDto2>> GetMembersThatNotInTheChannel(Guid workspaceId, Guid channelId)
+    {
+        var method = GetActualAsyncMethodName();
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var isWorkspaceExist = await _unitOfWork.Workspaces.CheckIsExistAsync(workspaceId);
+
+        if (!isWorkspaceExist)
+        {
+            throw new NotFoundException<Workspace>(workspaceId.ToString());
+        }
+
+        var isChannelExist = await _unitOfWork.Channels.CheckIsExistAsync(channelId);
+
+        if (!isChannelExist)
+        {
+            throw new NotFoundException<Channel>(channelId.ToString());
+        }
+
+        var currentUserId = Guid.Parse(
+            _currentUser.UserId ?? throw new UnauthorizedAccessException()
+        );
+
+        var isMember = await _unitOfWork.Workspaces.CheckIsMemberAsync(
+            workspaceId,
+            currentUserId
+        );
+
+        if (!isMember)
+        {
+            throw new ForbidException();
+        }
+
+        var members = await _unitOfWork.WorkspaceMembers
+            .Queryable()
+            .Include(x => x.User)
+            .ThenInclude(x => x.Information)
+            .Where(x => x.WorkspaceId == workspaceId && !x.IsDeleted)
+            .ToListAsync();
+
+        var channelMembers = await _unitOfWork.ChannelMembers
+            .Queryable()
+            .Include(x => x.User)
+            .ThenInclude(x => x.Information)
+            .Where(x => x.ChannelId == channelId && !x.IsDeleted)
+            .ToListAsync();
+
+        var result = members.Where(x => !channelMembers.Select(x => x.UserId).Contains(x.UserId));
+
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
+        return _mapper.Map<IEnumerable<UserDto2>>(result.Select(x => x.User));
     }
 }
