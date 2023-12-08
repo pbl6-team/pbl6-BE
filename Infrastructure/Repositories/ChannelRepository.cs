@@ -47,7 +47,7 @@ namespace PBL6.Infrastructure.Repositories
             }
 
             return await _apiDbContext.ChannelMembers.AnyAsync(
-                x => x.ChannelId == channelId && x.UserId == userId
+                x => !x.IsDeleted && x.ChannelId == channelId && x.UserId == userId
             );
         }
 
