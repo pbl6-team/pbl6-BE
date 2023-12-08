@@ -61,7 +61,7 @@ public class UserService : BaseService, IUserService
                                            .ToListAsync();
 
             users = users.Where(x => _unitOfWork.Channels.CheckIsMemberAsync(channelId, x.Id).Result).ToList();
-            
+
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return _mapper.Map<IEnumerable<UserDto2>>(users);
         }
@@ -173,58 +173,6 @@ public class UserService : BaseService, IUserService
 
     }
 
-    public async Task<IEnumerable<UserDto2>> SearchByNameAsync(string fullName)
-    {
-        var method = GetActualAsyncMethodName();
-        try
-        {
-            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var users = await _unitOfWork.Users.Queryable()
-                                               .Include(x => x.Information)
-                                               .Where(x => !x.IsDeleted && (x.Information.LastName + " " + x.Information.FirstName).ToUpper().Contains(fullName.ToUpper()))
-                                               .ToListAsync();
-            _logger.LogInformation("[{_className}][{method}] End", _className, method);
-            return _mapper.Map<IEnumerable<UserDto2>>(users);
-        }
-        catch (Exception e)
-        {
-            _logger.LogInformation(
-                "[{_className}][{method}] Error: {message}",
-                _className,
-                method,
-                e.Message
-            );
-
-            throw;
-        }
-    }
-
-    public async Task<IEnumerable<UserDto2>> SearchByEmailAsync(string email)
-    {
-        var method = GetActualAsyncMethodName();
-        try
-        {
-            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var users = await _unitOfWork.Users.Queryable()
-                                               .Include(x => x.Information)
-                                               .Where(x => !x.IsDeleted && x.Email.ToUpper().Contains(email.ToUpper()))
-                                               .ToListAsync();
-            _logger.LogInformation("[{_className}][{method}] End", _className, method);
-            return _mapper.Map<IEnumerable<UserDto2>>(users);
-        }
-        catch (Exception e)
-        {
-            _logger.LogInformation(
-                "[{_className}][{method}] Error: {message}",
-                _className,
-                method,
-                e.Message
-            );
-
-            throw;
-        }
-    }
-
     public async Task<UserDto2> GetByIdAsync(Guid userId)
     {
         var method = GetActualAsyncMethodName();
@@ -250,5 +198,47 @@ public class UserService : BaseService, IUserService
         }
     }
 
+    public async Task<IEnumerable<UserDto2>> SearchUserAsync(string searchType, string searchValue, int numberOfResults)
+    {
+        var method = GetActualAsyncMethodName();
+        try
+        {
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var users = await _unitOfWork.Users.Queryable()
+                                           .Include(x => x.Information)
+                                           .Where(x => !x.IsDeleted)
+                                           .ToListAsync();
 
+            searchType = searchType.ToUpper();
+            searchValue = searchValue.ToUpper();
+
+            switch (searchType)
+            {
+                case "EMAIL":
+                    users = users.Where(x => x.Email.ToUpper().Contains(searchValue)).ToList();
+                    break;
+                case "NAME":
+                    users = users.Where(x => (x.Information.LastName + " " + x.Information.FirstName).ToUpper().Contains(searchValue)).ToList();
+                    break;
+                default:
+                    throw new Exception("Search type is not valid");
+            }
+
+            users = users.Take(numberOfResults).ToList();
+
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+            return _mapper.Map<IEnumerable<UserDto2>>(users);
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation(
+                "[{_className}][{method}] Error: {message}",
+                _className,
+                method,
+                e.Message
+            );
+
+            throw;
+        }
+    }
 }

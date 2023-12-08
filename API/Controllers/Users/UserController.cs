@@ -103,34 +103,21 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// API Search user by name - cần đăng nhập
+    /// API Search user - cần đăng nhập
     /// </summary>
-    /// <param name="fullName"></param>
+    /// <param name="searchType"></param>
+    /// <param name="searchValue"></param>
+    /// <param name="numberOfResults"></param>
     /// <returns></returns>
     /// <response code="200">Get thành công</response>
     /// <response code="400">Có lỗi xảy ra</response>
-    [HttpGet("search/name/{fullName}")]
+    [HttpGet("search/{searchType}/{searchValue}/{numberOfResults}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDto2>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [AuthorizeFilter]
-    public async Task<IActionResult> SearchByName([FromRoute] string fullName)
+    public async Task<IActionResult> SearchUser([FromRoute] string searchType, [FromRoute] string searchValue, [FromRoute] int numberOfResults)
     {
-        return Ok(await _userService.SearchByNameAsync(fullName));
+        return Ok(await _userService.SearchUserAsync(searchType, searchValue, numberOfResults));
     }
 
-    /// <summary>
-    /// API Search user by email - cần đăng nhập
-    /// </summary>
-    /// <param name="email"></param>
-    /// <returns></returns>
-    /// <response code="200">Get thành công</response>
-    /// <response code="400">Có lỗi xảy ra</response>
-    [HttpGet("search/email/{email}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDto2>))]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [AuthorizeFilter]
-    public async Task<IActionResult> SearchByEmail([FromRoute] string email)
-    {
-        return Ok(await _userService.SearchByEmailAsync(email));
-    }
 }
