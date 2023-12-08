@@ -185,7 +185,12 @@ namespace PBL6.Infrastructure.Data
                 .WithMany()
                 .HasForeignKey(x => x.CreatedBy)
                 .OnDelete(DeleteBehavior.NoAction);
-
+            
+            modelBuilder.Entity<Message>()
+                .HasOne(x => x.Receiver)
+                .WithMany()
+                .HasForeignKey(x => x.ToUserId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
 
         public override int SaveChanges()

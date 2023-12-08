@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using PBL6.Application.Contract.Channels;
 using PBL6.Application.Contract.Channels.Dtos;
 using PBL6.Application.Contract.Workspaces.Dtos;
-using PBL6.Application.Hubs;
 using PBL6.Common.Exceptions;
 using PBL6.Domain.Models.Users;
 

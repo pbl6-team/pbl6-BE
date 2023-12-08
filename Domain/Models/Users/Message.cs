@@ -23,5 +23,7 @@ namespace PBL6.Domain.Models.Users
         public ICollection<MessageTracking> MessageTrackings { get; set; }
 
         public User Sender { get; set; }
+
+        public User Receiver { get; set; }
     }
 }
