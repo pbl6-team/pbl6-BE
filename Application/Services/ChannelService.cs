@@ -238,6 +238,10 @@ public class ChannelService : BaseService, IChannelService
             throw new NotFoundException<ChannelRole>(roleId.ToString());
         }
         var channelRole = await _unitOfWork.Channels.GetRoleById(channelId, roleId);
+        foreach (var permission in channelRole.Permissions)
+        {
+            await _unitOfWork.PermissionsOfChannelRoles.DeleteAsync(permission, isHardDelete: true);
+        }
         await _unitOfWork.ChannelRoles.DeleteAsync(channelRole, isHardDelete: true);
         await _unitOfWork.SaveChangeAsync();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
@@ -664,6 +668,10 @@ public class ChannelService : BaseService, IChannelService
         }
 
         var role = await _unitOfWork.Channels.GetRoleById(channelId, roleId);
+        foreach (var permission in role.Permissions)
+        {
+            await _unitOfWork.PermissionsOfChannelRoles.DeleteAsync(permission, isHardDelete: true);
+        }
         _mapper.Map(input, role);
         await _unitOfWork.ChannelRoles.UpdateAsync(role);
         await _unitOfWork.SaveChangeAsync();
