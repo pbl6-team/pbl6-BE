@@ -47,7 +47,7 @@ namespace PBL6.Infrastructure.Repositories
             }
 
             return await _apiDbContext.WorkspaceMembers.AnyAsync(
-                x => x.WorkspaceId == workspaceId && x.UserId == userId
+                x => !x.IsDeleted && x.WorkspaceId == workspaceId && x.UserId == userId
             );
         }
 
