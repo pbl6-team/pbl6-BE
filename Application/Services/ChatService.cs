@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PBL6.Application.Contract.Chats;
 using PBL6.Application.Contract.Chats.Dtos;
@@ -97,6 +98,46 @@ namespace workspace.PBL6.Application.Services
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
             return null;
+        }
+
+        public async Task<List<ConversationDto>> GetConversationsAsync(ConversationRequest input)
+        {
+           var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not authorized")
+            );
+            var conversationDtos = await _unitOfWork.Messages.GetConversations(
+                currentUserId,
+                input.Search
+            )
+            .GroupBy(x => x.ToUserId == currentUserId ? x.CreatedBy : x.ToUserId)
+            .OrderByDescending(x => x.Max(x => x.CreatedAt))
+            .Select(x => new ConversationDto
+            {
+            Id = (Guid)x.Key,
+            Name = currentUserId == x.First().CreatedBy
+                ? x.First().Receiver.Information.FirstName + " " + x.First().Receiver.Information.LastName
+                : x.First().Sender.Information.FirstName + " " + x.First().Sender.Information.LastName,
+            LastMessage = x.First().Content,
+            LastMessageTime = x.First().CreatedAt,
+            LastMessageSender = currentUserId == x.First().CreatedBy
+                ? "You"
+                : x.First().Receiver.Information.FirstName + " " + x.First().Receiver.Information.LastName,
+            LastMessageSenderAvatar = x.First().Sender.Information.Picture,
+            IsRead = x.First().MessageTrackings.Any(x => x.UserId == currentUserId && !x.IsDeleted && x.IsRead),
+            IsChannel = x.First().ToChannelId != null,
+            Avatar = currentUserId == x.First().CreatedBy
+                ? x.First().Receiver.Information.Picture
+                : x.First().Sender.Information.Picture
+            })
+            .Skip(input.Offset)
+            .Take(input.Limit)
+            .ToListAsync();
+
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+            return conversationDtos;
         }
 
         public async Task<List<MessageDto>> GetMessagesAsync(GetMessageDto input)

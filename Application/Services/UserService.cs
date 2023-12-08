@@ -3,7 +3,6 @@ using Application.Contract.Users.Dtos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PBL6.Application.Contract.Users;
-using PBL6.Application.Contract.Users.Dtos;
 using PBL6.Application.Services;
 
 namespace Application.Services;

@@ -43,6 +43,35 @@ namespace PBL6.Infrastructure.Repositories
                 .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
         }
 
+        public  IQueryable<Message> GetConversations(Guid currentUserId, string search)
+        {
+            var result = _dbSet
+                .Include(x => x.Sender)
+                .ThenInclude(x => x.Information)
+                .Include(x => x.Receiver)
+                .ThenInclude(x => x.Information)
+                .Include(x => x.MessageTrackings)
+                .ThenInclude(x => x.User)
+                .ThenInclude(x => x.Information)
+                .AsNoTracking()
+                .Where(
+                    x =>
+                        (
+                            x.ToUserId == currentUserId
+                            || x.CreatedBy == currentUserId
+                        )
+                        && x.ToChannelId == null
+                        && (
+                            currentUserId == x.CreatedBy ?
+                            (x.Receiver.Information.FirstName + " " + x.Receiver.Information.LastName).ToLower().Contains(search.ToLower())
+                            : (x.Sender.Information.FirstName + " " + x.Sender.Information.LastName).ToLower().Contains(search.ToLower())
+                        )
+                        && !x.IsDeleted
+                );
+                
+            return result;
+        }
+
         public async Task<IEnumerable<Message>> GetMessagesOfChannelAsync(
             Guid value,
             DateTimeOffset timeCusor,

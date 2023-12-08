@@ -35,4 +35,22 @@ using PBL6.API.Filters;
             var messages = await _chatService.GetMessagesAsync(input);
             return Ok(messages);
         }
+
+        /// <summary>
+        /// get list conversations
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        /// <response code="200">Returns conversations</response>
+        /// <response code="400">If the request is invalid</response>
+        /// <response code="500">If there was an internal server error</response>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<ConversationDto>))]
+        [HttpGet("conversations")]
+        [AuthorizeFilter]
+        public async Task<IActionResult> GetConversations([FromQuery] ConversationRequest input)
+        {
+            List<ConversationDto> conversations = await _chatService.GetConversationsAsync(input);
+            
+            return Ok(conversations);
+        }
     }
