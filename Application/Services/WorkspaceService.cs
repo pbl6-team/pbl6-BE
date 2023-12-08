@@ -611,6 +611,10 @@ namespace PBL6.Application.Services
             }
 
             var role = await _unitOfWork.Workspaces.GetRoleById(workspaceId, roleId);
+            foreach (var permission in role.Permissions)
+            {
+                await _unitOfWork.PermissionsOfWorkspaceRoles.DeleteAsync(permission, isHardDelete: true);
+            }
             _mapper.Map(input, role);
             await _unitOfWork.WorkspaceRoles.UpdateAsync(role);
             await _unitOfWork.SaveChangeAsync();
@@ -675,6 +679,10 @@ namespace PBL6.Application.Services
                 throw new NotFoundException<WorkspaceRole>(roleId.ToString());
             }
             var workspaceRole = await _unitOfWork.Workspaces.GetRoleById(workspaceId, roleId);
+            foreach (var permission in workspaceRole.Permissions)
+            {
+                await _unitOfWork.PermissionsOfWorkspaceRoles.DeleteAsync(permission, isHardDelete: true);
+            }
             await _unitOfWork.WorkspaceRoles.DeleteAsync(workspaceRole, isHardDelete: true);
             await _unitOfWork.SaveChangeAsync();
             _logger.LogInformation("[{_className}][{method}] End", _className, method);

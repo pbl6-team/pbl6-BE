@@ -24,6 +24,8 @@ namespace PBL6.Infrastructure.Data
         public IMessageRepository Messages { get; }
         public IAdminRepository Admins { get; }
         public IAdminTokenRepository AdminTokens { get; }
+        public IPermissionsOfWorkspaceRoleRepository PermissionsOfWorkspaceRoles { get; }
+        public IPermissionsOfChannelRoleRepository PermissionsOfChannelRoles { get; }
 
         public UnitOfWork(ApiDbContext apiDbContext, ILoggerFactory loggerFactory)
         {
@@ -43,6 +45,8 @@ namespace PBL6.Infrastructure.Data
             Messages = new MessageRepository(apiDbContext, logger);
             Admins = new AdminRepository(apiDbContext, logger);
             AdminTokens = new AdminTokenRepository(apiDbContext, logger);
+            PermissionsOfWorkspaceRoles = new PermissionsOfWorkspaceRoleRepository(apiDbContext, logger);
+            PermissionsOfChannelRoles = new PermissionsOfChannelRoleRepository(apiDbContext, logger);
         }
 
         public async Task SaveChangeAsync()
