@@ -20,7 +20,9 @@ namespace PBL6.Infrastructure.Repositories
                 || currentUserId == message.ToUserId
                 || currentUserId == message.ToChannel.CreatedBy
                 || currentUserId == message.ToChannel.Workspace.CreatedBy
-                || message.ToChannel.ChannelMembers.Any(x => x.UserId == currentUserId && !x.IsDeleted)
+                || message.ToChannel.ChannelMembers.Any(
+                    x => x.UserId == currentUserId && !x.IsDeleted
+                )
             )
             {
                 return true;
@@ -43,7 +45,7 @@ namespace PBL6.Infrastructure.Repositories
                 .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
         }
 
-        public  IQueryable<Message> GetConversations(Guid currentUserId, string search)
+        public IQueryable<Message> GetConversations(Guid currentUserId, string search)
         {
             var result = _dbSet
                 .Include(x => x.Sender)
@@ -56,32 +58,42 @@ namespace PBL6.Infrastructure.Repositories
                 .AsNoTracking()
                 .Where(
                     x =>
-                        (
-                            x.ToUserId == currentUserId
-                            || x.CreatedBy == currentUserId
-                        )
+                        (x.ToUserId == currentUserId || x.CreatedBy == currentUserId)
                         && x.ToChannelId == null
                         && (
-                            currentUserId == x.CreatedBy ?
-                            (
-                                (x.Receiver.Information.FirstName + " " + x.Receiver.Information.LastName).ToLower().Contains(search.ToLower())
-                                || x.Receiver.Email.ToLower().Contains(search.ToLower())
+                            currentUserId == x.CreatedBy
+                                ? (
+                                    (
+                                        x.Receiver.Information.FirstName
+                                        + " "
+                                        + x.Receiver.Information.LastName
+                                    )
+                                        .ToLower()
+                                        .Contains(search.ToLower())
+                                    || x.Receiver.Email.ToLower().Contains(search.ToLower())
                                 )
-                            : (
-                                (x.Sender.Information.FirstName + " " + x.Sender.Information.LastName).ToLower().Contains(search.ToLower())
-                                || x.Sender.Email.ToLower().Contains(search.ToLower())
-                            )
+                                : (
+                                    (
+                                        x.Sender.Information.FirstName
+                                        + " "
+                                        + x.Sender.Information.LastName
+                                    )
+                                        .ToLower()
+                                        .Contains(search.ToLower())
+                                    || x.Sender.Email.ToLower().Contains(search.ToLower())
+                                )
                         )
                         && !x.IsDeleted
                 );
-                
+
             return result;
         }
 
         public async Task<IEnumerable<Message>> GetMessagesOfChannelAsync(
-            Guid value,
-            DateTimeOffset timeCursor,
-            int count
+            Guid channelId,
+            DateTimeOffset timeCusor,
+            int count,
+            Guid currentUserId
         )
         {
             return await _apiDbContext.Messages
@@ -91,7 +103,11 @@ namespace PBL6.Infrastructure.Repositories
                 .Include(x => x.Sender)
                 .ThenInclude(x => x.Information)
                 .Include(x => x.Children)
-                .Where(x => x.ToChannelId == value && x.CreatedAt < timeCursor && !x.IsDeleted && x.ParentId == null)
+                .Where(x => 
+                    x.ToChannelId == channelId 
+                    && x.CreatedAt < timeCusor 
+                    && !x.IsDeleted
+                    && !x.MessageTrackings.Any(x => x.UserId == currentUserId && x.IsDeleted))
                 .OrderByDescending(x => x.CreatedAt)
                 .Take(count)
                 .ToListAsync();
@@ -121,6 +137,7 @@ namespace PBL6.Infrastructure.Repositories
                         && !x.IsDeleted
                         && x.ToChannelId == null
                         && x.ParentId == null
+                        && !x.MessageTrackings.Any(x => x.UserId == currentUserId && x.IsDeleted)
                 )
                 .OrderByDescending(x => x.CreatedAt)
                 .Take(count)

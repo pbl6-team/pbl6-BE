@@ -188,6 +188,47 @@ namespace PBL6.Application.Hubs
             }
         }
 
+        public async Task ReactMessageAsync(ReactMessageDto input)
+        {
+            try
+            {
+                if (_currentUserService.UserId is null)
+                {
+                    throw new UnauthorizedException("User is not authorized");
+                }
+                MessageDto messageDto = await _chatService.ReactMessageAsync(input);
+
+                if (messageDto.IsChannel)
+                {
+                    await _hubContext.Clients
+                        .Group(messageDto.ReceiverId.ToString())
+                        .SendAsync(UPDATE_MESSAGE, messageDto, messageDto.ReceiverId);
+                }
+                else
+                {
+                    Users.TryGetValue(messageDto.ReceiverId, out var hubUser);
+                    if (hubUser is not null && hubUser.ConnectionIds.Any())
+                    {
+                        await _hubContext.Clients
+                            .Clients(hubUser.ConnectionIds.ToList())
+                            .SendAsync(UPDATE_MESSAGE, messageDto);
+                    }
+
+                    Users.TryGetValue(messageDto.SenderId, out hubUser);
+                    if (hubUser is not null && hubUser.ConnectionIds.Any())
+                    {
+                        await _hubContext.Clients
+                            .Clients(hubUser.ConnectionIds.ToList())
+                            .SendAsync(UPDATE_MESSAGE, messageDto);
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                HandleException(exception);
+            }
+        }
+
         public async Task<Guid?> UpdateMessageAsync(UpdateMessageDto input)
         {
             try
