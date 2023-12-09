@@ -25,5 +25,7 @@ namespace PBL6.Application.Contract.Chats.Dtos
         public IEnumerable<Reader> Readers { get; set; }
 
         public bool IsChannel { get; set; }
+
+        public IEnumerable<MessageDto>  Children { get; set; }
     }
 }
