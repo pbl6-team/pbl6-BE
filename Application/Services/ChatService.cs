@@ -6,6 +6,7 @@ using PBL6.Application.Contract.Chats.Dtos;
 using PBL6.Application.Services;
 using PBL6.Common.Consts;
 using PBL6.Common.Exceptions;
+using PBL6.Common.Functions;
 using PBL6.Domain.Models.Users;
 
 namespace workspace.PBL6.Application.Services
@@ -148,6 +149,7 @@ namespace workspace.PBL6.Application.Services
                 _currentUser.UserId ?? throw new UnauthorizedException("User is not authorized")
             );
             List<MessageDto> messageDtos;
+            IEnumerable<Message> messages;
             if (input.ToChannelId is not null)
             {
                 var isMember = await _unitOfWork.Channels.CheckIsMemberAsync(
@@ -159,29 +161,87 @@ namespace workspace.PBL6.Application.Services
                     throw new NotFoundException<Channel>(input.ToChannelId.Value.ToString());
                 }
 
-                IEnumerable<Message> messages =
+                messages =
                     await _unitOfWork.Messages.GetMessagesOfChannelAsync(
                         input.ToChannelId.Value,
                         input.TimeCursor,
-                        input.Count
+                        input.Count,
+                        currentUserId
                     );
-                messageDtos = _mapper.Map<List<MessageDto>>(messages);
             }
             else
             {
-                IEnumerable<Message> messages = await _unitOfWork.Messages.GetMessagesOfUserAsync(
+                messages = await _unitOfWork.Messages.GetMessagesOfUserAsync(
                     currentUserId,
                     input.ToUserId.Value,
                     input.TimeCursor,
                     input.Count
                 );
-
-                messageDtos = _mapper.Map<List<MessageDto>>(messages);
             }
+            messageDtos = _mapper.Map<List<MessageDto>>(messages);
+            foreach (var (message, messageDto) in messages.Zip(messageDtos))
+            {
+                var reactions = message.MessageTrackings.Where(x => !x.IsDeleted).Select(x => x.Reaction);
+                messageDto.ReactionCount = CommonFunctions.GetReactionCount(reactions);
+            } 
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
             return messageDtos;
+        }
+
+        public async Task<MessageDto> ReactMessageAsync(ReactMessageDto input)
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not authorized")
+            );
+            var message = await
+                _unitOfWork.Messages.Get(input.MessageId)
+                ?? throw new NotFoundException<Message>(input.MessageId.ToString());
+            var isInConversation = await  _unitOfWork.Messages.CheckUserInConversation(
+                currentUserId,
+                message.Id
+            );
+
+            if (!isInConversation)
+            {
+                throw new NotFoundException<Message>(input.MessageId.ToString());
+            }
+
+            var messageTracking = message.MessageTrackings.FirstOrDefault(
+                x => x.UserId == currentUserId
+            );
+
+            if (messageTracking is null)
+            {
+                message.MessageTrackings.Add(
+                    new MessageTracking { UserId = currentUserId, IsDeleted = false, IsRead = true, Reaction = input.Emoji }
+                );
+            }
+            else
+            {
+                messageTracking.IsRead = true;
+                if (messageTracking.Reaction.Contains(input.Emoji))
+                {
+                    messageTracking.Reaction = messageTracking.Reaction.Replace(input.Emoji, "");
+                }
+                else
+                {
+                    messageTracking.Reaction += input.Emoji + " ";
+                }
+            }
+
+            await _unitOfWork.Messages.UpdateAsync(message);
+            await _unitOfWork.SaveChangeAsync();
+            MessageDto messageDto = _mapper.Map<MessageDto>(message);
+            var reactions = message.MessageTrackings.Where(x => !x.IsDeleted).Select(x => x.Reaction);
+            messageDto.ReactionCount = CommonFunctions.GetReactionCount(reactions);
+
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+            return messageDto;
         }
 
         public async Task<MessageDto> SendMessageAsync(SendMessageDto input)
@@ -266,6 +326,8 @@ namespace workspace.PBL6.Application.Services
             await _unitOfWork.Messages.UpdateAsync(message);
             await _unitOfWork.SaveChangeAsync();
             MessageDto messageDto = _mapper.Map<MessageDto>(message);
+            var reactions = message.MessageTrackings.Where(x => !x.IsDeleted).Select(x => x.Reaction);
+            messageDto.ReactionCount = CommonFunctions.GetReactionCount(reactions);
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 

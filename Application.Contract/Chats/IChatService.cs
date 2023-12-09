@@ -9,5 +9,6 @@ namespace PBL6.Application.Contract.Chats
         Task<MessageDto> UpdateMessageAsync(UpdateMessageDto input);
         Task<MessageDto> DeleteMessageAsync(Guid id, bool isDeleteEverywhere = false);
         Task<List<ConversationDto>> GetConversationsAsync(ConversationRequest input);
+        Task<MessageDto> ReactMessageAsync(ReactMessageDto input);
     }
 }

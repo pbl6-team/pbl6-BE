@@ -26,6 +26,8 @@ namespace PBL6.Application.Contract.Chats.Dtos
 
         public bool IsChannel { get; set; }
 
-        public IEnumerable<MessageDto>  Children { get; set; }
+        public IEnumerable<MessageDto> Children { get; set; }
+
+        public Dictionary<string, int> ReactionCount { get; set; }
     }
 }
