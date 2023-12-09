@@ -80,7 +80,7 @@ namespace PBL6.Infrastructure.Repositories
 
         public async Task<IEnumerable<Message>> GetMessagesOfChannelAsync(
             Guid value,
-            DateTimeOffset timeCusor,
+            DateTimeOffset timeCursor,
             int count
         )
         {
@@ -90,7 +90,8 @@ namespace PBL6.Infrastructure.Repositories
                 .ThenInclude(x => x.Information)
                 .Include(x => x.Sender)
                 .ThenInclude(x => x.Information)
-                .Where(x => x.ToChannelId == value && x.CreatedAt < timeCusor && !x.IsDeleted)
+                .Include(x => x.Children)
+                .Where(x => x.ToChannelId == value && x.CreatedAt < timeCursor && !x.IsDeleted && x.ParentId == null)
                 .OrderByDescending(x => x.CreatedAt)
                 .Take(count)
                 .ToListAsync();
@@ -99,7 +100,7 @@ namespace PBL6.Infrastructure.Repositories
         public async Task<IEnumerable<Message>> GetMessagesOfUserAsync(
             Guid currentUserId,
             Guid ToUserId,
-            DateTimeOffset timeCusor,
+            DateTimeOffset timeCursor,
             int count
         )
         {
@@ -109,14 +110,17 @@ namespace PBL6.Infrastructure.Repositories
                 .ThenInclude(x => x.Information)
                 .Include(x => x.Sender)
                 .ThenInclude(x => x.Information)
+                .Include(x => x.Children)
                 .Where(
                     x =>
                         (
                             (x.ToUserId == currentUserId && x.CreatedBy == ToUserId)
                             || (x.ToUserId == ToUserId && x.CreatedBy == currentUserId)
                         )
-                        && x.CreatedAt < timeCusor
+                        && x.CreatedAt < timeCursor
                         && !x.IsDeleted
+                        && x.ToChannelId == null
+                        && x.ParentId == null
                 )
                 .OrderByDescending(x => x.CreatedAt)
                 .Take(count)
