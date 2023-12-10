@@ -368,7 +368,7 @@ namespace PBL6.API.Controllers.Channels
         /// <returns></returns>
         /// <response code="200">Get thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpPut("workspace/{workspaceId}/channel/{channelId}/user-not-in-channel")]
+        [HttpGet("workspace/{workspaceId}/channel/{channelId}/user-not-in-channel")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
@@ -378,6 +378,22 @@ namespace PBL6.API.Controllers.Channels
         )
         {
             return Ok(await _channelService.GetMembersThatNotInTheChannel(workspaceId, channelId));
+        }
+
+        /// <summary>
+        /// API get users with their role by channelId - cần đăng nhập
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <returns></returns>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpGet("{channelId}/users")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [AuthorizeFilter]
+        public async Task<IActionResult> GetMembers([FromRoute] Guid channelId)
+        {
+            return Ok(await _channelService.GetMembersAsync(channelId));
         }
     }
 }

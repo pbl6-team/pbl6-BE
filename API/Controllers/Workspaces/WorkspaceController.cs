@@ -386,5 +386,21 @@ namespace PBL6.API.Controllers.Workspaces
             await _workspaceService.SetRoleAsync(workspaceId, userId, role.Id);
             return NoContent();
         }
+
+        /// <summary>
+        /// API get users with their role by workspaceId - cần đăng nhập
+        /// </summary>
+        /// <param name="workspaceId"></param>
+        /// <returns></returns>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpGet("{workspaceId}/users")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [AuthorizeFilter]
+        public async Task<IActionResult> GetMembers([FromRoute] Guid workspaceId)
+        {
+            return Ok(await _workspaceService.GetMembersAsync(workspaceId));
+        }
     }
 }

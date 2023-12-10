@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Application.Contract.Channels.Dtos;
 using Application.Contract.Users.Dtos;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
@@ -787,5 +788,35 @@ public class ChannelService : BaseService, IChannelService
 
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
         return _mapper.Map<IEnumerable<UserDto2>>(result.Select(x => x.User));
+    }
+
+    public async Task<IEnumerable<ChannelUserDto>> GetMembersAsync(Guid channelId)
+    {
+        var method = GetActualAsyncMethodName();
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var isExist = await _unitOfWork.Channels.CheckIsExistAsync(channelId);
+        var currentUserId = Guid.Parse(
+            _currentUser.UserId ?? throw new UnauthorizedAccessException()
+        );
+        if (!isExist)
+        {
+            throw new NotFoundException<Channel>(channelId.ToString());
+        }
+
+        var isMember = await _unitOfWork.Channels.CheckIsMemberAsync(channelId, currentUserId);
+        if (!isMember)
+        {
+            throw new ForbidException();
+        }
+
+        var members = await _unitOfWork.ChannelMembers
+            .Queryable()
+            .Include(x => x.User)
+            .ThenInclude(x => x.Information)
+            .Include(x => x.ChannelRole)
+            .Where(x => x.ChannelId == channelId)
+            .ToListAsync();
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
+        return _mapper.Map<IEnumerable<ChannelUserDto>>(members);
     }
 }

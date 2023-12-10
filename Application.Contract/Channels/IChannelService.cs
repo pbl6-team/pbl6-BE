@@ -1,3 +1,4 @@
+using Application.Contract.Channels.Dtos;
 using Application.Contract.Users.Dtos;
 using PBL6.Application.Contract.Channels.Dtos;
 using PBL6.Application.Contract.Workspaces.Dtos;
@@ -27,5 +28,6 @@ namespace PBL6.Application.Contract.Channels
         Task<IEnumerable<UserDto2>> GetMembersbyRoleIdAsync(Guid channelId, Guid roleId);
         Task<IEnumerable<UserDto2>> GetMembersWithoutRoleAsync(Guid channelId);
         Task<IEnumerable<UserDto2>> GetMembersThatNotInTheChannel(Guid workspaceId, Guid channelId);
+        Task<IEnumerable<ChannelUserDto>> GetMembersAsync(Guid channelId);
     }
 }

@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using Application.Contract.Users.Dtos;
+using Application.Contract.Workspaces.Dtos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PBL6.Application.Contract.Channels;
@@ -849,6 +850,41 @@ namespace PBL6.Application.Services
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
             return _mapper.Map<IEnumerable<UserDto2>>(members.Select(x => x.User));
+        }
+
+        public async Task<IEnumerable<WorkspaceUserDto>> GetMembersAsync(Guid workspaceId)
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var isWorkspaceExist = await _unitOfWork.Workspaces.CheckIsExistAsync(workspaceId);
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedAccessException()
+            );
+            if (!isWorkspaceExist)
+            {
+                throw new NotFoundException<Workspace>(workspaceId.ToString());
+            }
+
+            var isMember = await _unitOfWork.Workspaces.CheckIsMemberAsync(
+                workspaceId,
+                currentUserId
+            );
+            if (!isMember)
+            {
+                throw new ForbidException();
+            }
+
+            var members = await _unitOfWork.WorkspaceMembers
+                .Queryable()
+                .Include(x => x.User)
+                .ThenInclude(x => x.Information)
+                .Include(x => x.WorkspaceRole)
+                .Where(x => x.WorkspaceId == workspaceId)
+                .ToListAsync();
+            
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+            return _mapper.Map<IEnumerable<WorkspaceUserDto>>(members);
         }
     }
 }
