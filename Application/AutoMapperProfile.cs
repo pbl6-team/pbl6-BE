@@ -8,6 +8,8 @@ using PBL6.Application.Contract.Channels.Dtos;
 using PBL6.Application.Contract.Users.Dtos;
 using Application.Contract.Users.Dtos;
 using PBL6.Application.Contract.Chats.Dtos;
+using Application.Contract.Workspaces.Dtos;
+using Application.Contract.Channels.Dtos;
 
 namespace PBL6.Application
 {
@@ -166,6 +168,28 @@ namespace PBL6.Application
                                     )
                         )
                 );
+
+            CreateMap<WorkspaceMember, WorkspaceUserDto>()
+                .ForMember(x => x.Id, opt => opt.MapFrom(src => src.UserId))
+                .ForMember(x => x.Username, opt => opt.MapFrom(src => src.User.Username))
+                .ForMember(x => x.FirstName, opt => opt.MapFrom(src => src.User.Information.FirstName))
+                .ForMember(x => x.LastName, opt => opt.MapFrom(src => src.User.Information.LastName))
+                .ForMember(x => x.Gender, opt => opt.MapFrom(src => src.User.Information.Gender))
+                .ForMember(x => x.Phone, opt => opt.MapFrom(src => src.User.Information.Phone))
+                .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.User.Information.BirthDay.ToString("MM-dd-yyyy")))
+                .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.User.Information.Picture))
+                .ForMember(x => x.Role, opt => opt.MapFrom(src => src.WorkspaceRole));
+
+                CreateMap<ChannelMember, ChannelUserDto>()
+            .ForMember(x => x.Id, opt => opt.MapFrom(src => src.UserId))
+            .ForMember(x => x.Username, opt => opt.MapFrom(src => src.User.Username))
+            .ForMember(x => x.FirstName, opt => opt.MapFrom(src => src.User.Information.FirstName))
+            .ForMember(x => x.LastName, opt => opt.MapFrom(src => src.User.Information.LastName))
+            .ForMember(x => x.Gender, opt => opt.MapFrom(src => src.User.Information.Gender))
+            .ForMember(x => x.Phone, opt => opt.MapFrom(src => src.User.Information.Phone))
+            .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.User.Information.BirthDay.ToString("MM-dd-yyyy")))
+            .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.User.Information.Picture))
+            .ForMember(x => x.Role, opt => opt.MapFrom(src => src.ChannelRole));
         }
     }
 }

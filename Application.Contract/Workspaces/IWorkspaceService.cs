@@ -1,4 +1,5 @@
 using Application.Contract.Users.Dtos;
+using Application.Contract.Workspaces.Dtos;
 using PBL6.Application.Contract.Workspaces.Dtos;
 
 namespace PBL6.Application.Contract.Workspaces
@@ -26,5 +27,6 @@ namespace PBL6.Application.Contract.Workspaces
         Task<IEnumerable<PermissionDto>> GetPermissionOfUser(Guid workspaceId, Guid userId);
         Task<IEnumerable<UserDto2>> GetMembersbyRoleIdAsync(Guid workspaceId, Guid roleId);
         Task<IEnumerable<UserDto2>> GetMembersWithoutRoleAsync(Guid workspaceId);
+        Task<IEnumerable<WorkspaceUserDto>> GetMembersAsync(Guid workspaceId);
     }
 }
