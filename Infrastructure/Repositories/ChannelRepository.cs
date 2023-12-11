@@ -102,5 +102,14 @@ namespace PBL6.Infrastructure.Repositories
 
             return Task.FromResult(query.AsEnumerable());
         }
+
+        public async Task<IEnumerable<Guid>> GetUserIds(Guid channelId)
+        {
+            return await _dbSet.Include(x => x.ChannelMembers)
+                .Where(x => x.Id == channelId)
+                .SelectMany(x => x.ChannelMembers)
+                .Select(m => m.UserId)
+                .ToListAsync();
+        }
     }
 }

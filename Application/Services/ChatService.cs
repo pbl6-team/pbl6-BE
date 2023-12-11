@@ -64,7 +64,7 @@ namespace workspace.PBL6.Application.Services
                 }
                 else
                 {
-                    if (message.ToUserId != currentUserId)
+                    if (message.CreatedBy != currentUserId)
                     {
                         throw new ForbidException();
                     }

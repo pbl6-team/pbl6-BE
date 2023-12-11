@@ -16,5 +16,6 @@ namespace PBL6.Domain.Data.Users
             Guid channelId,
             Guid userId
         );
+        Task<IEnumerable<Guid>> GetUserIds(Guid channelId);
     }
 }

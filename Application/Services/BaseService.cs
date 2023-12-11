@@ -83,14 +83,10 @@ namespace PBL6.Application.Services
                 {
                     foreach (var connectionId in connectionIds)
                     {
-                        _backgroundJobClient.Enqueue(
-                            () => AddToGroupAsync(connectionId, channelId.ToString())
-                        );
+                        await AddToGroupAsync(connectionId, channelId.ToString());
                     }
 
-                    _backgroundJobClient.Enqueue(
-                        () => SendAsync(connectionIds, ChatHub.ADD_USER_TO_CHANNEL, channelId)
-                    );
+                    await SendAsync(connectionIds, ChatHub.ADD_USER_TO_CHANNEL, channelId);
                 }
             }
         }
