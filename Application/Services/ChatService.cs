@@ -163,10 +163,11 @@ namespace workspace.PBL6.Application.Services
 
                 messages =
                     await _unitOfWork.Messages.GetMessagesOfChannelAsync(
+                        currentUserId,
                         input.ToChannelId.Value,
+                        input.ParentId,
                         input.TimeCursor,
-                        input.Count,
-                        currentUserId
+                        input.Count
                     );
             }
             else
@@ -174,6 +175,7 @@ namespace workspace.PBL6.Application.Services
                 messages = await _unitOfWork.Messages.GetMessagesOfUserAsync(
                     currentUserId,
                     input.ToUserId.Value,
+                    input.ParentId,
                     input.TimeCursor,
                     input.Count
                 );

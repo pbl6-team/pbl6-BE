@@ -10,6 +10,8 @@ namespace PBL6.Application.Contract.Chats.Dtos
         
         public Guid? ToChannelId { get; set; }
 
+        public Guid? ParentId { get; set; }
+
         public GetMessageDto()
         {
             Count = 20;

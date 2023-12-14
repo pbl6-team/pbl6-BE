@@ -7,7 +7,7 @@ namespace PBL6.Domain.Data.Users
         Task<bool> CheckUserInConversation(Guid currentUserId, Guid id);
         Task<Message> Get(Guid id);
         IQueryable<Message> GetConversations(Guid currentUserId, string search);
-        Task<IEnumerable<Message>> GetMessagesOfChannelAsync(Guid channelId, DateTimeOffset timeCusor, int count, Guid currentUserId);
-        Task<IEnumerable<Message>> GetMessagesOfUserAsync(Guid currentUserId, Guid ToUserId, DateTimeOffset timeCursor, int count);
+        Task<IEnumerable<Message>> GetMessagesOfChannelAsync(Guid currentUserId, Guid channelId, Guid? parentId, DateTimeOffset timeCursor, int count);
+        Task<IEnumerable<Message>> GetMessagesOfUserAsync(Guid currentUserId, Guid toUserId, Guid? parentId, DateTimeOffset timeCursor, int count);
     }
 }

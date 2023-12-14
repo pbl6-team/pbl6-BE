@@ -90,24 +90,25 @@ namespace PBL6.Infrastructure.Repositories
         }
 
         public async Task<IEnumerable<Message>> GetMessagesOfChannelAsync(
+            Guid currentUserId,
             Guid channelId,
-            DateTimeOffset timeCusor,
-            int count,
-            Guid currentUserId
+            Guid? parentId,
+            DateTimeOffset timeCursor,
+            int count
         )
         {
             return await _apiDbContext.Messages
                 .Include(x => x.MessageTrackings)
-                .ThenInclude(x => x.User)
-                .ThenInclude(x => x.Information)
+                .ThenInclude(x => x.User).ThenInclude(x => x.Information)
                 .Include(x => x.Sender)
                 .ThenInclude(x => x.Information)
                 .Include(x => x.Children)
                 .Where(x => 
                     x.ToChannelId == channelId 
-                    && x.CreatedAt < timeCusor 
+                    && x.CreatedAt < timeCursor 
                     && !x.IsDeleted
-                    && !x.MessageTrackings.Any(x => x.UserId == currentUserId && x.IsDeleted))
+                    && !x.MessageTrackings.Any(x => x.UserId == currentUserId && x.IsDeleted)
+                    && x.ParentId == parentId)
                 .OrderByDescending(x => x.CreatedAt)
                 .Take(count)
                 .ToListAsync();
@@ -115,7 +116,8 @@ namespace PBL6.Infrastructure.Repositories
 
         public async Task<IEnumerable<Message>> GetMessagesOfUserAsync(
             Guid currentUserId,
-            Guid ToUserId,
+            Guid toUserId,
+            Guid? parentId,
             DateTimeOffset timeCursor,
             int count
         )
@@ -130,13 +132,13 @@ namespace PBL6.Infrastructure.Repositories
                 .Where(
                     x =>
                         (
-                            (x.ToUserId == currentUserId && x.CreatedBy == ToUserId)
-                            || (x.ToUserId == ToUserId && x.CreatedBy == currentUserId)
+                            (x.ToUserId == currentUserId && x.CreatedBy == toUserId)
+                            || (x.ToUserId == toUserId && x.CreatedBy == currentUserId)
                         )
                         && x.CreatedAt < timeCursor
                         && !x.IsDeleted
                         && x.ToChannelId == null
-                        && x.ParentId == null
+                        && x.ParentId == parentId
                         && !x.MessageTrackings.Any(x => x.UserId == currentUserId && x.IsDeleted)
                 )
                 .OrderByDescending(x => x.CreatedAt)

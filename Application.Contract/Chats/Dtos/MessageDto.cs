@@ -22,11 +22,11 @@ namespace PBL6.Application.Contract.Chats.Dtos
 
         public string Reaction { get; set; }
 
+        public int ChildCount { get; set; }
+
         public IEnumerable<Reader> Readers { get; set; }
 
         public bool IsChannel { get; set; }
-
-        public IEnumerable<MessageDto> Children { get; set; }
 
         public Dictionary<string, int> ReactionCount { get; set; }
     }
