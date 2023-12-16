@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using PBL6.Domain.Data;
 using PBL6.Domain.Data.Admins;
 using PBL6.Domain.Data.Users;
+using PBL6.Domain.Models.Users;
 using PBL6.Infrastructure.Repositories;
 
 namespace PBL6.Infrastructure.Data
@@ -26,6 +27,7 @@ namespace PBL6.Infrastructure.Data
         public IAdminTokenRepository AdminTokens { get; }
         public IPermissionsOfWorkspaceRoleRepository PermissionsOfWorkspaceRoles { get; }
         public IPermissionsOfChannelRoleRepository PermissionsOfChannelRoles { get; }
+        public INotificationRepository Notifications { get; }
 
         public UnitOfWork(ApiDbContext apiDbContext, ILoggerFactory loggerFactory)
         {
@@ -47,6 +49,7 @@ namespace PBL6.Infrastructure.Data
             AdminTokens = new AdminTokenRepository(apiDbContext, logger);
             PermissionsOfWorkspaceRoles = new PermissionsOfWorkspaceRoleRepository(apiDbContext, logger);
             PermissionsOfChannelRoles = new PermissionsOfChannelRoleRepository(apiDbContext, logger);
+            Notifications = new NotificationRepository(apiDbContext, logger);
         }
 
         public async Task SaveChangeAsync()
@@ -74,6 +77,11 @@ namespace PBL6.Infrastructure.Data
         {
             if (transaction is not null)
                 await transaction.RollbackAsync();
+        }
+
+        public IRepository<T> Repository<T>() where T : class
+        {
+            return new Repository<T>(_apiDbContext, null);
         }
     }
 }

@@ -15,12 +15,12 @@ namespace PBL6.Domain.Models.Users
         [Required]
         public string Content { get; set; }
 
-        public DateTimeOffset TimeToSend { get; set; }
+        public DateTime TimeToSend { get; set; }
 
         [Required]
         public short Status { get; set; }
 
-        public string RefId { get; set; }
+        public string Data { get; set; }
 
         [Required]
         public short Type { get; set; }

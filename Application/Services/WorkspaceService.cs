@@ -1,12 +1,16 @@
 using System.Runtime.CompilerServices;
 using Application.Contract.Users.Dtos;
 using Application.Contract.Workspaces.Dtos;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using PBL6.Application.Contract.Channels;
+using PBL6.Application.Contract.Notifications.Dtos;
 using PBL6.Application.Contract.Workspaces;
 using PBL6.Application.Contract.Workspaces.Dtos;
 using PBL6.Common.Consts;
+using PBL6.Common.Enum;
 using PBL6.Common.Exceptions;
 using PBL6.Domain.Models.Users;
 
@@ -392,6 +396,7 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+                var currentUser = await _unitOfWork.Users.GetUserByIdAsync(currentUserId);
                 var workspace = await _unitOfWork.Workspaces
                     .Queryable()
                     .Include(x => x.Members.Where(m => !m.IsDeleted))
@@ -406,6 +411,30 @@ namespace PBL6.Application.Services
                 {
                     throw new ForbidException();
                 }
+                var notification = new Notification
+                {
+                    Title = "You have been invited to join a workspace",
+                    Content =
+                        $"You have been invited to join a workspace {workspace.Name} by {currentUser.Information.FirstName} {currentUser.Information.LastName}",
+                    Type = (short)NOTIFICATION_TYPE.WORKSPACE_INVITATION,
+                    TimeToSend = DateTime.UtcNow,
+                    Data = JsonConvert.SerializeObject(
+                        new
+                        {
+                            Type = (short)NOTIFICATION_TYPE.WORKSPACE_INVITATION,
+                            Detail = new InvitedToNewGroup
+                            {
+                                GroupId = workspace.Id,
+                                GroupName = workspace.Name,
+                                InviterId = currentUserId,
+                                InviterName =
+                                    $"{currentUser.Information.FirstName} {currentUser.Information.LastName}",
+                                InviterAvatar = currentUser.Information.Picture,
+                            }
+                        }
+                    )
+                };
+
                 foreach (var userId in userIds)
                 {
                     var user = await _unitOfWork.Users.FindAsync(userId);
@@ -428,9 +457,35 @@ namespace PBL6.Application.Services
                     workspace.Members.Add(
                         new WorkspaceMember { UserId = userId, AddBy = currentUserId }
                     );
+                    notification.UserNotifications.Add(
+                        new UserNotification
+                        {
+                            UserId = userId,
+                            Status = (short)NOTIFICATION_STATUS.PENDING,
+                            SendAt = DateTimeOffset.UtcNow
+                        }
+                    );
                 }
                 await _unitOfWork.Workspaces.UpdateAsync(workspace);
                 await _unitOfWork.SaveChangeAsync();
+                try
+                {
+                    notification = await _unitOfWork.Notifications.AddAsync(notification);
+                    _backgroundJobClient.Enqueue(
+                        () => _notificationService.SendNotificationAsync(notification.Id)
+                    );
+                    await _unitOfWork.SaveChangeAsync();
+                }
+                catch (Exception e)
+                {
+                    _logger.LogInformation(
+                        "[{_className}][{method}] Error: {message}",
+                        _className,
+                        method,
+                        e.Message
+                    );
+                }
+
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
                 return workspace.Id;
@@ -453,31 +508,51 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+                var currentUserId = Guid.Parse(
+                    _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+                );
+                var currentUser = await _unitOfWork.Users.GetUserByIdAsync(currentUserId);
 
-                var workspace = await _unitOfWork.Workspaces
-                    .Queryable()
-                    .Include(x => x.Members.Where(m => !m.IsDeleted))
-                    .FirstOrDefaultAsync(x => x.Id == workspaceId);
-
-                if (workspace is null)
-                {
-                    throw new NotFoundException<Workspace>(workspaceId.ToString());
-                }
-
-                var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
-
+                var workspace =
+                    await _unitOfWork.Workspaces
+                        .Queryable()
+                        .Include(x => x.Members.Where(m => !m.IsDeleted))
+                        .FirstOrDefaultAsync(x => x.Id == workspaceId)
+                    ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
                 if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, currentUserId))
                 {
                     throw new ForbidException();
                 }
+                var notification = new Notification
+                {
+                    Title = "You have been removed from a workspace",
+                    Content =
+                        $"You have been removed from a workspace {workspace.Name} by {currentUser.Information.FirstName} {currentUser.Information.LastName}",
+                    Type = (short)NOTIFICATION_TYPE.WORKSPACE_REMOVED,
+                    TimeToSend = DateTime.UtcNow,
+                    Data = JsonConvert.SerializeObject(
+                        new
+                        {
+                            Type = (short)NOTIFICATION_TYPE.WORKSPACE_REMOVED,
+                            Detail = new RemovedFromGroup
+                            {
+                                GroupId = workspace.Id,
+                                GroupName = workspace.Name,
+                                RemoverId = currentUserId,
+                                RemoverName =
+                                    $"{currentUser.Information.FirstName} {currentUser.Information.LastName}",
+                                RemoverAvatar = currentUser.Information.Picture,
+                            }
+                        }
+                    )
+                };
                 foreach (var userId in userIds)
                 {
-                    var member = workspace.Members.FirstOrDefault(x => x.UserId == userId);
-                    if (member is null)
-                    {
-                        throw new Exception($"User {userId} is not a member of this workspace");
-                    }
-
+                    var member =
+                        workspace.Members.FirstOrDefault(x => x.UserId == userId)
+                        ?? throw new BadRequestException(
+                            $"User {userId} is not a member of this workspace"
+                        );
                     await _unitOfWork.WorkspaceMembers.DeleteAsync(member);
 
                     var channels = await _unitOfWork.Channels
@@ -495,9 +570,34 @@ namespace PBL6.Application.Services
                             await _unitOfWork.ChannelMembers.DeleteAsync(channelMember);
                         }
                     }
+                    notification.UserNotifications.Add(
+                        new UserNotification
+                        {
+                            UserId = userId,
+                            Status = (short)NOTIFICATION_STATUS.PENDING,
+                            SendAt = DateTimeOffset.UtcNow
+                        }
+                    );
                 }
                 await _unitOfWork.SaveChangeAsync();
-
+                try
+                {
+                    notification = await _unitOfWork.Notifications.AddAsync(notification);
+                    await _unitOfWork.SaveChangeAsync();
+                    _backgroundJobClient.Enqueue(
+                        () => _notificationService.SendNotificationAsync(notification.Id)
+                    );
+                }
+                catch (Exception e)
+                {
+                    _logger.LogInformation(
+                        "[{_className}][{method}] Error: {message}",
+                        _className,
+                        method,
+                        e.Message
+                    );
+                }
+                
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
                 return workspace.Id;
@@ -614,7 +714,10 @@ namespace PBL6.Application.Services
             var role = await _unitOfWork.Workspaces.GetRoleById(workspaceId, roleId);
             foreach (var permission in role.Permissions)
             {
-                await _unitOfWork.PermissionsOfWorkspaceRoles.DeleteAsync(permission, isHardDelete: true);
+                await _unitOfWork.PermissionsOfWorkspaceRoles.DeleteAsync(
+                    permission,
+                    isHardDelete: true
+                );
             }
             _mapper.Map(input, role);
             await _unitOfWork.WorkspaceRoles.UpdateAsync(role);
@@ -682,7 +785,10 @@ namespace PBL6.Application.Services
             var workspaceRole = await _unitOfWork.Workspaces.GetRoleById(workspaceId, roleId);
             foreach (var permission in workspaceRole.Permissions)
             {
-                await _unitOfWork.PermissionsOfWorkspaceRoles.DeleteAsync(permission, isHardDelete: true);
+                await _unitOfWork.PermissionsOfWorkspaceRoles.DeleteAsync(
+                    permission,
+                    isHardDelete: true
+                );
             }
             await _unitOfWork.WorkspaceRoles.DeleteAsync(workspaceRole, isHardDelete: true);
             await _unitOfWork.SaveChangeAsync();
@@ -780,21 +886,21 @@ namespace PBL6.Application.Services
             return _mapper.Map<IEnumerable<PermissionDto>>(permissions);
         }
 
-        public async Task<IEnumerable<UserDto2>> GetMembersbyRoleIdAsync(
+        public async Task<IEnumerable<UserDto2>> GetMembersByRoleIdAsync(
             Guid workspaceId,
-            Guid roleid
+            Guid roleId
         )
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var isRoleExist = await _unitOfWork.Workspaces.CheckIsExistRole(workspaceId, roleid);
+            var isRoleExist = await _unitOfWork.Workspaces.CheckIsExistRole(workspaceId, roleId);
             var currentUserId = Guid.Parse(
                 _currentUser.UserId ?? throw new UnauthorizedAccessException()
             );
 
             if (!isRoleExist)
             {
-                throw new NotFoundException<WorkspaceRole>(roleid.ToString());
+                throw new NotFoundException<WorkspaceRole>(roleId.ToString());
             }
 
             var isMember = await _unitOfWork.Workspaces.CheckIsMemberAsync(
@@ -810,7 +916,7 @@ namespace PBL6.Application.Services
                 .Queryable()
                 .Include(x => x.User)
                 .ThenInclude(x => x.Information)
-                .Where(x => x.WorkspaceId == workspaceId && x.RoleId == roleid)
+                .Where(x => x.WorkspaceId == workspaceId && x.RoleId == roleId)
                 .ToListAsync();
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
@@ -881,7 +987,7 @@ namespace PBL6.Application.Services
                 .Include(x => x.WorkspaceRole)
                 .Where(x => x.WorkspaceId == workspaceId)
                 .ToListAsync();
-            
+
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
             return _mapper.Map<IEnumerable<WorkspaceUserDto>>(members);

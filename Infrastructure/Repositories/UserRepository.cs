@@ -16,5 +16,13 @@ namespace PBL6.Infrastructure.Repositories
         {
             return _apiDbContext.Users.AnyAsync(x => x.Id == userId && !x.IsDeleted);
         }
+
+        public Task<User> GetUserByIdAsync(Guid userId)
+        {
+            return _apiDbContext.Users
+                .Include(x => x.UserTokens)
+                .Include(x => x.Information)
+                .FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted);
+        }
     }
 }

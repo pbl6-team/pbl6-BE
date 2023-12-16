@@ -199,7 +199,7 @@ namespace PBL6.API.Controllers.Channels
         [AuthorizeFilter]
         public async Task<IActionResult> GetMembersByRoleId([FromRoute] Guid channelId, [FromRoute] Guid roleId)
         {
-            return Ok(await _channelService.GetMembersbyRoleIdAsync(channelId, roleId));
+            return Ok(await _channelService.GetMembersByRoleIdAsync(channelId, roleId));
         }
 
         /// <summary>
