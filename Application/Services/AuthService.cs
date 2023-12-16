@@ -432,7 +432,8 @@ namespace PBL6.Application.Services
                             {
                                 FirstName = googleOauthUser.Name,
                                 Status = (short)USER.DEFAULT
-                            }
+                            },
+                            IsActive = true
                         };
 
                     existedUser = await _unitOfWork.Users.AddAsync(newUser);

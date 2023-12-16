@@ -12,8 +12,8 @@ using PBL6.Infrastructure.Data;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    [Migration("20231031090828_add_refreshtokentimeout")]
-    partial class add_refreshtokentimeout
+    [Migration("20231216191842_initial_migrations")]
+    partial class initial_migrations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -98,7 +98,7 @@ namespace Infrastructure.Migrations
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("UserName")
+                    b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -202,20 +202,26 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("OTP")
+                    b.Property<string>("Otp")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<short?>("OtpType")
+                        .HasColumnType("smallint");
 
                     b.Property<string>("RefreshToken")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<DateTimeOffset?>("RefreshTokenTimeOut")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<DateTimeOffset>("TimeOut")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Token")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
@@ -368,57 +374,13 @@ namespace Infrastructure.Migrations
                     b.ToTable("RolesOfAdmins", "Admin");
                 });
 
-            modelBuilder.Entity("PBL6.Domain.Models.Example", b =>
+            modelBuilder.Entity("PBL6.Domain.Models.Users.Channel", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Examples");
-                });
-
-            modelBuilder.Entity("PBL6.Domain.Models.Users.Chanel", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid?>("CategoryId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedAt")
@@ -446,7 +408,7 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<Guid?>("ParentId")
+                    b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
@@ -462,10 +424,47 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("WorkspaceId");
 
-                    b.ToTable("Chanels", "Chat");
+                    b.ToTable("Channels", "Chat");
                 });
 
-            modelBuilder.Entity("PBL6.Domain.Models.Users.ChanelMember", b =>
+            modelBuilder.Entity("PBL6.Domain.Models.Users.ChannelCategory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ChannelCategories", "Chat");
+                });
+
+            modelBuilder.Entity("PBL6.Domain.Models.Users.ChannelMember", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -474,10 +473,7 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("AddBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ChanelId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ChanelRoleId")
+                    b.Property<Guid>("ChannelId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedAt")
@@ -498,8 +494,11 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Method")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("RoleId")
+                    b.Property<Guid?>("RoleId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
@@ -512,16 +511,16 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ChanelId");
+                    b.HasIndex("ChannelId");
 
-                    b.HasIndex("ChanelRoleId");
+                    b.HasIndex("RoleId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ChanelMembers", "Chat");
+                    b.ToTable("ChannelMembers", "Chat");
                 });
 
-            modelBuilder.Entity("PBL6.Domain.Models.Users.ChanelPermission", b =>
+            modelBuilder.Entity("PBL6.Domain.Models.Users.ChannelPermission", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -567,13 +566,19 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ChanelPermissions", "Chat");
+                    b.ToTable("ChannelPermissions", "Chat");
                 });
 
-            modelBuilder.Entity("PBL6.Domain.Models.Users.ChanelRole", b =>
+            modelBuilder.Entity("PBL6.Domain.Models.Users.ChannelRole", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ChannelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ChannelPermissionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Color")
@@ -612,7 +617,99 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ChanelRoles", "Chat");
+                    b.HasIndex("ChannelId");
+
+                    b.HasIndex("ChannelPermissionId");
+
+                    b.ToTable("ChannelRoles", "Chat");
+                });
+
+            modelBuilder.Entity("PBL6.Domain.Models.Users.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ToChannelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ToUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("ToChannelId");
+
+                    b.HasIndex("ToUserId");
+
+                    b.ToTable("Messages", "Chat");
+                });
+
+            modelBuilder.Entity("PBL6.Domain.Models.Users.MessageTracking", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedTime")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reaction")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("ReadTime")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("MessageTrackings");
                 });
 
             modelBuilder.Entity("PBL6.Domain.Models.Users.Notification", b =>
@@ -632,6 +729,9 @@ namespace Infrastructure.Migrations
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Data")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -641,14 +741,11 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("RefId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<short>("Status")
                         .HasColumnType("smallint");
 
-                    b.Property<DateTimeOffset>("TimeToSend")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("TimeToSend")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -669,13 +766,13 @@ namespace Infrastructure.Migrations
                     b.ToTable("Notifications", "Notifications");
                 });
 
-            modelBuilder.Entity("PBL6.Domain.Models.Users.PermissionsOfChanelRole", b =>
+            modelBuilder.Entity("PBL6.Domain.Models.Users.PermissionsOfChannelRole", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ChanelRoleId")
+                    b.Property<Guid>("ChannelRoleId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedAt")
@@ -693,7 +790,7 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsEnable")
+                    b.Property<bool>("IsEnabled")
                         .HasColumnType("bit");
 
                     b.Property<Guid>("PermissionId")
@@ -707,11 +804,11 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ChanelRoleId");
+                    b.HasIndex("ChannelRoleId");
 
                     b.HasIndex("PermissionId");
 
-                    b.ToTable("PermissionsOfChanelRoles", "Chat");
+                    b.ToTable("PermissionsOfChannelRoles", "Chat");
                 });
 
             modelBuilder.Entity("PBL6.Domain.Models.Users.PermissionsOfWorkspaceRole", b =>
@@ -733,9 +830,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsEnable")
                         .HasColumnType("bit");
 
                     b.Property<Guid>("PermissionId")
@@ -893,12 +987,10 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Password")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("PasswordSalt")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -954,13 +1046,15 @@ namespace Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("LastName")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Phone")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Picture")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<short>("Status")
                         .HasColumnType("smallint");
@@ -1063,11 +1157,14 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<short?>("OtpType")
+                        .HasColumnType("smallint");
+
                     b.Property<string>("RefreshToken")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<DateTimeOffset>("RefreshTokenTimeOut")
+                    b.Property<DateTimeOffset?>("RefreshTokenTimeOut")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<DateTimeOffset>("TimeOut")
@@ -1101,6 +1198,10 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AvatarUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
@@ -1170,8 +1271,11 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Method")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("RoleId")
+                    b.Property<Guid?>("RoleId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
@@ -1186,6 +1290,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
 
                     b.HasIndex("UserId");
 
@@ -1283,7 +1389,17 @@ namespace Infrastructure.Migrations
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("WorkspacePermissionId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("WorkspaceId");
+
+                    b.HasIndex("WorkspacePermissionId");
 
                     b.ToTable("WorkspaceRoles", "Chat");
                 });
@@ -1340,10 +1456,10 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PBL6.Domain.Models.Users.Chanel", b =>
+            modelBuilder.Entity("PBL6.Domain.Models.Users.Channel", b =>
                 {
                     b.HasOne("PBL6.Domain.Models.Users.Workspace", "Workspace")
-                        .WithMany("Chanels")
+                        .WithMany("Channels")
                         .HasForeignKey("WorkspaceId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
@@ -1351,17 +1467,18 @@ namespace Infrastructure.Migrations
                     b.Navigation("Workspace");
                 });
 
-            modelBuilder.Entity("PBL6.Domain.Models.Users.ChanelMember", b =>
+            modelBuilder.Entity("PBL6.Domain.Models.Users.ChannelMember", b =>
                 {
-                    b.HasOne("PBL6.Domain.Models.Users.Chanel", "Workspace")
-                        .WithMany()
-                        .HasForeignKey("ChanelId")
+                    b.HasOne("PBL6.Domain.Models.Users.Channel", "Channel")
+                        .WithMany("ChannelMembers")
+                        .HasForeignKey("ChannelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PBL6.Domain.Models.Users.ChanelRole", null)
+                    b.HasOne("PBL6.Domain.Models.Users.ChannelRole", "ChannelRole")
                         .WithMany("Members")
-                        .HasForeignKey("ChanelRoleId");
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("PBL6.Domain.Models.Users.User", "User")
                         .WithMany()
@@ -1369,39 +1486,113 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Channel");
 
-                    b.Navigation("Workspace");
+                    b.Navigation("ChannelRole");
+
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("PBL6.Domain.Models.Users.PermissionsOfChanelRole", b =>
+            modelBuilder.Entity("PBL6.Domain.Models.Users.ChannelRole", b =>
                 {
-                    b.HasOne("PBL6.Domain.Models.Users.ChanelRole", null)
+                    b.HasOne("PBL6.Domain.Models.Users.Channel", "Channel")
+                        .WithMany("ChannelRoles")
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("PBL6.Domain.Models.Users.ChannelPermission", null)
+                        .WithMany("ChannelRoles")
+                        .HasForeignKey("ChannelPermissionId");
+
+                    b.Navigation("Channel");
+                });
+
+            modelBuilder.Entity("PBL6.Domain.Models.Users.Message", b =>
+                {
+                    b.HasOne("PBL6.Domain.Models.Users.User", "Sender")
                         .WithMany()
-                        .HasForeignKey("ChanelRoleId")
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("PBL6.Domain.Models.Users.Message", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("PBL6.Domain.Models.Users.Channel", "ToChannel")
+                        .WithMany("ChannelMessages")
+                        .HasForeignKey("ToChannelId");
+
+                    b.HasOne("PBL6.Domain.Models.Users.User", "Receiver")
+                        .WithMany()
+                        .HasForeignKey("ToUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Parent");
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
+
+                    b.Navigation("ToChannel");
+                });
+
+            modelBuilder.Entity("PBL6.Domain.Models.Users.MessageTracking", b =>
+                {
+                    b.HasOne("PBL6.Domain.Models.Users.Message", "Message")
+                        .WithMany("MessageTrackings")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("PBL6.Domain.Models.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PBL6.Domain.Models.Users.ChanelPermission", null)
+                    b.Navigation("Message");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PBL6.Domain.Models.Users.PermissionsOfChannelRole", b =>
+                {
+                    b.HasOne("PBL6.Domain.Models.Users.ChannelRole", "ChannelRole")
+                        .WithMany("Permissions")
+                        .HasForeignKey("ChannelRoleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("PBL6.Domain.Models.Users.ChannelPermission", "Permission")
                         .WithMany()
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ChannelRole");
+
+                    b.Navigation("Permission");
                 });
 
             modelBuilder.Entity("PBL6.Domain.Models.Users.PermissionsOfWorkspaceRole", b =>
                 {
-                    b.HasOne("PBL6.Domain.Models.Users.WorkspacePermission", null)
+                    b.HasOne("PBL6.Domain.Models.Users.WorkspacePermission", "Permission")
                         .WithMany()
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PBL6.Domain.Models.Users.WorkspaceRole", null)
-                        .WithMany()
+                    b.HasOne("PBL6.Domain.Models.Users.WorkspaceRole", "WorkspaceRole")
+                        .WithMany("Permissions")
                         .HasForeignKey("WorkspaceRoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("WorkspaceRole");
                 });
 
             modelBuilder.Entity("PBL6.Domain.Models.Users.PlanDetail", b =>
@@ -1469,6 +1660,11 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("PBL6.Domain.Models.Users.WorkspaceMember", b =>
                 {
+                    b.HasOne("PBL6.Domain.Models.Users.WorkspaceRole", "WorkspaceRole")
+                        .WithMany("Members")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("PBL6.Domain.Models.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -1481,17 +1677,26 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("PBL6.Domain.Models.Users.WorkspaceRole", "WorkspaceRole")
-                        .WithMany("Members")
-                        .HasForeignKey("WorkspaceId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.Navigation("User");
 
                     b.Navigation("Workspace");
 
                     b.Navigation("WorkspaceRole");
+                });
+
+            modelBuilder.Entity("PBL6.Domain.Models.Users.WorkspaceRole", b =>
+                {
+                    b.HasOne("PBL6.Domain.Models.Users.Workspace", "Workspace")
+                        .WithMany("WorkspaceRoles")
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("PBL6.Domain.Models.Users.WorkspacePermission", null)
+                        .WithMany("WorkspaceRoles")
+                        .HasForeignKey("WorkspacePermissionId");
+
+                    b.Navigation("Workspace");
                 });
 
             modelBuilder.Entity("PBL6.Domain.Models.Admins.AdminAccount", b =>
@@ -1504,9 +1709,32 @@ namespace Infrastructure.Migrations
                     b.Navigation("AdminAccount");
                 });
 
-            modelBuilder.Entity("PBL6.Domain.Models.Users.ChanelRole", b =>
+            modelBuilder.Entity("PBL6.Domain.Models.Users.Channel", b =>
+                {
+                    b.Navigation("ChannelMembers");
+
+                    b.Navigation("ChannelMessages");
+
+                    b.Navigation("ChannelRoles");
+                });
+
+            modelBuilder.Entity("PBL6.Domain.Models.Users.ChannelPermission", b =>
+                {
+                    b.Navigation("ChannelRoles");
+                });
+
+            modelBuilder.Entity("PBL6.Domain.Models.Users.ChannelRole", b =>
                 {
                     b.Navigation("Members");
+
+                    b.Navigation("Permissions");
+                });
+
+            modelBuilder.Entity("PBL6.Domain.Models.Users.Message", b =>
+                {
+                    b.Navigation("Children");
+
+                    b.Navigation("MessageTrackings");
                 });
 
             modelBuilder.Entity("PBL6.Domain.Models.Users.Notification", b =>
@@ -1528,14 +1756,23 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("PBL6.Domain.Models.Users.Workspace", b =>
                 {
-                    b.Navigation("Chanels");
+                    b.Navigation("Channels");
 
                     b.Navigation("Members");
+
+                    b.Navigation("WorkspaceRoles");
+                });
+
+            modelBuilder.Entity("PBL6.Domain.Models.Users.WorkspacePermission", b =>
+                {
+                    b.Navigation("WorkspaceRoles");
                 });
 
             modelBuilder.Entity("PBL6.Domain.Models.Users.WorkspaceRole", b =>
                 {
                     b.Navigation("Members");
+
+                    b.Navigation("Permissions");
                 });
 #pragma warning restore 612, 618
         }

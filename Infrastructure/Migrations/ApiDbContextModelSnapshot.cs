@@ -726,6 +726,9 @@ namespace Infrastructure.Migrations
                     b.Property<Guid?>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Data")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -735,14 +738,11 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("RefId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<short>("Status")
                         .HasColumnType("smallint");
 
-                    b.Property<DateTimeOffset>("TimeToSend")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("TimeToSend")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
                         .IsRequired()

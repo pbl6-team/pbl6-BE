@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class inital_database : Migration
+    public partial class initial_migrations : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,9 +19,6 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.EnsureSchema(
                 name: "Notifications");
-
-            migrationBuilder.EnsureSchema(
-                name: "Users");
 
             migrationBuilder.EnsureSchema(
                 name: "User");
@@ -45,7 +42,7 @@ namespace Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -53,7 +50,27 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ChanelPermissions",
+                name: "ChannelCategories",
+                schema: "Chat",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CategoryName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChannelCategories", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ChannelPermissions",
                 schema: "Chat",
                 columns: table => new
                 {
@@ -68,54 +85,11 @@ namespace Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ChanelPermissions", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ChanelRoles",
-                schema: "Chat",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Color = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ChanelRoles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Examples",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Examples", x => x.Id);
+                    table.PrimaryKey("PK_ChannelPermissions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -124,7 +98,7 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
@@ -133,7 +107,7 @@ namespace Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -148,9 +122,9 @@ namespace Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     Content = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    TimeToSend = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    TimeToSend = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<short>(type: "smallint", nullable: false),
-                    RefId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Data = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Type = table.Column<short>(type: "smallint", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -158,7 +132,7 @@ namespace Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -167,7 +141,7 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Plans",
-                schema: "Users",
+                schema: "User",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -180,7 +154,7 @@ namespace Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -202,7 +176,7 @@ namespace Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -211,15 +185,16 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "UserInfos",
-                schema: "Users",
+                schema: "User",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     Status = table.Column<short>(type: "smallint", nullable: false),
                     Gender = table.Column<bool>(type: "bit", nullable: true),
+                    Picture = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     BirthDay = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -227,7 +202,7 @@ namespace Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -250,33 +225,11 @@ namespace Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_WorkspacePermissions", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "WorkspaceRoles",
-                schema: "Chat",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Color = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_WorkspaceRoles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -285,7 +238,7 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Password = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     PasswordSalt = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
@@ -300,7 +253,7 @@ namespace Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -315,43 +268,8 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PermissionsOfChanelRoles",
-                schema: "Chat",
-                columns: table => new
-                {
-                    ChanelRoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PermissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IsEnable = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PermissionsOfChanelRoles", x => new { x.ChanelRoleId, x.PermissionId });
-                    table.ForeignKey(
-                        name: "FK_PermissionsOfChanelRoles_ChanelPermissions_PermissionId",
-                        column: x => x.PermissionId,
-                        principalSchema: "Chat",
-                        principalTable: "ChanelPermissions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PermissionsOfChanelRoles_ChanelRoles_ChanelRoleId",
-                        column: x => x.ChanelRoleId,
-                        principalSchema: "Chat",
-                        principalTable: "ChanelRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PlanDetails",
-                schema: "Users",
+                schema: "User",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -365,7 +283,7 @@ namespace Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -373,7 +291,7 @@ namespace Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_PlanDetails_Plans_PlanId",
                         column: x => x.PlanId,
-                        principalSchema: "Users",
+                        principalSchema: "User",
                         principalTable: "Plans",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -412,10 +330,10 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserName = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    PasswordSalt = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    PasswordSalt = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     LastLoginAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     LastLogoutAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -426,7 +344,7 @@ namespace Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -434,43 +352,8 @@ namespace Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_Users_UserInfos_InfoId",
                         column: x => x.InfoId,
-                        principalSchema: "Users",
+                        principalSchema: "User",
                         principalTable: "UserInfos",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PermissionsOfWorkspaceRoles",
-                schema: "Chat",
-                columns: table => new
-                {
-                    WorkspaceRoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PermissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IsEnable = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PermissionsOfWorkspaceRoles", x => new { x.PermissionId, x.WorkspaceRoleId });
-                    table.ForeignKey(
-                        name: "FK_PermissionsOfWorkspaceRoles_WorkspacePermissions_PermissionId",
-                        column: x => x.PermissionId,
-                        principalSchema: "Chat",
-                        principalTable: "WorkspacePermissions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PermissionsOfWorkspaceRoles_WorkspaceRoles_WorkspaceRoleId",
-                        column: x => x.WorkspaceRoleId,
-                        principalSchema: "Chat",
-                        principalTable: "WorkspaceRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -482,11 +365,13 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AdminId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Token = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Token = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     TimeOut = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     RefreshToken = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    RefreshTokenTimeOut = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IpAddress = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    OTP = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Otp = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    OtpType = table.Column<short>(type: "smallint", nullable: true),
                     ValidTo = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     DeviceId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
@@ -495,7 +380,7 @@ namespace Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -514,6 +399,7 @@ namespace Infrastructure.Migrations
                 schema: "Admin",
                 columns: table => new
                 {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AdminId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
@@ -522,11 +408,11 @@ namespace Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RolesOfAdmins", x => new { x.AdminId, x.RoleId });
+                    table.PrimaryKey("PK_RolesOfAdmins", x => x.Id);
                     table.ForeignKey(
                         name: "FK_RolesOfAdmins_AdminAccounts_AdminId",
                         column: x => x.AdminId,
@@ -561,7 +447,7 @@ namespace Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -583,16 +469,18 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "UserTokens",
-                schema: "Admin",
+                schema: "User",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Token = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Token = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     TimeOut = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     RefreshToken = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    RefreshTokenTimeOut = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IpAddress = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    OTP = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Otp = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    OtpType = table.Column<short>(type: "smallint", nullable: true),
                     ValidTo = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     DeviceId = table.Column<Guid>(type: "uniqueidentifier", maxLength: 20, nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
@@ -601,7 +489,7 @@ namespace Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -623,6 +511,7 @@ namespace Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    AvatarUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     OwnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -630,7 +519,7 @@ namespace Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -645,13 +534,14 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Chanels",
+                name: "Channels",
                 schema: "Chat",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    ParentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    OwnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     WorkspaceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
@@ -660,16 +550,169 @@ namespace Infrastructure.Migrations
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Chanels", x => x.Id);
+                    table.PrimaryKey("PK_Channels", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Chanels_Workspaces_WorkspaceId",
+                        name: "FK_Channels_Workspaces_WorkspaceId",
                         column: x => x.WorkspaceId,
                         principalSchema: "Chat",
                         principalTable: "Workspaces",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "WorkspaceRoles",
+                schema: "Chat",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Color = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    WorkspaceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    WorkspacePermissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WorkspaceRoles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_WorkspaceRoles_WorkspacePermissions_WorkspacePermissionId",
+                        column: x => x.WorkspacePermissionId,
+                        principalSchema: "Chat",
+                        principalTable: "WorkspacePermissions",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_WorkspaceRoles_Workspaces_WorkspaceId",
+                        column: x => x.WorkspaceId,
+                        principalSchema: "Chat",
+                        principalTable: "Workspaces",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ChannelRoles",
+                schema: "Chat",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Color = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ChannelId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ChannelPermissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChannelRoles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ChannelRoles_ChannelPermissions_ChannelPermissionId",
+                        column: x => x.ChannelPermissionId,
+                        principalSchema: "Chat",
+                        principalTable: "ChannelPermissions",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ChannelRoles_Channels_ChannelId",
+                        column: x => x.ChannelId,
+                        principalSchema: "Chat",
+                        principalTable: "Channels",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Messages",
+                schema: "Chat",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ToUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ToChannelId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ParentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Messages_Channels_ToChannelId",
+                        column: x => x.ToChannelId,
+                        principalSchema: "Chat",
+                        principalTable: "Channels",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Messages_Messages_ParentId",
+                        column: x => x.ParentId,
+                        principalSchema: "Chat",
+                        principalTable: "Messages",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Messages_Users_CreatedBy",
+                        column: x => x.CreatedBy,
+                        principalSchema: "User",
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Messages_Users_ToUserId",
+                        column: x => x.ToUserId,
+                        principalSchema: "User",
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PermissionsOfWorkspaceRoles",
+                schema: "Chat",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    WorkspaceRoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PermissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PermissionsOfWorkspaceRoles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PermissionsOfWorkspaceRoles_WorkspacePermissions_PermissionId",
+                        column: x => x.PermissionId,
+                        principalSchema: "Chat",
+                        principalTable: "WorkspacePermissions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PermissionsOfWorkspaceRoles_WorkspaceRoles_WorkspaceRoleId",
+                        column: x => x.WorkspaceRoleId,
+                        principalSchema: "Chat",
+                        principalTable: "WorkspaceRoles",
                         principalColumn: "Id");
                 });
 
@@ -681,16 +724,17 @@ namespace Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     WorkspaceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Status = table.Column<short>(type: "smallint", nullable: false),
                     Method = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AddBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -703,8 +747,8 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_WorkspaceMembers_WorkspaceRoles_WorkspaceId",
-                        column: x => x.WorkspaceId,
+                        name: "FK_WorkspaceMembers_WorkspaceRoles_RoleId",
+                        column: x => x.RoleId,
                         principalSchema: "Chat",
                         principalTable: "WorkspaceRoles",
                         principalColumn: "Id");
@@ -717,43 +761,109 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ChanelMembers",
+                name: "ChannelMembers",
                 schema: "Chat",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ChanelId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ChannelId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Method = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Status = table.Column<short>(type: "smallint", nullable: false),
                     AddBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ChanelRoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ChanelMembers", x => x.Id);
+                    table.PrimaryKey("PK_ChannelMembers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ChanelMembers_ChanelRoles_ChanelRoleId",
-                        column: x => x.ChanelRoleId,
+                        name: "FK_ChannelMembers_ChannelRoles_RoleId",
+                        column: x => x.RoleId,
                         principalSchema: "Chat",
-                        principalTable: "ChanelRoles",
+                        principalTable: "ChannelRoles",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_ChanelMembers_Chanels_ChanelId",
-                        column: x => x.ChanelId,
+                        name: "FK_ChannelMembers_Channels_ChannelId",
+                        column: x => x.ChannelId,
                         principalSchema: "Chat",
-                        principalTable: "Chanels",
+                        principalTable: "Channels",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ChanelMembers_Users_UserId",
+                        name: "FK_ChannelMembers_Users_UserId",
+                        column: x => x.UserId,
+                        principalSchema: "User",
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PermissionsOfChannelRoles",
+                schema: "Chat",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ChannelRoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PermissionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    UpdatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PermissionsOfChannelRoles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PermissionsOfChannelRoles_ChannelPermissions_PermissionId",
+                        column: x => x.PermissionId,
+                        principalSchema: "Chat",
+                        principalTable: "ChannelPermissions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PermissionsOfChannelRoles_ChannelRoles_ChannelRoleId",
+                        column: x => x.ChannelRoleId,
+                        principalSchema: "Chat",
+                        principalTable: "ChannelRoles",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MessageTrackings",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MessageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
+                    ReadTime = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedTime = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    Reaction = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MessageTrackings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MessageTrackings_Messages_MessageId",
+                        column: x => x.MessageId,
+                        principalSchema: "Chat",
+                        principalTable: "Messages",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_MessageTrackings_Users_UserId",
                         column: x => x.UserId,
                         principalSchema: "User",
                         principalTable: "Users",
@@ -775,27 +885,39 @@ namespace Infrastructure.Migrations
                 column: "AdminId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ChanelMembers_ChanelId",
+                name: "IX_ChannelMembers_ChannelId",
                 schema: "Chat",
-                table: "ChanelMembers",
-                column: "ChanelId");
+                table: "ChannelMembers",
+                column: "ChannelId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ChanelMembers_ChanelRoleId",
+                name: "IX_ChannelMembers_RoleId",
                 schema: "Chat",
-                table: "ChanelMembers",
-                column: "ChanelRoleId");
+                table: "ChannelMembers",
+                column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ChanelMembers_UserId",
+                name: "IX_ChannelMembers_UserId",
                 schema: "Chat",
-                table: "ChanelMembers",
+                table: "ChannelMembers",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Chanels_WorkspaceId",
+                name: "IX_ChannelRoles_ChannelId",
                 schema: "Chat",
-                table: "Chanels",
+                table: "ChannelRoles",
+                column: "ChannelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChannelRoles_ChannelPermissionId",
+                schema: "Chat",
+                table: "ChannelRoles",
+                column: "ChannelPermissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Channels_WorkspaceId",
+                schema: "Chat",
+                table: "Channels",
                 column: "WorkspaceId");
 
             migrationBuilder.CreateIndex(
@@ -805,9 +927,55 @@ namespace Infrastructure.Migrations
                 column: "FunctionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PermissionsOfChanelRoles_PermissionId",
+                name: "IX_Messages_CreatedBy",
                 schema: "Chat",
-                table: "PermissionsOfChanelRoles",
+                table: "Messages",
+                column: "CreatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_ParentId",
+                schema: "Chat",
+                table: "Messages",
+                column: "ParentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_ToChannelId",
+                schema: "Chat",
+                table: "Messages",
+                column: "ToChannelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_ToUserId",
+                schema: "Chat",
+                table: "Messages",
+                column: "ToUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MessageTrackings_MessageId",
+                table: "MessageTrackings",
+                column: "MessageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MessageTrackings_UserId",
+                table: "MessageTrackings",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PermissionsOfChannelRoles_ChannelRoleId",
+                schema: "Chat",
+                table: "PermissionsOfChannelRoles",
+                column: "ChannelRoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PermissionsOfChannelRoles_PermissionId",
+                schema: "Chat",
+                table: "PermissionsOfChannelRoles",
+                column: "PermissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PermissionsOfWorkspaceRoles_PermissionId",
+                schema: "Chat",
+                table: "PermissionsOfWorkspaceRoles",
                 column: "PermissionId");
 
             migrationBuilder.CreateIndex(
@@ -818,9 +986,15 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlanDetails_PlanId",
-                schema: "Users",
+                schema: "User",
                 table: "PlanDetails",
                 column: "PlanId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RolesOfAdmins_AdminId",
+                schema: "Admin",
+                table: "RolesOfAdmins",
+                column: "AdminId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RolesOfAdmins_RoleId",
@@ -849,9 +1023,15 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserTokens_UserId",
-                schema: "Admin",
+                schema: "User",
                 table: "UserTokens",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WorkspaceMembers_RoleId",
+                schema: "Chat",
+                table: "WorkspaceMembers",
+                column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_WorkspaceMembers_UserId",
@@ -864,6 +1044,18 @@ namespace Infrastructure.Migrations
                 schema: "Chat",
                 table: "WorkspaceMembers",
                 column: "WorkspaceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WorkspaceRoles_WorkspaceId",
+                schema: "Chat",
+                table: "WorkspaceRoles",
+                column: "WorkspaceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WorkspaceRoles_WorkspacePermissionId",
+                schema: "Chat",
+                table: "WorkspaceRoles",
+                column: "WorkspacePermissionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Workspaces_OwnerId",
@@ -880,18 +1072,22 @@ namespace Infrastructure.Migrations
                 schema: "Admin");
 
             migrationBuilder.DropTable(
-                name: "ChanelMembers",
+                name: "ChannelCategories",
                 schema: "Chat");
 
             migrationBuilder.DropTable(
-                name: "Examples");
+                name: "ChannelMembers",
+                schema: "Chat");
 
             migrationBuilder.DropTable(
                 name: "FunctionsOfRoles",
                 schema: "Admin");
 
             migrationBuilder.DropTable(
-                name: "PermissionsOfChanelRoles",
+                name: "MessageTrackings");
+
+            migrationBuilder.DropTable(
+                name: "PermissionsOfChannelRoles",
                 schema: "Chat");
 
             migrationBuilder.DropTable(
@@ -900,7 +1096,7 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "PlanDetails",
-                schema: "Users");
+                schema: "User");
 
             migrationBuilder.DropTable(
                 name: "RolesOfAdmins",
@@ -912,14 +1108,10 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserTokens",
-                schema: "Admin");
+                schema: "User");
 
             migrationBuilder.DropTable(
                 name: "WorkspaceMembers",
-                schema: "Chat");
-
-            migrationBuilder.DropTable(
-                name: "Chanels",
                 schema: "Chat");
 
             migrationBuilder.DropTable(
@@ -927,20 +1119,16 @@ namespace Infrastructure.Migrations
                 schema: "Admin");
 
             migrationBuilder.DropTable(
-                name: "ChanelPermissions",
+                name: "Messages",
                 schema: "Chat");
 
             migrationBuilder.DropTable(
-                name: "ChanelRoles",
-                schema: "Chat");
-
-            migrationBuilder.DropTable(
-                name: "WorkspacePermissions",
+                name: "ChannelRoles",
                 schema: "Chat");
 
             migrationBuilder.DropTable(
                 name: "Plans",
-                schema: "Users");
+                schema: "User");
 
             migrationBuilder.DropTable(
                 name: "AdminAccounts",
@@ -959,7 +1147,11 @@ namespace Infrastructure.Migrations
                 schema: "Chat");
 
             migrationBuilder.DropTable(
-                name: "Workspaces",
+                name: "ChannelPermissions",
+                schema: "Chat");
+
+            migrationBuilder.DropTable(
+                name: "Channels",
                 schema: "Chat");
 
             migrationBuilder.DropTable(
@@ -967,12 +1159,20 @@ namespace Infrastructure.Migrations
                 schema: "Admin");
 
             migrationBuilder.DropTable(
+                name: "WorkspacePermissions",
+                schema: "Chat");
+
+            migrationBuilder.DropTable(
+                name: "Workspaces",
+                schema: "Chat");
+
+            migrationBuilder.DropTable(
                 name: "Users",
                 schema: "User");
 
             migrationBuilder.DropTable(
                 name: "UserInfos",
-                schema: "Users");
+                schema: "User");
         }
     }
 }
