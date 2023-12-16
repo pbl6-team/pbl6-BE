@@ -320,15 +320,21 @@ namespace workspace.PBL6.Application.Services
             if (input.IsChannel)
             {
                 notification.Data = JsonConvert.SerializeObject(
-                    new
+                    new Dictionary<string, string>
                     {
-                        Type = (short)NOTIFICATION_TYPE.NEW_MESSAGE,
-                        Detail = new
+                        { "Type", ((short)NOTIFICATION_TYPE.NEW_MESSAGE).ToString() },
                         {
-                            ChannelId = input.ReceiverId,
-                            MessageId = input.ReplyTo,
-                            IsChannel = true
-                        }
+                            "Detail",
+                            JsonConvert.SerializeObject(
+                                new
+                                {
+                                    ChannelId = input.ReceiverId,
+                                    MessageId = input.ReplyTo,
+                                    IsChannel = true
+                                }
+                            )
+                        },
+                        { "Url", $"{_config["BaseUrl"]}/channel/{input.ReceiverId}" }
                     }
                 );
                 var isMember = await _unitOfWork.Channels.CheckIsMemberAsync(
@@ -360,16 +366,21 @@ namespace workspace.PBL6.Application.Services
                     notification.Content =
                         $"{currentUser.Information.FirstName} {currentUser.Information.LastName} sent a message to {channel.Name}";
                     notification.Data = JsonConvert.SerializeObject(
-                        new
+                        new Dictionary<string, string>
                         {
-                            Type = (short)NOTIFICATION_TYPE.NEW_MESSAGE,
-                            Detail = new
+                            { "Type", ((short)NOTIFICATION_TYPE.NEW_MESSAGE).ToString() },
                             {
-                                ChannelId = input.ReceiverId,
-                                MessageId = message.Id,
-                                IsChannel = true
+                                "Detail",
+                                JsonConvert.SerializeObject(
+                                    new
+                                    {
+                                        ChannelId = input.ReceiverId,
+                                        MessageId = message.Id,
+                                        IsChannel = true
+                                    }
+                                )
                             },
-                            Url = $"{_config["BaseUrl"]}/channel/{input.ReceiverId}"
+                            { "Url", $"{_config["BaseUrl"]}/channel/{input.ReceiverId}" }
                         }
                     );
                     var userIds = (await _unitOfWork.Channels.GetUserIds(currentUserId))
@@ -437,16 +448,21 @@ namespace workspace.PBL6.Application.Services
                         notification.Content =
                             $"{currentUser.Information.FirstName} {currentUser.Information.LastName} sent a message to you";
                         notification.Data = JsonConvert.SerializeObject(
-                            new
+                            new Dictionary<string, string>
                             {
-                                Type = (short)NOTIFICATION_TYPE.NEW_MESSAGE,
-                                Detail = new
+                                { "Type", ((short)NOTIFICATION_TYPE.NEW_MESSAGE).ToString() },
                                 {
-                                    UserId = input.ReceiverId,
-                                    MessageId = message.Id,
-                                    IsChannel = false
+                                    "Detail",
+                                    JsonConvert.SerializeObject(
+                                        new
+                                        {
+                                            UserId = input.ReceiverId,
+                                            MessageId = message.Id,
+                                            IsChannel = false
+                                        }
+                                    )
                                 },
-                                Url = $"{_config["BaseUrl"]}/colleague-chat/{input.ReceiverId}"
+                                { "Url", $"{_config["BaseUrl"]}/colleague-chat/{currentUserId}" }
                             }
                         );
                         notification.UserNotifications.Add(

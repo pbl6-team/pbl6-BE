@@ -34,7 +34,7 @@ public class ChannelService : BaseService, IChannelService
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
             var channel = _mapper.Map<Channel>(createUpdateChannelDto);
-            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedException("User is not logged in"));
 
             var workspace = await _unitOfWork.Workspaces
                 .Queryable()
@@ -104,7 +104,7 @@ public class ChannelService : BaseService, IChannelService
                 .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
                 .Where(x => x.Id == channelId)
                 .FirstOrDefaultAsync();
-            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedException("User is not logged in"));
             var currentUser = await _unitOfWork.Users.GetUserByIdAsync(currentUserId);
             if (channel is null)
             {
@@ -124,21 +124,29 @@ public class ChannelService : BaseService, IChannelService
                 Status = (short)NOTIFICATION_STATUS.PENDING,
                 Type = (short)NOTIFICATION_TYPE.CHANNEL_INVITATION,
                 Data = JsonSerializer.Serialize(
-                    new
+                    new Dictionary<string, string>
                     {
-                        Type = (short)NOTIFICATION_TYPE.CHANNEL_INVITATION,
-                        Detail = new InvitedToNewGroup
+                        { "Type", ((short)NOTIFICATION_TYPE.CHANNEL_INVITATION).ToString() },
                         {
-                            GroupId = channelId,
-                            GroupName = channel.Name,
-                            InviterId = currentUserId,
-                            InviterName =
-                                currentUser.Information.FirstName
-                                + " "
-                                + currentUser.Information.LastName,
-                            InviterAvatar = currentUser.Information.Picture
+                            "Detail",
+                            JsonSerializer.Serialize(
+                                new InvitedToNewGroup
+                                {
+                                    GroupId = channelId,
+                                    GroupName = channel.Name,
+                                    InviterId = currentUserId,
+                                    InviterName =
+                                        currentUser.Information.FirstName
+                                        + " "
+                                        + currentUser.Information.LastName,
+                                    InviterAvatar = currentUser.Information.Picture
+                                }
+                            )
                         },
-                        Url = $"{_config["BaseUrl"]}/Workspace/{channel.WorkspaceId}/{channelId}"
+                        {
+                            "Url",
+                            $"{_config["BaseUrl"]}/Workspace/{channel.WorkspaceId}/{channelId}"
+                        }
                     }
                 ),
                 UserNotifications = new List<UserNotification>()
@@ -152,7 +160,7 @@ public class ChannelService : BaseService, IChannelService
                     .FirstOrDefaultAsync();
                 if (!workspace.Members.Any(x => x.UserId == userId))
                 {
-                    throw new Exception($"User {userId} is not in the workspace of this channel");
+                    throw new BadRequestException($"User {userId} is not in the workspace of this channel");
                 }
 
                 var user = await _unitOfWork.Users.FindAsync(userId);
@@ -164,7 +172,7 @@ public class ChannelService : BaseService, IChannelService
                 var member = channel.ChannelMembers.FirstOrDefault(x => x.UserId == userId);
                 if (member is not null)
                 {
-                    throw new Exception($"User {userId} is already in this channel");
+                    throw new BadRequestException($"User {userId} is already in this channel");
                 }
 
                 var channelMember = new ChannelMember { UserId = userId, AddBy = currentUserId };
@@ -254,7 +262,7 @@ public class ChannelService : BaseService, IChannelService
             if (channel is null)
                 throw new NotFoundException<Channel>(channelId.ToString());
 
-            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedException("User is not logged in"));
 
             if (!await _unitOfWork.Channels.CheckIsMemberAsync(channelId, currentUserId))
             {
@@ -313,7 +321,7 @@ public class ChannelService : BaseService, IChannelService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedException("User is not logged in"));
 
             var isMember = await _unitOfWork.Workspaces.CheckIsMemberAsync(
                 workspaceId,
@@ -363,7 +371,7 @@ public class ChannelService : BaseService, IChannelService
             if (channel is null)
                 throw new NotFoundException<Channel>(channelId.ToString());
 
-            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedException("User is not logged in"));
 
             if (!await _unitOfWork.Channels.CheckIsMemberAsync(channelId, currentUserId))
             {
@@ -398,7 +406,7 @@ public class ChannelService : BaseService, IChannelService
                 .Where(x => x.Name.Contains(channelName))
                 .ToListAsync();
 
-            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedException("User is not logged in"));
             channels = channels
                 .Where(x => x.ChannelMembers.Any(c => c.UserId == currentUserId))
                 .ToList();
@@ -587,7 +595,7 @@ public class ChannelService : BaseService, IChannelService
                 .Where(x => x.Id == channelId)
                 .FirstOrDefaultAsync();
 
-            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedException("User is not logged in"));
             var currentUser = await _unitOfWork.Users.GetUserByIdAsync(currentUserId);
             if (channel is null)
             {
@@ -606,19 +614,28 @@ public class ChannelService : BaseService, IChannelService
                 Status = (short)NOTIFICATION_STATUS.PENDING,
                 Type = (short)NOTIFICATION_TYPE.CHANNEL_REMOVED,
                 Data = JsonSerializer.Serialize(
-                    new
+                    new Dictionary<string, string>
                     {
-                        Type = (short)NOTIFICATION_TYPE.CHANNEL_REMOVED,
-                        Detail = new RemovedFromGroup
+                        { "Type", ((short)NOTIFICATION_TYPE.CHANNEL_REMOVED).ToString() },
                         {
-                            GroupId = channelId,
-                            GroupName = channel.Name,
-                            RemoverId = currentUserId,
-                            RemoverName =
-                                currentUser.Information.FirstName
-                                + " "
-                                + currentUser.Information.LastName,
-                            RemoverAvatar = currentUser.Information.Picture
+                            "Detail",
+                            JsonSerializer.Serialize(
+                                new RemovedFromGroup
+                                {
+                                    GroupId = channelId,
+                                    GroupName = channel.Name,
+                                    RemoverId = currentUserId,
+                                    RemoverName =
+                                        currentUser.Information.FirstName
+                                        + " "
+                                        + currentUser.Information.LastName,
+                                    RemoverAvatar = currentUser.Information.Picture
+                                }
+                            )
+                        },
+                        {
+                            "Url",
+                            $"{_config["BaseUrl"]}/Workspace/{channel.WorkspaceId}/{channelId}"
                         }
                     }
                 ),
@@ -630,7 +647,7 @@ public class ChannelService : BaseService, IChannelService
                 var member = channel.ChannelMembers.FirstOrDefault(x => x.UserId == userId);
                 if (member is null)
                 {
-                    throw new Exception($"User {userId} is not in this channel");
+                    throw new BadRequestException($"User {userId} is not in this channel");
                 }
                 notification.UserNotifications.Add(
                     new UserNotification
@@ -725,7 +742,7 @@ public class ChannelService : BaseService, IChannelService
                 .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
                 .Where(x => x.Id == channelId)
                 .FirstOrDefaultAsync();
-            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedException("User is not logged in"));
 
             if (channel is null)
             {

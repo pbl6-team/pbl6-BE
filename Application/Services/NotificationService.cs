@@ -54,7 +54,7 @@ namespace Application.Services
                     Contents = new OneSignalApi.Model.StringMap(en: content),
                     Subtitle = new OneSignalApi.Model.StringMap(en: subtitle),
                     Data = data,
-                    Url = url ?? _config["BaseUrl"],
+                    WebUrl = url ?? _config["BaseUrl"],
                     SendAfter = sendAfter
                 };
 
@@ -97,9 +97,10 @@ namespace Application.Services
             if (notification is not null)
             {
                 var data = JsonConvert.DeserializeObject<Dictionary<string, string>>(notification.Data);
-                var url = data.TryGetValue("url", out var u) ? u : null;
+                var url = data.TryGetValue("Url", out var u) ? u : null;
                 url ??= $"{_config["BaseUrl"]}/notification/{notification.Id}";
-                data.Add("notificationId", notification.Id.ToString());
+                data.Remove("notificationId");
+                data.TryAdd("notificationId", notification.Id.ToString());
                 var result = await SendNotificationAsync(
                     notification.Content,
                     notification.UserNotifications.Select(x => x.UserId).ToList(),
@@ -107,10 +108,11 @@ namespace Application.Services
                     notification.Title,
                     notification.Type,
                     data,
-                    notification.TimeToSend,
-                    data.TryGetValue("icon", out var icon) ? icon : null
+                    notification.TimeToSend < DateTime.Now ? null : notification.TimeToSend,
+                    data.TryGetValue("icon", out var icon) ? icon : null,
+                    url
                 );
-                if (result is not null)
+                if (!result.IsNullOrEmpty())
                 {
                     notification.Status = (short)NOTIFICATION_STATUS.SENT;
                     notification.UserNotifications.ToList().ForEach(x => x.PushId = Guid.Parse(result));

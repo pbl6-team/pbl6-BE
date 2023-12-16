@@ -158,7 +158,9 @@ namespace PBL6.Application.Services
                     w.Members = w.Members.Where(m => !m.IsDeleted).ToList();
                 });
 
-                var userId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+                var userId = Guid.Parse(
+                    _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+                );
                 workspaces = workspaces.Where(x => x.Members.Any(m => m.UserId == userId)).ToList();
 
                 foreach (var workspace in workspaces)
@@ -212,7 +214,9 @@ namespace PBL6.Application.Services
 
                 if (workspace is null)
                     throw new NotFoundException<Workspace>(workspaceId.ToString());
-                var userId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+                var userId = Guid.Parse(
+                    _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+                );
 
                 if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, userId))
                     throw new ForbidException();
@@ -259,7 +263,9 @@ namespace PBL6.Application.Services
                     .Where(x => x.Name.Contains(workspaceName))
                     .ToListAsync();
 
-                var userId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+                var userId = Guid.Parse(
+                    _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+                );
                 workspaces = workspaces.Where(x => x.Members.Any(m => m.UserId == userId)).ToList();
 
                 foreach (var workspace in workspaces)
@@ -300,7 +306,9 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                var userId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+                var userId = Guid.Parse(
+                    _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+                );
                 var workspace = await _unitOfWork.Workspaces
                     .Queryable()
                     .Include(x => x.Members.Where(m => !m.IsDeleted))
@@ -346,7 +354,9 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                var userId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+                var userId = Guid.Parse(
+                    _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+                );
                 var workspace = await _unitOfWork.Workspaces
                     .Queryable()
                     .Include(x => x.Members.Where(m => !m.IsDeleted))
@@ -395,7 +405,9 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+                var currentUserId = Guid.Parse(
+                    _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+                );
                 var currentUser = await _unitOfWork.Users.GetUserByIdAsync(currentUserId);
                 var workspace = await _unitOfWork.Workspaces
                     .Queryable()
@@ -418,23 +430,30 @@ namespace PBL6.Application.Services
                         $"You have been invited to join a workspace {workspace.Name} by {currentUser.Information.FirstName} {currentUser.Information.LastName}",
                     Type = (short)NOTIFICATION_TYPE.WORKSPACE_INVITATION,
                     TimeToSend = DateTime.UtcNow,
+                    Status = (short)NOTIFICATION_STATUS.PENDING,
                     Data = JsonConvert.SerializeObject(
-                        new
+                        new Dictionary<string, string>
                         {
-                            Type = (short)NOTIFICATION_TYPE.WORKSPACE_INVITATION,
-                            Detail = new InvitedToNewGroup
+                            { "Type", ((short)NOTIFICATION_TYPE.WORKSPACE_INVITATION).ToString() },
                             {
-                                GroupId = workspace.Id,
-                                GroupName = workspace.Name,
-                                InviterId = currentUserId,
-                                InviterName =
-                                    $"{currentUser.Information.FirstName} {currentUser.Information.LastName}",
-                                InviterAvatar = currentUser.Information.Picture,
+                                "Detail",
+                                JsonConvert.SerializeObject(
+                                    new InvitedToNewGroup
+                                    {
+                                        GroupId = workspace.Id,
+                                        GroupName = workspace.Name,
+                                        InviterId = currentUserId,
+                                        InviterName =
+                                            $"{currentUser.Information.FirstName} {currentUser.Information.LastName}",
+                                        InviterAvatar = currentUser.Information.Picture,
+                                    }
+                                )
                             }
                         }
-                    )
+                    ),
+                    UserNotifications = new List<UserNotification>()
                 };
-
+                workspace.Members ??= new List<WorkspaceMember>();
                 foreach (var userId in userIds)
                 {
                     var user = await _unitOfWork.Users.FindAsync(userId);
@@ -445,13 +464,15 @@ namespace PBL6.Application.Services
 
                     if (!user.IsActive)
                     {
-                        throw new Exception("User is not active yet");
+                        throw new BadRequestException("User is not active yet");
                     }
 
-                    var member = workspace.Members.FirstOrDefault(x => x.UserId == userId);
+                    var member = workspace.Members.FirstOrDefault(
+                        x => x.UserId == userId && !x.IsDeleted
+                    );
                     if (member is not null)
                     {
-                        throw new Exception("User is already a member of this workspace");
+                        throw new BadRequestException("User is already a member of this workspace");
                     }
 
                     workspace.Members.Add(
@@ -471,10 +492,10 @@ namespace PBL6.Application.Services
                 try
                 {
                     notification = await _unitOfWork.Notifications.AddAsync(notification);
+                    await _unitOfWork.SaveChangeAsync();
                     _backgroundJobClient.Enqueue(
                         () => _notificationService.SendNotificationAsync(notification.Id)
                     );
-                    await _unitOfWork.SaveChangeAsync();
                 }
                 catch (Exception e)
                 {
@@ -529,22 +550,29 @@ namespace PBL6.Application.Services
                     Content =
                         $"You have been removed from a workspace {workspace.Name} by {currentUser.Information.FirstName} {currentUser.Information.LastName}",
                     Type = (short)NOTIFICATION_TYPE.WORKSPACE_REMOVED,
+                    Status = (short)NOTIFICATION_STATUS.PENDING,
                     TimeToSend = DateTime.UtcNow,
                     Data = JsonConvert.SerializeObject(
-                        new
+                        new Dictionary<string, string>
                         {
-                            Type = (short)NOTIFICATION_TYPE.WORKSPACE_REMOVED,
-                            Detail = new RemovedFromGroup
+                            { "Type", ((short)NOTIFICATION_TYPE.WORKSPACE_REMOVED).ToString() },
                             {
-                                GroupId = workspace.Id,
-                                GroupName = workspace.Name,
-                                RemoverId = currentUserId,
-                                RemoverName =
-                                    $"{currentUser.Information.FirstName} {currentUser.Information.LastName}",
-                                RemoverAvatar = currentUser.Information.Picture,
+                                "Detail",
+                                JsonConvert.SerializeObject(
+                                    new RemovedFromGroup
+                                    {
+                                        GroupId = workspace.Id,
+                                        GroupName = workspace.Name,
+                                        RemoverId = currentUserId,
+                                        RemoverName =
+                                            $"{currentUser.Information.FirstName} {currentUser.Information.LastName}",
+                                        RemoverAvatar = currentUser.Information.Picture,
+                                    }
+                                )
                             }
                         }
-                    )
+                    ),
+                    UserNotifications = new List<UserNotification>()
                 };
                 foreach (var userId in userIds)
                 {
@@ -597,7 +625,7 @@ namespace PBL6.Application.Services
                         e.Message
                     );
                 }
-                
+
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
                 return workspace.Id;

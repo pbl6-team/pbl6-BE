@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PBL6.Application.Contract.Users;
 using PBL6.Application.Services;
+using PBL6.Common.Exceptions;
 
 namespace Application.Services;
 
@@ -115,7 +116,7 @@ public class UserService : BaseService, IUserService
                                                      .AnyAsync(x => !x.IsDeleted && x.Email == updateUserDto.Email);
                 if (isExist)
                 {
-                    throw new Exception("Email is exist");
+                    throw new BadRequestException("Email is exist");
                 }
             }
 
@@ -221,7 +222,7 @@ public class UserService : BaseService, IUserService
                     users = users.Where(x => (x.Information.LastName + " " + x.Information.FirstName).ToUpper().Contains(searchValue)).ToList();
                     break;
                 default:
-                    throw new Exception("Search type is not valid");
+                    throw new BadRequestException("Search type is not valid");
             }
 
             users = users.Take(numberOfResults).ToList();

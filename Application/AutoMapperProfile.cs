@@ -107,7 +107,7 @@ namespace PBL6.Application
                 .ForMember(x => x.LastName, opt => opt.MapFrom(src => src.Information.LastName))
                 .ForMember(x => x.Gender, opt => opt.MapFrom(src => src.Information.Gender))
                 .ForMember(x => x.Phone, opt => opt.MapFrom(src => src.Information.Phone))
-                .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.Information.BirthDay.ToString("MM-dd-yyyy")))
+                .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.Information.BirthDay))
                 .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.Information.Picture));
 
             CreateMap<UpdateUserDto, User>()
@@ -177,7 +177,7 @@ namespace PBL6.Application
                 .ForMember(x => x.LastName, opt => opt.MapFrom(src => src.User.Information.LastName))
                 .ForMember(x => x.Gender, opt => opt.MapFrom(src => src.User.Information.Gender))
                 .ForMember(x => x.Phone, opt => opt.MapFrom(src => src.User.Information.Phone))
-                .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.User.Information.BirthDay.ToString("MM-dd-yyyy")))
+                .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.User.Information.BirthDay))
                 .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.User.Information.Picture))
                 .ForMember(x => x.Role, opt => opt.MapFrom(src => src.WorkspaceRole));
 
@@ -188,7 +188,7 @@ namespace PBL6.Application
             .ForMember(x => x.LastName, opt => opt.MapFrom(src => src.User.Information.LastName))
             .ForMember(x => x.Gender, opt => opt.MapFrom(src => src.User.Information.Gender))
             .ForMember(x => x.Phone, opt => opt.MapFrom(src => src.User.Information.Phone))
-            .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.User.Information.BirthDay.ToString("MM-dd-yyyy")))
+            .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.User.Information.BirthDay))
             .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.User.Information.Picture))
             .ForMember(x => x.Role, opt => opt.MapFrom(src => src.ChannelRole));
         }
