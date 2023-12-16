@@ -102,7 +102,9 @@ namespace PBL6.Infrastructure.Repositories
                 .ThenInclude(x => x.User).ThenInclude(x => x.Information)
                 .Include(x => x.Sender)
                 .ThenInclude(x => x.Information)
-                .Include(x => x.Children)
+                .Include(x => x.Children.Where(x => !x.IsDeleted && !x.MessageTrackings.Any(x => x.UserId == currentUserId && !x.IsDeleted)))
+                .ThenInclude(x => x.MessageTrackings)
+                .AsNoTracking()
                 .Where(x => 
                     x.ToChannelId == channelId 
                     && x.CreatedAt < timeCursor 
@@ -128,7 +130,11 @@ namespace PBL6.Infrastructure.Repositories
                 .ThenInclude(x => x.Information)
                 .Include(x => x.Sender)
                 .ThenInclude(x => x.Information)
-                .Include(x => x.Children)
+                .Include(x => x.Children
+                    .Where(x => !x.IsDeleted && !x.MessageTrackings.Any(x => x.UserId == currentUserId && !x.IsDeleted))
+                )
+                .ThenInclude(x => x.MessageTrackings)
+                .AsNoTracking()
                 .Where(
                     x =>
                         (

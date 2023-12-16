@@ -112,26 +112,28 @@ namespace workspace.PBL6.Application.Services
                 currentUserId,
                 input.Search
             )
+            .OrderByDescending(x => x.CreatedAt)
             .GroupBy(x => x.ToUserId == currentUserId ? x.CreatedBy : x.ToUserId)
-            .OrderByDescending(x => x.Max(x => x.CreatedAt))
+            .OrderByDescending(x => x.First().CreatedAt)
             .Select(x => new ConversationDto
             {
-            Id = (Guid)x.Key,
-            Name = currentUserId == x.First().CreatedBy
-                ? x.First().Receiver.Information.FirstName + " " + x.First().Receiver.Information.LastName
-                : x.First().Sender.Information.FirstName + " " + x.First().Sender.Information.LastName,
-            LastMessage = x.First().Content,
-            LastMessageTime = x.First().CreatedAt,
-            LastMessageSender = currentUserId == x.First().CreatedBy
-                ? "You"
-                : x.First().Receiver.Information.FirstName + " " + x.First().Receiver.Information.LastName,
-            LastMessageSenderAvatar = x.First().Sender.Information.Picture,
-            IsRead = x.First().MessageTrackings.Any(x => x.UserId == currentUserId && !x.IsDeleted && x.IsRead),
-            IsChannel = x.First().ToChannelId != null,
-            Avatar = currentUserId == x.First().CreatedBy
-                ? x.First().Receiver.Information.Picture
-                : x.First().Sender.Information.Picture
+                Id = (Guid)x.Key,
+                Name = currentUserId == x.OrderByDescending(x => x.CreatedAt).First().CreatedBy
+                    ? x.First().Receiver.Information.FirstName + " " + x.OrderByDescending(x => x.CreatedAt).First().Receiver.Information.LastName
+                    : x.OrderByDescending(x => x.CreatedAt).First().Sender.Information.FirstName + " " + x.OrderByDescending(x => x.CreatedAt).First().Sender.Information.LastName,
+                LastMessage = x.OrderByDescending(x => x.CreatedAt).First().Content,
+                LastMessageTime = x.OrderByDescending(x => x.CreatedAt).First().CreatedAt,
+                LastMessageSender = currentUserId == x.OrderByDescending(x => x.CreatedAt).First().CreatedBy
+                    ? "You"
+                    : x.OrderByDescending(x => x.CreatedAt).First().Receiver.Information.FirstName + " " + x.OrderByDescending(x => x.CreatedAt).First().Receiver.Information.LastName,
+                LastMessageSenderAvatar = x.OrderByDescending(x => x.CreatedAt).First().Sender.Information.Picture,
+                IsRead = x.OrderByDescending(x => x.CreatedAt).First().MessageTrackings.Any(x => x.UserId == currentUserId && !x.IsDeleted && x.IsRead),
+                IsChannel = x.OrderByDescending(x => x.CreatedAt).First().ToChannelId != null,
+                Avatar = currentUserId == x.OrderByDescending(x => x.CreatedAt).First().CreatedBy
+                    ? x.OrderByDescending(x => x.CreatedAt).First().Receiver.Information.Picture
+                    : x.OrderByDescending(x => x.CreatedAt).First().Sender.Information.Picture
             })
+            .OrderByDescending(x => x.LastMessageTime)
             .Skip(input.Offset)
             .Take(input.Limit)
             .ToListAsync();
@@ -227,11 +229,11 @@ namespace workspace.PBL6.Application.Services
                 messageTracking.IsRead = true;
                 if (messageTracking.Reaction.Contains(input.Emoji))
                 {
-                    messageTracking.Reaction = messageTracking.Reaction.Replace(input.Emoji, "");
+                    messageTracking.Reaction = messageTracking.Reaction.Replace($" {input.Emoji}", "");
                 }
                 else
                 {
-                    messageTracking.Reaction += input.Emoji + " ";
+                    messageTracking.Reaction += $" {input.Emoji}";
                 }
             }
 
