@@ -221,7 +221,7 @@ namespace PBL6.API.Controllers.Workspaces
         [AuthorizeFilter]
         public async Task<IActionResult> GetMembersByRoleId([FromRoute] Guid workspaceId, [FromRoute] Guid roleId)
         {
-            return Ok(await _workspaceService.GetMembersbyRoleIdAsync(workspaceId, roleId));
+            return Ok(await _workspaceService.GetMembersByRoleIdAsync(workspaceId, roleId));
         }
 
         /// <summary>

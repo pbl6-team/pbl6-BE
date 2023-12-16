@@ -1,3 +1,4 @@
+using Application.Services;
 using AutoMapper;
 using Hangfire;
 using Microsoft.AspNetCore.Hosting;
@@ -22,7 +23,8 @@ namespace PBL6.Application.Services
         protected readonly IWebHostEnvironment _hostingEnvironment;
         protected readonly IFileService _fileService;
         protected readonly IBackgroundJobClient _backgroundJobClient;
-        protected readonly IHubContext<ChatHub> _chatHub;
+        protected readonly INotificationService _notificationService;
+        protected readonly IHubService _hubService;
 
         public BaseService(IServiceProvider serviceProvider)
         {
@@ -34,61 +36,9 @@ namespace PBL6.Application.Services
             _unitOfWork = serviceProvider.GetService<IUnitOfWork>();
             _hostingEnvironment = serviceProvider.GetService<IWebHostEnvironment>();
             _fileService = serviceProvider.GetService<IFileService>();
-            _chatHub = serviceProvider.GetService<IHubContext<ChatHub>>();
             _backgroundJobClient = serviceProvider.GetService<IBackgroundJobClient>();
-        }
-
-        public async Task AddToGroupAsync(string connectionId, string groupName)
-        {
-            await _chatHub.Groups.AddToGroupAsync(connectionId, groupName);
-        }
-
-        public async Task RemoveFromGroupAsync(string connectionId, string groupName)
-        {
-            await _chatHub.Groups.RemoveFromGroupAsync(connectionId, groupName);
-        }
-
-        public async Task SendAsync(IEnumerable<string> connectionIds, string method, object arg1)
-        {
-            await _chatHub.Clients.Clients(connectionIds).SendAsync(method, arg1);
-        }
-
-        public async Task RemoveUsersFromChannelHub(Guid channelId, List<Guid> userIds)
-        {
-            foreach (var userId in userIds)
-            {
-                var connectionIds = await ChatHub.GetConnectionsByUserId(userId);
-                if (connectionIds is not null)
-                {
-                    await _chatHub.Clients
-                        .Clients(connectionIds)
-                        .SendAsync(ChatHub.REMOVE_USER_FROM_CHANNEL, channelId);
-                    foreach (var connectionId in connectionIds)
-                    {
-                        await _chatHub.Groups.RemoveFromGroupAsync(
-                            connectionId,
-                            channelId.ToString()
-                        );
-                    }
-                }
-            }
-        }
-
-        public async Task AddUsersToChannelHub(Guid channelId, List<Guid> userIds)
-        {
-            foreach (var userId in userIds)
-            {
-                var connectionIds = await ChatHub.GetConnectionsByUserId(userId);
-                if (connectionIds is not null)
-                {
-                    foreach (var connectionId in connectionIds)
-                    {
-                        await AddToGroupAsync(connectionId, channelId.ToString());
-                    }
-
-                    await SendAsync(connectionIds, ChatHub.ADD_USER_TO_CHANNEL, channelId);
-                }
-            }
+            _notificationService = serviceProvider.GetService<INotificationService>();
+            _hubService = serviceProvider.GetService<IHubService>();
         }
     }
 }

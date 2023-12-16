@@ -455,5 +455,11 @@ namespace PBL6.Application.Hubs
                 hubUser?.ConnectionIds.AsEnumerable() ?? Enumerable.Empty<string>()
             );
         }
+
+        public static Task<bool> IsUserOnline(Guid userId)
+        {
+            Users.TryGetValue(userId, out var hubUser);
+            return Task.FromResult(hubUser?.ConnectionIds.Any() ?? false);
+        }
     }
 }

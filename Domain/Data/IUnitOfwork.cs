@@ -21,6 +21,8 @@ namespace PBL6.Domain.Data
         IAdminTokenRepository AdminTokens { get; }
         IPermissionsOfWorkspaceRoleRepository PermissionsOfWorkspaceRoles { get; }
         IPermissionsOfChannelRoleRepository PermissionsOfChannelRoles { get; }
+        INotificationRepository Notifications { get; }
+        IRepository<T> Repository<T>() where T : class;
 
         Task SaveChangeAsync();
         Task<IDbContextTransaction> BeginTransactionAsync();

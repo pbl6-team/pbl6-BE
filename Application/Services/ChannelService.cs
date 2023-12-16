@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Application.Contract.Channels.Dtos;
 using Application.Contract.Users.Dtos;
 using Hangfire;
@@ -6,7 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PBL6.Application.Contract.Channels;
 using PBL6.Application.Contract.Channels.Dtos;
+using PBL6.Application.Contract.Notifications.Dtos;
 using PBL6.Application.Contract.Workspaces.Dtos;
+using PBL6.Common.Enum;
 using PBL6.Common.Exceptions;
 using PBL6.Domain.Models.Users;
 
@@ -102,6 +105,7 @@ public class ChannelService : BaseService, IChannelService
                 .Where(x => x.Id == channelId)
                 .FirstOrDefaultAsync();
             var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+            var currentUser = await _unitOfWork.Users.GetUserByIdAsync(currentUserId);
             if (channel is null)
             {
                 throw new NotFoundException<Channel>(channelId.ToString());
@@ -111,6 +115,34 @@ public class ChannelService : BaseService, IChannelService
             {
                 throw new ForbidException();
             }
+            var notification = new Notification
+            {
+                Title = "You have been added to channel",
+                Content =
+                    $"You have been added to channel {channel.Name} by {currentUser.Information.FirstName} {currentUser.Information.LastName}",
+                TimeToSend = DateTime.UtcNow,
+                Status = (short)NOTIFICATION_STATUS.PENDING,
+                Type = (short)NOTIFICATION_TYPE.CHANNEL_INVITATION,
+                Data = JsonSerializer.Serialize(
+                    new
+                    {
+                        Type = (short)NOTIFICATION_TYPE.CHANNEL_INVITATION,
+                        Detail = new InvitedToNewGroup
+                        {
+                            GroupId = channelId,
+                            GroupName = channel.Name,
+                            InviterId = currentUserId,
+                            InviterName =
+                                currentUser.Information.FirstName
+                                + " "
+                                + currentUser.Information.LastName,
+                            InviterAvatar = currentUser.Information.Picture
+                        },
+                        Url = $"{_config["BaseUrl"]}/Workspace/{channel.WorkspaceId}/{channelId}"
+                    }
+                ),
+                UserNotifications = new List<UserNotification>()
+            };
             foreach (var userId in userIds)
             {
                 var workspace = await _unitOfWork.Workspaces
@@ -138,9 +170,36 @@ public class ChannelService : BaseService, IChannelService
                 var channelMember = new ChannelMember { UserId = userId, AddBy = currentUserId };
 
                 channel.ChannelMembers.Add(channelMember);
+                notification.UserNotifications.Add(
+                    new UserNotification
+                    {
+                        UserId = userId,
+                        Status = (short)NOTIFICATION_STATUS.PENDING,
+                        SendAt = DateTimeOffset.UtcNow
+                    }
+                );
             }
             await _unitOfWork.SaveChangeAsync();
-            _backgroundJobClient.Enqueue(() => AddUsersToChannelHub(channelId, userIds));
+            try
+            {
+                notification = await _unitOfWork.Notifications.AddAsync(notification);
+                await _unitOfWork.SaveChangeAsync();
+                _backgroundJobClient.Enqueue(
+                    () => _notificationService.SendNotificationAsync(notification.Id)
+                );
+                _backgroundJobClient.Enqueue(
+                    () => _hubService.AddUsersToChannelHub(channelId, userIds)
+                );
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation(
+                    "[{_className}][{method}] Error: {message}",
+                    _className,
+                    method,
+                    e.Message
+                );
+            }
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
@@ -529,6 +588,7 @@ public class ChannelService : BaseService, IChannelService
                 .FirstOrDefaultAsync();
 
             var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new Exception());
+            var currentUser = await _unitOfWork.Users.GetUserByIdAsync(currentUserId);
             if (channel is null)
             {
                 throw new NotFoundException<Channel>(channelId.ToString());
@@ -538,6 +598,33 @@ public class ChannelService : BaseService, IChannelService
             {
                 throw new ForbidException();
             }
+            var notification = new Notification
+            {
+                Title = "You have been removed from channel",
+                Content = $"You have been removed from channel {channel.Name}",
+                TimeToSend = DateTime.UtcNow,
+                Status = (short)NOTIFICATION_STATUS.PENDING,
+                Type = (short)NOTIFICATION_TYPE.CHANNEL_REMOVED,
+                Data = JsonSerializer.Serialize(
+                    new
+                    {
+                        Type = (short)NOTIFICATION_TYPE.CHANNEL_REMOVED,
+                        Detail = new RemovedFromGroup
+                        {
+                            GroupId = channelId,
+                            GroupName = channel.Name,
+                            RemoverId = currentUserId,
+                            RemoverName =
+                                currentUser.Information.FirstName
+                                + " "
+                                + currentUser.Information.LastName,
+                            RemoverAvatar = currentUser.Information.Picture
+                        }
+                    }
+                ),
+                UserNotifications = new List<UserNotification>()
+            };
+
             foreach (var userId in userIds)
             {
                 var member = channel.ChannelMembers.FirstOrDefault(x => x.UserId == userId);
@@ -545,11 +632,39 @@ public class ChannelService : BaseService, IChannelService
                 {
                     throw new Exception($"User {userId} is not in this channel");
                 }
+                notification.UserNotifications.Add(
+                    new UserNotification
+                    {
+                        UserId = userId,
+                        Status = (short)NOTIFICATION_STATUS.PENDING,
+                        SendAt = DateTime.UtcNow
+                    }
+                );
 
                 await _unitOfWork.ChannelMembers.DeleteAsync(member);
             }
             await _unitOfWork.SaveChangeAsync();
-            _backgroundJobClient.Enqueue(() => RemoveUsersFromChannelHub(channelId, userIds));
+
+            try
+            {
+                notification = await _unitOfWork.Notifications.AddAsync(notification);
+                await _unitOfWork.SaveChangeAsync();
+                _backgroundJobClient.Enqueue(
+                    () => _notificationService.SendNotificationAsync(notification.Id)
+                );
+                _backgroundJobClient.Enqueue(
+                    () => _hubService.RemoveUsersFromChannelHub(channelId, userIds)
+                );
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation(
+                    "[{_className}][{method}] Error: {message}",
+                    _className,
+                    method,
+                    e.Message
+                );
+            }
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
@@ -680,17 +795,17 @@ public class ChannelService : BaseService, IChannelService
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
     }
 
-    public async Task<IEnumerable<UserDto2>> GetMembersbyRoleIdAsync(Guid channelId, Guid roleid)
+    public async Task<IEnumerable<UserDto2>> GetMembersByRoleIdAsync(Guid channelId, Guid roleId)
     {
         var method = GetActualAsyncMethodName();
         _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-        var isRoleExist = await _unitOfWork.Channels.CheckIsExistRole(channelId, roleid);
+        var isRoleExist = await _unitOfWork.Channels.CheckIsExistRole(channelId, roleId);
         var currentUserId = Guid.Parse(
             _currentUser.UserId ?? throw new UnauthorizedAccessException()
         );
         if (!isRoleExist)
         {
-            throw new NotFoundException<ChannelRole>(roleid.ToString());
+            throw new NotFoundException<ChannelRole>(roleId.ToString());
         }
         var isMember = await _unitOfWork.Channels.CheckIsMemberAsync(channelId, currentUserId);
 
@@ -703,7 +818,7 @@ public class ChannelService : BaseService, IChannelService
             .Queryable()
             .Include(x => x.User)
             .ThenInclude(x => x.Information)
-            .Where(x => x.ChannelId == channelId && x.RoleId == roleid)
+            .Where(x => x.ChannelId == channelId && x.RoleId == roleId)
             .ToListAsync();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
         return _mapper.Map<IEnumerable<UserDto2>>(members.Select(x => x.User));
@@ -738,7 +853,10 @@ public class ChannelService : BaseService, IChannelService
         return _mapper.Map<IEnumerable<UserDto2>>(members.Select(x => x.User));
     }
 
-    public async Task<IEnumerable<UserDto2>> GetMembersThatNotInTheChannel(Guid workspaceId, Guid channelId)
+    public async Task<IEnumerable<UserDto2>> GetMembersThatNotInTheChannel(
+        Guid workspaceId,
+        Guid channelId
+    )
     {
         var method = GetActualAsyncMethodName();
         _logger.LogInformation("[{_className}][{method}] Start", _className, method);
@@ -760,10 +878,7 @@ public class ChannelService : BaseService, IChannelService
             _currentUser.UserId ?? throw new UnauthorizedAccessException()
         );
 
-        var isMember = await _unitOfWork.Workspaces.CheckIsMemberAsync(
-            workspaceId,
-            currentUserId
-        );
+        var isMember = await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, currentUserId);
 
         if (!isMember)
         {
