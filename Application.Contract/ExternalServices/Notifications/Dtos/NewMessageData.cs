@@ -1,4 +1,4 @@
-namespace PBL6.Application.Contract.Notifications.Dtos
+namespace PBL6.Application.Contract.ExternalServices.Notifications.Dtos
 {
     public class NewMessageData
     {

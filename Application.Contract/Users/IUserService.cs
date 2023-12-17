@@ -1,4 +1,3 @@
-using Application.Contract.Users.Dtos;
 using PBL6.Application.Contract.Users.Dtos;
 
 namespace PBL6.Application.Contract.Users

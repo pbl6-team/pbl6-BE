@@ -5,11 +5,13 @@ using Microsoft.Extensions.DependencyInjection;
 using PBL6.Application.Contract.Channels;
 using PBL6.Application.Contract.Chats;
 using PBL6.Application.Contract.Common;
+using PBL6.Application.Contract.ExternalServices.Notifications;
 using PBL6.Application.Contract.Users;
 using PBL6.Application.Contract.Workspaces;
+using PBL6.Application.ExternalServices;
 using PBL6.Application.Services;
 using PBL6.Common;
-using workspace.PBL6.Application.Services;
+using PBL6.Application.Services;
 
 namespace PBL6.Application
 {

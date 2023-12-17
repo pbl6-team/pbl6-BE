@@ -12,7 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using PBL6.Application.Contract.Mails;
+using PBL6.Application.Contract.ExternalServices.Mails;
 
 namespace PBL6.Application.Services
 {

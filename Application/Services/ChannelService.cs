@@ -1,13 +1,12 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using Application.Contract.Channels.Dtos;
-using Application.Contract.Users.Dtos;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PBL6.Application.Contract.Channels;
 using PBL6.Application.Contract.Channels.Dtos;
-using PBL6.Application.Contract.Notifications.Dtos;
+using PBL6.Application.Contract.ExternalServices.Notifications.Dtos;
+using PBL6.Application.Contract.Users.Dtos;
 using PBL6.Application.Contract.Workspaces.Dtos;
 using PBL6.Common.Enum;
 using PBL6.Common.Exceptions;

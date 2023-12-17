@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Application.Contract.Users.Dtos;
+namespace PBL6.Application.Contract.Users.Dtos;
 
 public class UpdateUserDto
 {

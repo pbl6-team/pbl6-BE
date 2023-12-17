@@ -1,15 +1,12 @@
 using AutoMapper;
 using PBL6.Application.Contract;
-using PBL6.Domain.Models;
 using PBL6.Domain.Models.Common;
 using PBL6.Domain.Models.Users;
 using PBL6.Application.Contract.Workspaces.Dtos;
 using PBL6.Application.Contract.Channels.Dtos;
 using PBL6.Application.Contract.Users.Dtos;
-using Application.Contract.Users.Dtos;
 using PBL6.Application.Contract.Chats.Dtos;
 using Application.Contract.Workspaces.Dtos;
-using Application.Contract.Channels.Dtos;
 
 namespace PBL6.Application
 {

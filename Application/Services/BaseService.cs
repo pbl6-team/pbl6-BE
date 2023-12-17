@@ -1,13 +1,11 @@
-using Application.Services;
 using AutoMapper;
 using Hangfire;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PBL6.Application.Contract.Common;
-using PBL6.Application.Hubs;
+using PBL6.Application.Contract.ExternalServices.Notifications;
 using PBL6.Domain.Data;
 
 namespace PBL6.Application.Services

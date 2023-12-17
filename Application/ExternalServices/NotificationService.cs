@@ -3,11 +3,11 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using OneSignalApi.Api;
 using OneSignalApi.Client;
+using PBL6.Application.Contract.ExternalServices.Notifications;
 using PBL6.Common.Enum;
 using PBL6.Domain.Data;
-using PBL6.Domain.Models.Users;
 
-namespace Application.Services
+namespace PBL6.Application.ExternalServices
 {
     public class NotificationService: INotificationService
     {

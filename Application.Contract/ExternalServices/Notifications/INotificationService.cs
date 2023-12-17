@@ -1,4 +1,4 @@
-namespace Application.Services
+namespace PBL6.Application.Contract.ExternalServices.Notifications
 {
     public interface INotificationService
     {

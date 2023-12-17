@@ -3,8 +3,8 @@ using PBL6.Application.Filters;
 using PBL6.Application.Contract.Workspaces;
 using PBL6.Application.Contract.Workspaces.Dtos;
 using PBL6.Common.Consts;
-using Application.Contract.Users.Dtos;
 using PBL6.API.Filters;
+using PBL6.Application.Contract.Users.Dtos;
 
 namespace PBL6.API.Controllers.Workspaces
 {

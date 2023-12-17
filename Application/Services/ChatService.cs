@@ -13,7 +13,7 @@ using PBL6.Common.Exceptions;
 using PBL6.Common.Functions;
 using PBL6.Domain.Models.Users;
 
-namespace workspace.PBL6.Application.Services
+namespace PBL6.Application.Services
 {
     public class ChatService : BaseService, IChatService
     {
