@@ -368,7 +368,7 @@ namespace PBL6.Application.Services
                             { "Avatar", $"{currentUser.Information.Picture}" }
                         }
                     );
-                    var userIds = (await _unitOfWork.Channels.GetUserIds(currentUserId))
+                    var userIds = (await _unitOfWork.Channels.GetUserIds(input.ReceiverId))
                         .Where(x => x != currentUserId)
                         .ToList();
                     foreach (var userId in userIds)
@@ -385,11 +385,14 @@ namespace PBL6.Application.Services
                             }
                         );
                     }
-                    notification = await _unitOfWork.Notifications.AddAsync(notification);
-                    await _unitOfWork.SaveChangeAsync();
-                    _backgroundJobClient.Enqueue(
-                        () => _notificationService.SendNotificationAsync(notification.Id)
-                    );
+                    if (notification.UserNotifications.Any())
+                    {
+                        notification = await _unitOfWork.Notifications.AddAsync(notification);
+                        await _unitOfWork.SaveChangeAsync();
+                        _backgroundJobClient.Enqueue(
+                            () => _notificationService.SendNotificationAsync(notification.Id)
+                        );
+                    }
                 }
                 catch (Exception e)
                 {
