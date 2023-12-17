@@ -196,14 +196,17 @@ public class ChannelService : BaseService, IChannelService
             await _unitOfWork.SaveChangeAsync();
             try
             {
-                notification = await _unitOfWork.Notifications.AddAsync(notification);
-                await _unitOfWork.SaveChangeAsync();
-                _backgroundJobClient.Enqueue(
-                    () => _notificationService.SendNotificationAsync(notification.Id)
-                );
-                _backgroundJobClient.Enqueue(
-                    () => _hubService.AddUsersToChannelHub(channelId, userIds)
-                );
+                if (notification.UserNotifications.Any())
+                {
+                    notification = await _unitOfWork.Notifications.AddAsync(notification);
+                    await _unitOfWork.SaveChangeAsync();
+                    _backgroundJobClient.Enqueue(
+                        () => _notificationService.SendNotificationAsync(notification.Id)
+                    );
+                    _backgroundJobClient.Enqueue(
+                        () => _hubService.AddUsersToChannelHub(channelId, userIds)
+                    );
+                }
             }
             catch (Exception e)
             {
@@ -681,14 +684,17 @@ public class ChannelService : BaseService, IChannelService
 
             try
             {
-                notification = await _unitOfWork.Notifications.AddAsync(notification);
-                await _unitOfWork.SaveChangeAsync();
-                _backgroundJobClient.Enqueue(
-                    () => _notificationService.SendNotificationAsync(notification.Id)
-                );
-                _backgroundJobClient.Enqueue(
-                    () => _hubService.RemoveUsersFromChannelHub(channelId, userIds)
-                );
+                if (notification.UserNotifications.Any())
+                {
+                    notification = await _unitOfWork.Notifications.AddAsync(notification);
+                    await _unitOfWork.SaveChangeAsync();
+                    _backgroundJobClient.Enqueue(
+                        () => _notificationService.SendNotificationAsync(notification.Id)
+                    );
+                    _backgroundJobClient.Enqueue(
+                        () => _hubService.RemoveUsersFromChannelHub(channelId, userIds)
+                    );
+                }
             }
             catch (Exception e)
             {
