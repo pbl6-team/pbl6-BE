@@ -40,7 +40,8 @@ namespace PBL6.Application.ExternalServices
             Dictionary<string, string> data = null,
             DateTime? sendAfter = null,
             string icon = null,
-            string url = null
+            string url = null,
+            string avatar = null
           )
         {
             try
@@ -55,7 +56,11 @@ namespace PBL6.Application.ExternalServices
                     Subtitle = new OneSignalApi.Model.StringMap(en: subtitle),
                     Data = data,
                     WebUrl = url ?? _config["BaseUrl"],
-                    SendAfter = sendAfter
+                    SendAfter = sendAfter,
+                    SmallIcon = avatar,
+                    LargeIcon = avatar,
+                    ChromeWebImage = avatar,
+                    ChromeWebIcon = avatar,
                 };
 
                 if(icon != null && _config["OneSignal:SmallIcon"] != null)
@@ -99,6 +104,7 @@ namespace PBL6.Application.ExternalServices
                 var data = JsonConvert.DeserializeObject<Dictionary<string, string>>(notification.Data);
                 var url = data.TryGetValue("Url", out var u) ? u : null;
                 url ??= $"{_config["BaseUrl"]}/notification/{notification.Id}";
+                var avatar = data.TryGetValue("Avatar", out var a) ? a : null;
                 data.Remove("notificationId");
                 data.TryAdd("notificationId", notification.Id.ToString());
                 var result = await SendNotificationAsync(
@@ -110,7 +116,8 @@ namespace PBL6.Application.ExternalServices
                     data,
                     notification.TimeToSend < DateTime.Now ? null : notification.TimeToSend,
                     data.TryGetValue("icon", out var icon) ? icon : null,
-                    url
+                    url,
+                    avatar
                 );
                 if (!result.IsNullOrEmpty())
                 {

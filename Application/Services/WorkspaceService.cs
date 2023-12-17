@@ -448,7 +448,8 @@ namespace PBL6.Application.Services
                                         InviterAvatar = currentUser.Information.Picture,
                                     }
                                 )
-                            }
+                            },
+                            { "Avatar", $"{currentUser.Information.Picture}" }
                         }
                     ),
                     UserNotifications = new List<UserNotification>()
@@ -569,7 +570,8 @@ namespace PBL6.Application.Services
                                         RemoverAvatar = currentUser.Information.Picture,
                                     }
                                 )
-                            }
+                            },
+                            { "Avatar", $"{currentUser.Information.Picture}" }
                         }
                     ),
                     UserNotifications = new List<UserNotification>()

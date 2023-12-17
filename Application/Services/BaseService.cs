@@ -5,8 +5,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PBL6.Application.Contract.Common;
-using PBL6.Application.Contract.ExternalServices.Notifications;
+using PBL6.Application.ExternalServices;
 using PBL6.Domain.Data;
+using IExternalNotificationService = PBL6.Application.Contract.ExternalServices.Notifications.INotificationService; 
 
 namespace PBL6.Application.Services
 {
@@ -21,7 +22,7 @@ namespace PBL6.Application.Services
         protected readonly IWebHostEnvironment _hostingEnvironment;
         protected readonly IFileService _fileService;
         protected readonly IBackgroundJobClient _backgroundJobClient;
-        protected readonly INotificationService _notificationService;
+        protected readonly IExternalNotificationService _notificationService;
         protected readonly IHubService _hubService;
 
         public BaseService(IServiceProvider serviceProvider)
@@ -35,7 +36,7 @@ namespace PBL6.Application.Services
             _hostingEnvironment = serviceProvider.GetService<IWebHostEnvironment>();
             _fileService = serviceProvider.GetService<IFileService>();
             _backgroundJobClient = serviceProvider.GetService<IBackgroundJobClient>();
-            _notificationService = serviceProvider.GetService<INotificationService>();
+            _notificationService = serviceProvider.GetService<IExternalNotificationService>();
             _hubService = serviceProvider.GetService<IHubService>();
         }
     }
