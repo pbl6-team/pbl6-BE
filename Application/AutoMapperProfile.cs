@@ -1,15 +1,14 @@
 using AutoMapper;
 using PBL6.Application.Contract;
-using PBL6.Domain.Models;
 using PBL6.Domain.Models.Common;
 using PBL6.Domain.Models.Users;
 using PBL6.Application.Contract.Workspaces.Dtos;
 using PBL6.Application.Contract.Channels.Dtos;
 using PBL6.Application.Contract.Users.Dtos;
-using Application.Contract.Users.Dtos;
 using PBL6.Application.Contract.Chats.Dtos;
 using Application.Contract.Workspaces.Dtos;
-using Application.Contract.Channels.Dtos;
+using PBL6.Application.Contract.Notifications.Dtos;
+using PBL6.Common.Enum;
 
 namespace PBL6.Application
 {
@@ -118,14 +117,16 @@ namespace PBL6.Application
                 .ForPath(x => x.Information.Phone, opt => opt.MapFrom(src => src.Phone))
                 .ForPath(x => x.Information.BirthDay, opt => opt.MapFrom(src => src.BirthDay));
 
-
             CreateMap<Message, MessageDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(x => x.IsEdited, opt => opt.MapFrom(src => src.UpdatedAt != null))
                 .ForMember(x => x.SendAt, opt => opt.MapFrom(src => src.CreatedAt))
                 .ForMember(x => x.IsChannel, opt => opt.MapFrom(src => src.ToChannelId != null))
                 .ForMember(x => x.ChildCount, opt => opt.MapFrom(src => src.Children.Count))
-                .ForMember(x => x.ReceiverId, opt => opt.MapFrom(src => src.ToChannelId ?? src.ToUserId))
+                .ForMember(
+                    x => x.ReceiverId,
+                    opt => opt.MapFrom(src => src.ToChannelId ?? src.ToUserId)
+                )
                 .ForMember(
                     x => x.SenderAvatar,
                     opt => opt.MapFrom(src => src.Sender.Information.Picture)
@@ -173,24 +174,48 @@ namespace PBL6.Application
             CreateMap<WorkspaceMember, WorkspaceUserDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.UserId))
                 .ForMember(x => x.Username, opt => opt.MapFrom(src => src.User.Username))
-                .ForMember(x => x.FirstName, opt => opt.MapFrom(src => src.User.Information.FirstName))
-                .ForMember(x => x.LastName, opt => opt.MapFrom(src => src.User.Information.LastName))
+                .ForMember(
+                    x => x.FirstName,
+                    opt => opt.MapFrom(src => src.User.Information.FirstName)
+                )
+                .ForMember(
+                    x => x.LastName,
+                    opt => opt.MapFrom(src => src.User.Information.LastName)
+                )
                 .ForMember(x => x.Gender, opt => opt.MapFrom(src => src.User.Information.Gender))
                 .ForMember(x => x.Phone, opt => opt.MapFrom(src => src.User.Information.Phone))
-                .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.User.Information.BirthDay))
+                .ForMember(
+                    x => x.BirthDay,
+                    opt => opt.MapFrom(src => src.User.Information.BirthDay)
+                )
                 .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.User.Information.Picture))
                 .ForMember(x => x.Role, opt => opt.MapFrom(src => src.WorkspaceRole));
 
-                CreateMap<ChannelMember, ChannelUserDto>()
-            .ForMember(x => x.Id, opt => opt.MapFrom(src => src.UserId))
-            .ForMember(x => x.Username, opt => opt.MapFrom(src => src.User.Username))
-            .ForMember(x => x.FirstName, opt => opt.MapFrom(src => src.User.Information.FirstName))
-            .ForMember(x => x.LastName, opt => opt.MapFrom(src => src.User.Information.LastName))
-            .ForMember(x => x.Gender, opt => opt.MapFrom(src => src.User.Information.Gender))
-            .ForMember(x => x.Phone, opt => opt.MapFrom(src => src.User.Information.Phone))
-            .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.User.Information.BirthDay))
-            .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.User.Information.Picture))
-            .ForMember(x => x.Role, opt => opt.MapFrom(src => src.ChannelRole));
+            CreateMap<ChannelMember, ChannelUserDto>()
+                .ForMember(x => x.Id, opt => opt.MapFrom(src => src.UserId))
+                .ForMember(x => x.Username, opt => opt.MapFrom(src => src.User.Username))
+                .ForMember(
+                    x => x.FirstName,
+                    opt => opt.MapFrom(src => src.User.Information.FirstName)
+                )
+                .ForMember(
+                    x => x.LastName,
+                    opt => opt.MapFrom(src => src.User.Information.LastName)
+                )
+                .ForMember(x => x.Gender, opt => opt.MapFrom(src => src.User.Information.Gender))
+                .ForMember(x => x.Phone, opt => opt.MapFrom(src => src.User.Information.Phone))
+                .ForMember(
+                    x => x.BirthDay,
+                    opt => opt.MapFrom(src => src.User.Information.BirthDay)
+                )
+                .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.User.Information.Picture))
+                .ForMember(x => x.Role, opt => opt.MapFrom(src => src.ChannelRole));
+            
+            CreateMap<Notification, NotificationDto>()
+                .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(x => x.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+                .ForMember(x => x.IsRead, opt => opt.MapFrom(src => src.UserNotifications.First().Status == ((short)NOTIFICATION_STATUS.READ)))
+                .ForMember(x => x.Data, opt => opt.MapFrom(src => src.Data));
         }
     }
 }

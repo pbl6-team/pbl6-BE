@@ -1,4 +1,4 @@
-namespace Application.Services
+namespace PBL6.Application.Contract.ExternalServices.Notifications
 {
     public interface INotificationService
     {
@@ -11,7 +11,8 @@ namespace Application.Services
             Dictionary<string, string> data = null,
             DateTime? sendAfter = null,
             string icon = null,
-            string url = null
+            string url = null,
+            string avatar = null
         );
         Task SendNotificationAsync(Guid notificationId);
     }

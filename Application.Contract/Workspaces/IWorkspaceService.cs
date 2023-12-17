@@ -1,5 +1,5 @@
-using Application.Contract.Users.Dtos;
 using Application.Contract.Workspaces.Dtos;
+using PBL6.Application.Contract.Users.Dtos;
 using PBL6.Application.Contract.Workspaces.Dtos;
 
 namespace PBL6.Application.Contract.Workspaces

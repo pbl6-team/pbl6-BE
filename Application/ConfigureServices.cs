@@ -9,7 +9,11 @@ using PBL6.Application.Contract.Users;
 using PBL6.Application.Contract.Workspaces;
 using PBL6.Application.Services;
 using PBL6.Common;
-using workspace.PBL6.Application.Services;
+using INotificationService = PBL6.Application.Services.INotificationService;
+using NotificationService = PBL6.Application.Services.NotificationService;
+using ExternalNotificationService = PBL6.Application.ExternalServices.NotificationService;
+using IExternalNotificationService = PBL6.Application.Contract.ExternalServices.Notifications.INotificationService;
+using PBL6.Application.ExternalServices;
 
 namespace PBL6.Application
 {
@@ -27,7 +31,8 @@ namespace PBL6.Application
             services.AddScoped<IChatService, ChatService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<INotificationService, NotificationService>();
-            
+
+            services.AddScoped<IExternalNotificationService, ExternalNotificationService>();
             services.AddTransient<IMailService, MailService>();
             services.AddTransient<IFileService, FileService>();
 

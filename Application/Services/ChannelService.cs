@@ -1,13 +1,12 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using Application.Contract.Channels.Dtos;
-using Application.Contract.Users.Dtos;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PBL6.Application.Contract.Channels;
 using PBL6.Application.Contract.Channels.Dtos;
-using PBL6.Application.Contract.Notifications.Dtos;
+using PBL6.Application.Contract.ExternalServices.Notifications.Dtos;
+using PBL6.Application.Contract.Users.Dtos;
 using PBL6.Application.Contract.Workspaces.Dtos;
 using PBL6.Common.Enum;
 using PBL6.Common.Exceptions;
@@ -34,7 +33,9 @@ public class ChannelService : BaseService, IChannelService
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
             var channel = _mapper.Map<Channel>(createUpdateChannelDto);
-            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedException("User is not logged in"));
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+            );
 
             var workspace = await _unitOfWork.Workspaces
                 .Queryable()
@@ -104,7 +105,9 @@ public class ChannelService : BaseService, IChannelService
                 .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
                 .Where(x => x.Id == channelId)
                 .FirstOrDefaultAsync();
-            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedException("User is not logged in"));
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+            );
             var currentUser = await _unitOfWork.Users.GetUserByIdAsync(currentUserId);
             if (channel is null)
             {
@@ -146,7 +149,8 @@ public class ChannelService : BaseService, IChannelService
                         {
                             "Url",
                             $"{_config["BaseUrl"]}/Workspace/{channel.WorkspaceId}/{channelId}"
-                        }
+                        },
+                        { "Avatar", $"{currentUser.Information.Picture}" }
                     }
                 ),
                 UserNotifications = new List<UserNotification>()
@@ -160,7 +164,9 @@ public class ChannelService : BaseService, IChannelService
                     .FirstOrDefaultAsync();
                 if (!workspace.Members.Any(x => x.UserId == userId))
                 {
-                    throw new BadRequestException($"User {userId} is not in the workspace of this channel");
+                    throw new BadRequestException(
+                        $"User {userId} is not in the workspace of this channel"
+                    );
                 }
 
                 var user = await _unitOfWork.Users.FindAsync(userId);
@@ -262,7 +268,9 @@ public class ChannelService : BaseService, IChannelService
             if (channel is null)
                 throw new NotFoundException<Channel>(channelId.ToString());
 
-            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedException("User is not logged in"));
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+            );
 
             if (!await _unitOfWork.Channels.CheckIsMemberAsync(channelId, currentUserId))
             {
@@ -321,7 +329,9 @@ public class ChannelService : BaseService, IChannelService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedException("User is not logged in"));
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+            );
 
             var isMember = await _unitOfWork.Workspaces.CheckIsMemberAsync(
                 workspaceId,
@@ -371,7 +381,9 @@ public class ChannelService : BaseService, IChannelService
             if (channel is null)
                 throw new NotFoundException<Channel>(channelId.ToString());
 
-            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedException("User is not logged in"));
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+            );
 
             if (!await _unitOfWork.Channels.CheckIsMemberAsync(channelId, currentUserId))
             {
@@ -406,7 +418,9 @@ public class ChannelService : BaseService, IChannelService
                 .Where(x => x.Name.Contains(channelName))
                 .ToListAsync();
 
-            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedException("User is not logged in"));
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+            );
             channels = channels
                 .Where(x => x.ChannelMembers.Any(c => c.UserId == currentUserId))
                 .ToList();
@@ -595,7 +609,9 @@ public class ChannelService : BaseService, IChannelService
                 .Where(x => x.Id == channelId)
                 .FirstOrDefaultAsync();
 
-            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedException("User is not logged in"));
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+            );
             var currentUser = await _unitOfWork.Users.GetUserByIdAsync(currentUserId);
             if (channel is null)
             {
@@ -636,7 +652,8 @@ public class ChannelService : BaseService, IChannelService
                         {
                             "Url",
                             $"{_config["BaseUrl"]}/Workspace/{channel.WorkspaceId}/{channelId}"
-                        }
+                        },
+                        { "Avatar", $"{currentUser.Information.Picture}" }
                     }
                 ),
                 UserNotifications = new List<UserNotification>()
@@ -742,7 +759,9 @@ public class ChannelService : BaseService, IChannelService
                 .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
                 .Where(x => x.Id == channelId)
                 .FirstOrDefaultAsync();
-            var currentUserId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedException("User is not logged in"));
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+            );
 
             if (channel is null)
             {

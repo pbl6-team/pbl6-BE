@@ -12,9 +12,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using PBL6.Application.Contract.Mails;
+using PBL6.Application.Contract.ExternalServices.Mails;
 
-namespace PBL6.Application.Services
+namespace PBL6.Application.ExternalServices
 {
     public interface IMailService
     {
@@ -24,7 +24,6 @@ namespace PBL6.Application.Services
 
     public class MailService : IMailService
     {
-
         private readonly ILogger<MailService> _logger;
         private readonly IConfiguration _configuration;
         private readonly IRazorViewEngine _viewEngine;
@@ -41,13 +40,21 @@ namespace PBL6.Application.Services
         )
         {
             _logger = logger;
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _configuration =
+                configuration ?? throw new ArgumentNullException(nameof(configuration));
             _viewEngine = viewEngine ?? throw new ArgumentNullException(nameof(viewEngine));
-            _tempDataProvider = tempDataProvider ?? throw new ArgumentNullException(nameof(tempDataProvider));
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _tempDataProvider =
+                tempDataProvider ?? throw new ArgumentNullException(nameof(tempDataProvider));
+            _serviceProvider =
+                serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
-        public async Task<bool> Send(string toEmail, string subject, string template, string jsonData)
+        public async Task<bool> Send(
+            string toEmail,
+            string subject,
+            string template,
+            string jsonData
+        )
         {
             try
             {
@@ -55,7 +62,10 @@ namespace PBL6.Application.Services
                 {
                     return false;
                 }
-                string body = await RenderPartialToStringAsync("Views/Templates/" + template, new MailData() { JsonData = jsonData });
+                string body = await RenderPartialToStringAsync(
+                    "Views/Templates/" + template,
+                    new MailData() { JsonData = jsonData }
+                );
                 var mailConfig = _configuration.GetSection("Mail");
                 smtpClient ??= new SmtpClient
                 {
@@ -63,21 +73,26 @@ namespace PBL6.Application.Services
                     Host = mailConfig["Host"],
                     Port = int.Parse(mailConfig["Port"]),
                     UseDefaultCredentials = false,
-                    Credentials = new NetworkCredential(mailConfig["Email"], mailConfig["Password"]),
+                    Credentials = new NetworkCredential(
+                        mailConfig["Email"],
+                        mailConfig["Password"]
+                    ),
                     DeliveryMethod = SmtpDeliveryMethod.Network
                 };
                 var msg = new MailMessage
                 {
                     IsBodyHtml = true,
                     BodyEncoding = Encoding.UTF8,
-                    From = string.IsNullOrEmpty(mailConfig["Name"]) ? new MailAddress(mailConfig["Email"]) : new MailAddress(mailConfig["Email"], mailConfig["Name"]),
+                    From = string.IsNullOrEmpty(mailConfig["Name"])
+                        ? new MailAddress(mailConfig["Email"])
+                        : new MailAddress(mailConfig["Email"], mailConfig["Name"]),
                     Subject = subject,
                     Body = body,
                     Priority = MailPriority.Normal,
                 };
                 msg.To.Add(toEmail);
                 await smtpClient.SendMailAsync(msg);
-                
+
                 return true;
             }
             catch (Exception e)
@@ -87,7 +102,10 @@ namespace PBL6.Application.Services
             }
         }
 
-        public async Task<string> RenderPartialToStringAsync<TModel>(string partialName, TModel model)
+        public async Task<string> RenderPartialToStringAsync<TModel>(
+            string partialName,
+            TModel model
+        )
         {
             var actionContext = GetActionContext();
             var partial = FindView(actionContext, partialName);
@@ -97,13 +115,12 @@ namespace PBL6.Application.Services
                 partial,
                 new ViewDataDictionary<TModel>(
                     metadataProvider: new EmptyModelMetadataProvider(),
-                    modelState: new ModelStateDictionary())
+                    modelState: new ModelStateDictionary()
+                )
                 {
                     Model = model
                 },
-                new TempDataDictionary(
-                    actionContext.HttpContext,
-                    _tempDataProvider),
+                new TempDataDictionary(actionContext.HttpContext, _tempDataProvider),
                 output,
                 new HtmlHelperOptions()
             );
@@ -124,19 +141,23 @@ namespace PBL6.Application.Services
             {
                 return findPartialResult.View;
             }
-            var searchedLocations = getPartialResult.SearchedLocations.Concat(findPartialResult.SearchedLocations);
+            var searchedLocations = getPartialResult.SearchedLocations.Concat(
+                findPartialResult.SearchedLocations
+            );
             var errorMessage = string.Join(
                 Environment.NewLine,
-                new[] { $"Unable to find partial '{partialName}'. The following locations were searched:" }.Concat(searchedLocations)); ;
+                new[]
+                {
+                    $"Unable to find partial '{partialName}'. The following locations were searched:"
+                }.Concat(searchedLocations)
+            );
+            ;
             throw new InvalidOperationException(errorMessage);
         }
 
         private ActionContext GetActionContext()
         {
-            var httpContext = new DefaultHttpContext
-            {
-                RequestServices = _serviceProvider
-            };
+            var httpContext = new DefaultHttpContext { RequestServices = _serviceProvider };
 
             return new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
         }
