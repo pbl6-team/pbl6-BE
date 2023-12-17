@@ -1,6 +1,4 @@
-using PBL6.Application.Contract.Channels.Dtos;
-
-namespace Application.Contract.Channels.Dtos;
+namespace PBL6.Application.Contract.Channels.Dtos;
 
 public class ChannelUserDto
 {
@@ -14,5 +12,4 @@ public class ChannelUserDto
     public string Picture { get; set; }
     public DateTimeOffset BirthDay { get; set; }
     public ChannelRoleDto Role { get; set; }
-
 }

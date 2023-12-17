@@ -6,14 +6,13 @@ using Newtonsoft.Json;
 using PBL6.Application.Contract.Chats;
 using PBL6.Application.Contract.Chats.Dtos;
 using PBL6.Application.Hubs;
-using PBL6.Application.Services;
 using PBL6.Common.Consts;
 using PBL6.Common.Enum;
 using PBL6.Common.Exceptions;
 using PBL6.Common.Functions;
 using PBL6.Domain.Models.Users;
 
-namespace workspace.PBL6.Application.Services
+namespace PBL6.Application.Services
 {
     public class ChatService : BaseService, IChatService
     {
@@ -319,24 +318,6 @@ namespace workspace.PBL6.Application.Services
             };
             if (input.IsChannel)
             {
-                notification.Data = JsonConvert.SerializeObject(
-                    new Dictionary<string, string>
-                    {
-                        { "Type", ((short)NOTIFICATION_TYPE.NEW_MESSAGE).ToString() },
-                        {
-                            "Detail",
-                            JsonConvert.SerializeObject(
-                                new
-                                {
-                                    ChannelId = input.ReceiverId,
-                                    MessageId = input.ReplyTo,
-                                    IsChannel = true
-                                }
-                            )
-                        },
-                        { "Url", $"{_config["BaseUrl"]}/channel/{input.ReceiverId}" }
-                    }
-                );
                 var isMember = await _unitOfWork.Channels.CheckIsMemberAsync(
                     input.ReceiverId,
                     currentUserId
@@ -380,7 +361,11 @@ namespace workspace.PBL6.Application.Services
                                     }
                                 )
                             },
-                            { "Url", $"{_config["BaseUrl"]}/channel/{input.ReceiverId}" }
+                            {
+                                "Url",
+                                $"{_config["BaseUrl"]}/Workspace/{channel.WorkspaceId}/{input.ReceiverId}"
+                            },
+                            { "Avatar", $"{currentUser.Information.Picture}" }
                         }
                     );
                     var userIds = (await _unitOfWork.Channels.GetUserIds(currentUserId))
@@ -462,7 +447,8 @@ namespace workspace.PBL6.Application.Services
                                         }
                                     )
                                 },
-                                { "Url", $"{_config["BaseUrl"]}/colleague-chat/{currentUserId}" }
+                                { "Url", $"{_config["BaseUrl"]}/colleague-chat/{currentUserId}" },
+                                { "Avatar", $"{currentUser.Information.Picture}" }
                             }
                         );
                         notification.UserNotifications.Add(

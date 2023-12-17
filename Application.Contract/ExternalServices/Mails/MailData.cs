@@ -1,4 +1,4 @@
-namespace PBL6.Application.Contract.Mails
+namespace PBL6.Application.Contract.ExternalServices.Mails
 {
     public class MailData
     {
