@@ -385,11 +385,14 @@ namespace PBL6.Application.Services
                             }
                         );
                     }
-                    notification = await _unitOfWork.Notifications.AddAsync(notification);
-                    await _unitOfWork.SaveChangeAsync();
-                    _backgroundJobClient.Enqueue(
-                        () => _notificationService.SendNotificationAsync(notification.Id)
-                    );
+                    if (notification.UserNotifications.Any())
+                    {
+                        notification = await _unitOfWork.Notifications.AddAsync(notification);
+                        await _unitOfWork.SaveChangeAsync();
+                        _backgroundJobClient.Enqueue(
+                            () => _notificationService.SendNotificationAsync(notification.Id)
+                        );
+                    }
                 }
                 catch (Exception e)
                 {
