@@ -179,5 +179,83 @@ namespace PBL6.Infrastructure.Repositories
                 .Take(count)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Message>> GetPinMessagesOfChannelAsync(
+            Guid currentUserId,
+            Guid channelId,
+            int offset,
+            int limit
+        )
+        {
+            return await _apiDbContext.Messages
+                .Include(x => x.MessageTrackings)
+                .ThenInclude(x => x.User)
+                .ThenInclude(x => x.Information)
+                .Include(x => x.Sender)
+                .ThenInclude(x => x.Information)
+                .Include(x => x.Files)
+                .Include(
+                    x =>
+                        x.Children.Where(
+                            x =>
+                                !x.IsDeleted
+                                && !x.MessageTrackings.Any(
+                                    x => x.UserId == currentUserId && !x.IsDeleted
+                                )
+                        )
+                )
+                .ThenInclude(x => x.MessageTrackings)
+                .AsNoTracking()
+                .Where(
+                    x =>
+                        x.ToChannelId == channelId
+                        && x.IsPined
+                        && !x.IsDeleted
+                        && !x.MessageTrackings.Any(x => x.UserId == currentUserId && x.IsDeleted)
+                )
+                .OrderByDescending(x => x.CreatedAt)
+                .Skip(offset)
+                .Take(limit)
+                .ToListAsync();
+            ;
+        }
+
+        public async Task<IEnumerable<Message>> GetPinMessagesOfUserAsync(Guid currentUserId, Guid UserId, int offset, int limit)
+        {
+            return await _apiDbContext.Messages
+                .Include(x => x.MessageTrackings)
+                .ThenInclude(x => x.User)
+                .ThenInclude(x => x.Information)
+                .Include(x => x.Sender)
+                .ThenInclude(x => x.Information)
+                .Include(x => x.Files)
+                .Include(
+                    x =>
+                        x.Children.Where(
+                            x =>
+                                !x.IsDeleted
+                                && !x.MessageTrackings.Any(
+                                    x => x.UserId == currentUserId && !x.IsDeleted
+                                )
+                        )
+                )
+                .ThenInclude(x => x.MessageTrackings)
+                .AsNoTracking()
+                .Where(
+                    x =>
+                        (
+                            (x.ToUserId == currentUserId && x.CreatedBy == UserId)
+                            || (x.ToUserId == UserId && x.CreatedBy == currentUserId)
+                        )
+                        && x.IsPined
+                        && !x.IsDeleted
+                        && x.ToChannelId == null
+                        && !x.MessageTrackings.Any(x => x.UserId == currentUserId && x.IsDeleted)
+                )
+                .OrderByDescending(x => x.CreatedAt)
+                .Skip(offset)
+                .Take(limit)
+                .ToListAsync();
+        }
     }
 }
