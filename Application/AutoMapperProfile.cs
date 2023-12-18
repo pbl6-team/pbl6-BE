@@ -169,7 +169,8 @@ namespace PBL6.Application
                                             }
                                     )
                         )
-                );
+                )
+                .ForMember(x => x.Files, opt => opt.MapFrom(src => src.Files));
 
             CreateMap<WorkspaceMember, WorkspaceUserDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.UserId))
@@ -210,12 +211,26 @@ namespace PBL6.Application
                 )
                 .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.User.Information.Picture))
                 .ForMember(x => x.Role, opt => opt.MapFrom(src => src.ChannelRole));
-            
+
             CreateMap<Notification, NotificationDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(x => x.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
-                .ForMember(x => x.IsRead, opt => opt.MapFrom(src => src.UserNotifications.First().Status == ((short)NOTIFICATION_STATUS.READ)))
+                .ForMember(
+                    x => x.IsRead,
+                    opt =>
+                        opt.MapFrom(
+                            src =>
+                                src.UserNotifications.First().Status
+                                == ((short)NOTIFICATION_STATUS.READ)
+                        )
+                )
                 .ForMember(x => x.Data, opt => opt.MapFrom(src => src.Data));
+
+            CreateMap<FileDomain, FileInfoDto>()
+                .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(x => x.Name, opt => opt.MapFrom(src => src.Name))
+                .ForMember(x => x.Type, opt => opt.MapFrom(src => src.Type))
+                .ForMember(x => x.Url, opt => opt.MapFrom(src => src.Url));
         }
     }
 }

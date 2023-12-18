@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PBL6.Common;
 using PBL6.Common.Functions;
-using PBL6.Domain.Models;
 using PBL6.Domain.Models.Admins;
 using PBL6.Domain.Models.Common;
 using PBL6.Domain.Models.Users;
@@ -43,6 +42,7 @@ namespace PBL6.Infrastructure.Data
         public DbSet<PermissionsOfChannelRole> PermissionsOfChanelRoles { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<MessageTracking> MessageTrackings { get; set; }
+        public DbSet<FileDomain> Files { get; set; }
 
         public ApiDbContext() { }
 
@@ -190,6 +190,12 @@ namespace PBL6.Infrastructure.Data
                 .HasOne(x => x.Receiver)
                 .WithMany()
                 .HasForeignKey(x => x.ToUserId)
+                .OnDelete(DeleteBehavior.NoAction);
+            
+            modelBuilder.Entity<Message>()
+                .HasMany(x => x.Files)
+                .WithOne(x => x.Message)
+                .HasForeignKey(x => x.MessageId)
                 .OnDelete(DeleteBehavior.NoAction);
         }
 

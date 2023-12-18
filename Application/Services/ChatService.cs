@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PBL6.Application.Contract.Chats;
 using PBL6.Application.Contract.Chats.Dtos;
+using PBL6.Application.Contract.Common;
 using PBL6.Application.Hubs;
 using PBL6.Common.Consts;
 using PBL6.Common.Enum;
@@ -27,6 +28,36 @@ namespace PBL6.Application.Services
         private static string GetActualAsyncMethodName([CallerMemberName] string name = null)
         {
             return name;
+        }
+
+        public async Task DeleteFile(IEnumerable<Guid> ids)
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not authorized")
+            );
+            var currentUser = await _unitOfWork.Users.FindAsync(currentUserId);
+            List<string> urls = new();
+            foreach (var id in ids)
+            {
+                var message = await _unitOfWork.Messages.GetMessageByFileId(id) ?? throw new NotFoundException<FileDomain>(id.ToString());
+                if (message.CreatedBy != currentUserId)
+                {
+                    throw new ForbidException();
+                }
+                var file = message.Files.FirstOrDefault(x => x.Id == id);
+                
+                if (file is not null)
+                {
+                    urls.Add(file.Url);                   
+                    message.Files.Remove(file);
+                    await _unitOfWork.Messages.UpdateAsync(message);
+                }
+            }
+            await _fileService.DeleteFileUrlAsync(urls);
+            await _unitOfWork.SaveChangeAsync();
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
         }
 
         public async Task<MessageDto> DeleteMessageAsync(Guid id, bool isDeleteEveryone = false)
@@ -308,6 +339,21 @@ namespace PBL6.Application.Services
             );
             var currentUser = await _unitOfWork.Users.GetUserByIdAsync(currentUserId);
 
+            List<FileDomain> fileInfos = new();
+            if (input.Files is not null)
+            {
+                foreach (var file in input.Files)
+                {
+                    var fileInfo = new FileDomain
+                    {
+                        Name = file.Name,
+                        Type = file.Type,
+                        Url = file.Url,
+                    };
+                    fileInfos.Add(fileInfo);
+                }
+            }
+
             var notification = new Notification
             {
                 Title = "New message",
@@ -334,7 +380,8 @@ namespace PBL6.Application.Services
                         ToChannelId = input.ReceiverId,
                         ParentId = input.ReplyTo,
                         ToUserId = null,
-                        MessageTrackings = new List<MessageTracking>()
+                        MessageTrackings = new List<MessageTracking>(),
+                        Files = fileInfos
                     };
                 await _unitOfWork.Messages.AddAsync(message);
                 await _unitOfWork.SaveChangeAsync();
@@ -422,7 +469,8 @@ namespace PBL6.Application.Services
                         ToChannelId = null,
                         ParentId = input.ReplyTo,
                         ToUserId = input.ReceiverId,
-                        MessageTrackings = new List<MessageTracking>()
+                        MessageTrackings = new List<MessageTracking>(),
+                        Files = fileInfos
                     };
                 message = await _unitOfWork.Messages.AddAsync(message);
                 await _unitOfWork.SaveChangeAsync();
@@ -514,5 +562,6 @@ namespace PBL6.Application.Services
 
             return messageDto;
         }
+    
     }
 }

@@ -43,11 +43,13 @@ namespace PBL6.Application.Services
 
                 if (workspaceDto.Avatar is not null)
                 {
-                    var imageUrl = await _fileService.UploadImageToImgbb(
-                        workspaceDto.Avatar,
-                        workspace.Id
+                    var filename = workspace.Id.ToString() + Path.GetExtension(
+                        workspaceDto.Avatar.FileName
                     );
-                    workspace.AvatarUrl = imageUrl;
+                    workspace.AvatarUrl = await _fileService.UploadFileGetUrlAsync(
+                        filename,
+                        workspaceDto.Avatar.OpenReadStream()
+                    );
                 }
                 else
                 {
@@ -370,9 +372,12 @@ namespace PBL6.Application.Services
 
                 if (updateAvatarWorkspaceDto.Avatar is not null)
                 {
-                    workspace.AvatarUrl = await _fileService.UploadImageToImgbb(
-                        updateAvatarWorkspaceDto.Avatar,
-                        workspace.Id
+                    var filename = workspace.Id.ToString() + Path.GetExtension(
+                        updateAvatarWorkspaceDto.Avatar.FileName
+                    );
+                    workspace.AvatarUrl = await _fileService.UploadFileGetUrlAsync(
+                        filename,
+                        updateAvatarWorkspaceDto.Avatar.OpenReadStream()
                     );
                 }
                 else
