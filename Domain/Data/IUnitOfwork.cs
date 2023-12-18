@@ -17,6 +17,7 @@ namespace PBL6.Domain.Data
         IChannelPermissionRepository ChannelPermissions { get; }
         IChannelRoleRepository ChannelRoles { get; }
         IMessageRepository Messages { get; }
+        IMessageTrackingRepository MessageTrackings { get; }
         IAdminRepository Admins { get; }
         IAdminTokenRepository AdminTokens { get; }
         IPermissionsOfWorkspaceRoleRepository PermissionsOfWorkspaceRoles { get; }

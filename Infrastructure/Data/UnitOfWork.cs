@@ -28,6 +28,7 @@ namespace PBL6.Infrastructure.Data
         public IPermissionsOfWorkspaceRoleRepository PermissionsOfWorkspaceRoles { get; }
         public IPermissionsOfChannelRoleRepository PermissionsOfChannelRoles { get; }
         public INotificationRepository Notifications { get; }
+        public IMessageTrackingRepository MessageTrackings { get; }
 
         public UnitOfWork(ApiDbContext apiDbContext, ILoggerFactory loggerFactory)
         {
@@ -50,6 +51,7 @@ namespace PBL6.Infrastructure.Data
             PermissionsOfWorkspaceRoles = new PermissionsOfWorkspaceRoleRepository(apiDbContext, logger);
             PermissionsOfChannelRoles = new PermissionsOfChannelRoleRepository(apiDbContext, logger);
             Notifications = new NotificationRepository(apiDbContext, logger);
+            MessageTrackings = new MessageTrackingRepository(apiDbContext, logger);
         }
 
         public async Task SaveChangeAsync()
