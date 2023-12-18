@@ -1,10 +1,7 @@
-using Microsoft.AspNetCore.Http;
-
 namespace PBL6.Application.Contract.Common
 {
     public interface IFileService
     {
-        Task<string> UploadImageToImgbb(IFormFile file, Guid id);
         Task UploadFileAsync(string fileName, Stream stream, string contentType = "");
         Task<(Stream, string)> DownloadFileAsync(string fileName);
         Task<bool> FileExistsAsync(string fileName);

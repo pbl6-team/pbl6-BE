@@ -151,7 +151,7 @@ public class UserService : BaseService, IUserService
                                         .FirstOrDefault(x => !x.IsDeleted && x.Id == userId);
             var file = updateUserPictureDto.Picture;
             var fileName = user.Id + Path.GetExtension(file.FileName);
-            var url = await _fileService.UploadFileGetUrlAsync(fileName, file.OpenReadStream());
+            var url = await _fileService.UploadFileGetUrlAsync(fileName, file.OpenReadStream(), "image/png");
             user.Information.Picture = url;
 
             await _unitOfWork.Users.UpdateAsync(user);

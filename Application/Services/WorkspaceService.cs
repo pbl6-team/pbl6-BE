@@ -48,7 +48,8 @@ namespace PBL6.Application.Services
                     );
                     workspace.AvatarUrl = await _fileService.UploadFileGetUrlAsync(
                         filename,
-                        workspaceDto.Avatar.OpenReadStream()
+                        workspaceDto.Avatar.OpenReadStream(),
+                        "image/png"
                     );
                 }
                 else
@@ -377,7 +378,8 @@ namespace PBL6.Application.Services
                     );
                     workspace.AvatarUrl = await _fileService.UploadFileGetUrlAsync(
                         filename,
-                        updateAvatarWorkspaceDto.Avatar.OpenReadStream()
+                        updateAvatarWorkspaceDto.Avatar.OpenReadStream(),
+                        "image/png"
                     );
                 }
                 else

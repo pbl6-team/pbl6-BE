@@ -1,28 +1,29 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Minio;
 using Minio.DataModel.Args;
 using Minio.Exceptions;
-using Newtonsoft.Json.Linq;
 using PBL6.Application.Contract.Common;
-using PBL6.Common.Functions;
 
 namespace PBL6.Application.Services
 {
     public class FileService : IFileService
     {
         private string BucketName => _config["Minio:BucketName"];
-        private readonly string _baseUrl; 
+        private readonly string _baseUrl;
 
         private readonly IMinioClient _minioClient;
         private readonly IConfiguration _config;
 
-        public FileService(
-            IConfiguration config)
+        public FileService(IConfiguration config)
         {
             _config = config;
-            _baseUrl = $"{(_config["Minio:UseSSL"] == "false" ? "http" : "https")}{_config["Minio:EndPoint"]}/{BucketName}/";
-            _minioClient = new MinioClient().WithEndpoint(_config["Minio:EndPoint"]).WithCredentials(_config["Minio:AccessKey"],  _config["Minio:SecretKey"]).WithSSL().Build();
+            _baseUrl =
+                $"{(_config["Minio:UseSSL"] == "False" ? "http://" : "https://")}{_config["Minio:EndPoint"]}/{BucketName}/";
+            _minioClient = new MinioClient()
+                .WithEndpoint(_config["Minio:EndPoint"])
+                .WithCredentials(_config["Minio:AccessKey"], _config["Minio:SecretKey"])
+                .WithSSL(_config["Minio:UseSSL"] == "True")
+                .Build();
         }
 
         public async Task UploadFileAsync(string fileName, Stream stream, string contentType = "")
@@ -119,33 +120,22 @@ namespace PBL6.Application.Services
             string contentType = ""
         )
         {
-            var putObjectArgs = new PutObjectArgs()
-                .WithBucket(BucketName)
-                .WithObject(fileName)
-                .WithObjectSize(-1)
-                .WithStreamData(stream)
-                .WithContentType(contentType);
-            await _minioClient.PutObjectAsync(putObjectArgs);
+            try
+            {
+                var putObjectArgs = new PutObjectArgs()
+                    .WithBucket(BucketName)
+                    .WithObject(fileName)
+                    .WithObjectSize(-1)
+                    .WithStreamData(stream)
+                    .WithContentType(contentType);
+                await _minioClient.PutObjectAsync(putObjectArgs);
 
-            return $"{_baseUrl}{fileName}";
-        }
-
-
-        private const string ImgbbAPI = "0b3a1a01592a719072a36436ba3f503a";
-        public async Task<string> UploadImageToImgbb(IFormFile file, Guid id)
-        {
-            var client = new HttpClient();
-            var url = $"https://api.imgbb.com/1/upload?key={ImgbbAPI}";
-            var content = new MultipartFormDataContent();
-            var b64 = Convert.ToBase64String(await CommonFunctions.GetBytesAsync(file));
-
-            content.Add(new StringContent(b64), "image");
-
-            var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = content };
-            var response = await client.SendAsync(request);
-            return JObject.Parse(await response.Content.ReadAsStringAsync())["data"][
-                "url"
-            ].ToString();
+                return $"{_baseUrl}{fileName}";
+            }
+            catch (MinioException ex)
+            {
+                throw ex;
+            }
         }
 
         public string GetBaseUrl()
