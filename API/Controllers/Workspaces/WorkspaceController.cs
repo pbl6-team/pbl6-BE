@@ -216,7 +216,7 @@ namespace PBL6.API.Controllers.Workspaces
         /// <response code="200">Get thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpGet("{workspaceId}/roles/{roleId}/members")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDto2>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDetailDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
         public async Task<IActionResult> GetMembersByRoleId([FromRoute] Guid workspaceId, [FromRoute] Guid roleId)
@@ -232,7 +232,7 @@ namespace PBL6.API.Controllers.Workspaces
         /// <response code="200">Get thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
         [HttpGet("{workspaceId}/members/withoutrole")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDto2>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDetailDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
         public async Task<IActionResult> GetMembersWithoutRole([FromRoute] Guid workspaceId)

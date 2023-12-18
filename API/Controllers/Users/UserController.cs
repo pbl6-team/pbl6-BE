@@ -24,7 +24,7 @@ public class UserController : ControllerBase
     /// <returns></returns>
     /// <response code="200">Get thành công</response>
     /// <response code="400">Có lỗi xảy ra</response>
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDto2>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDetailDto>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [AuthorizeFilter]
     [HttpGet("workspace/{workspaceId}")]
@@ -40,7 +40,7 @@ public class UserController : ControllerBase
     /// <returns></returns>
     /// <response code="200">Get thành công</response>
     /// <response code="400">Có lỗi xảy ra</response>
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDto2>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDetailDto>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [AuthorizeFilter]
     [HttpGet("channel/{channelId}")]
@@ -94,7 +94,7 @@ public class UserController : ControllerBase
     /// <response code="200">Get thành công</response>
     /// <response code="400">Có lỗi xảy ra</response>
     [HttpGet("{userId}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserDto2))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserDetailDto))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [AuthorizeFilter]
     public async Task<IActionResult> GetById([FromRoute] Guid userId)
@@ -112,7 +112,7 @@ public class UserController : ControllerBase
     /// <response code="200">Get thành công</response>
     /// <response code="400">Có lỗi xảy ra</response>
     [HttpGet("search/{searchType}/{searchValue}/{numberOfResults}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDto2>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDetailDto>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [AuthorizeFilter]
     public async Task<IActionResult> SearchUser([FromRoute] string searchType, [FromRoute] string searchValue, [FromRoute] int numberOfResults)

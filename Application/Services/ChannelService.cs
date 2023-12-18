@@ -837,7 +837,7 @@ public class ChannelService : BaseService, IChannelService
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
     }
 
-    public async Task<IEnumerable<UserDto2>> GetMembersByRoleIdAsync(Guid channelId, Guid roleId)
+    public async Task<IEnumerable<UserDetailDto>> GetMembersByRoleIdAsync(Guid channelId, Guid roleId)
     {
         var method = GetActualAsyncMethodName();
         _logger.LogInformation("[{_className}][{method}] Start", _className, method);
@@ -863,10 +863,10 @@ public class ChannelService : BaseService, IChannelService
             .Where(x => x.ChannelId == channelId && x.RoleId == roleId)
             .ToListAsync();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
-        return _mapper.Map<IEnumerable<UserDto2>>(members.Select(x => x.User));
+        return _mapper.Map<IEnumerable<UserDetailDto>>(members.Select(x => x.User));
     }
 
-    public async Task<IEnumerable<UserDto2>> GetMembersWithoutRoleAsync(Guid channelId)
+    public async Task<IEnumerable<UserDetailDto>> GetMembersWithoutRoleAsync(Guid channelId)
     {
         var method = GetActualAsyncMethodName();
         _logger.LogInformation("[{_className}][{method}] Start", _className, method);
@@ -892,10 +892,10 @@ public class ChannelService : BaseService, IChannelService
             .Where(x => x.ChannelId == channelId && x.RoleId == null)
             .ToListAsync();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
-        return _mapper.Map<IEnumerable<UserDto2>>(members.Select(x => x.User));
+        return _mapper.Map<IEnumerable<UserDetailDto>>(members.Select(x => x.User));
     }
 
-    public async Task<IEnumerable<UserDto2>> GetMembersThatNotInTheChannel(
+    public async Task<IEnumerable<UserDetailDto>> GetMembersThatNotInTheChannel(
         Guid workspaceId,
         Guid channelId
     )
@@ -944,7 +944,7 @@ public class ChannelService : BaseService, IChannelService
         var result = members.Where(x => !channelMembers.Select(x => x.UserId).Contains(x.UserId));
 
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
-        return _mapper.Map<IEnumerable<UserDto2>>(result.Select(x => x.User));
+        return _mapper.Map<IEnumerable<UserDetailDto>>(result.Select(x => x.User));
     }
 
     public async Task<IEnumerable<ChannelUserDto>> GetMembersAsync(Guid channelId)

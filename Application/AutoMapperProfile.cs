@@ -100,7 +100,7 @@ namespace PBL6.Application
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(x => x.IsEnabled, opt => opt.MapFrom(src => false));
 
-            CreateMap<User, UserDto2>()
+            CreateMap<User, UserDetailDto>()
                 .ForMember(x => x.Username, opt => opt.MapFrom(src => src.Username))
                 .ForMember(x => x.FirstName, opt => opt.MapFrom(src => src.Information.FirstName))
                 .ForMember(x => x.LastName, opt => opt.MapFrom(src => src.Information.LastName))
