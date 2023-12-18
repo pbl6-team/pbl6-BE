@@ -9,6 +9,6 @@ namespace PBL6.Domain.Data.Users
         IQueryable<Message> GetConversations(Guid currentUserId, string search);
         Task<IEnumerable<Message>> GetMessagesOfChannelAsync(Guid currentUserId, Guid channelId, Guid? parentId, DateTimeOffset timeCursor, int count);
         Task<IEnumerable<Message>> GetMessagesOfUserAsync(Guid currentUserId, Guid toUserId, Guid? parentId, DateTimeOffset timeCursor, int count);
-        Task<Message> GetMessageByFileId(Guid fileId);
+        Task<Message> GetMessageByFileIds(IEnumerable<Guid> fileIds);
     }
 }

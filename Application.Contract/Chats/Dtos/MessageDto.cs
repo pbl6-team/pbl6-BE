@@ -31,5 +31,7 @@ namespace PBL6.Application.Contract.Chats.Dtos
         public Dictionary<string, int> ReactionCount { get; set; }
 
         public List<FileInfoDto> Files { get; set; }
+
+        public bool IsPined { get; set; }
     }
 }

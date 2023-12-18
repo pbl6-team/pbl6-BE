@@ -16,6 +16,10 @@ namespace PBL6.Domain.Models.Users
 
         public Guid? ParentId { get; set; }
 
+        public bool IsEdited { get; set; }
+
+        public bool IsPined { get; set; }
+
         public Message Parent { get; set; }
 
         public ICollection<Message> Children { get; set; }

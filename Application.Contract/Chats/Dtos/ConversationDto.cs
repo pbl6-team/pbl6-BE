@@ -11,5 +11,6 @@ namespace PBL6.Application.Contract.Chats.Dtos
         public bool IsRead { get; set; }
         public bool IsChannel { get; set; }
         public string Avatar { get; set; }
+        public bool IsOnline { get; set; }
     }
 }

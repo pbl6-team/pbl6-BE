@@ -9,5 +9,7 @@ namespace PBL6.Application.Contract.Chats.Dtos
         public string Name { get; set; }
 
         public string Type { get; set; }
+
+        public DateTimeOffset CreatedAt { get; set; }
     }
 }

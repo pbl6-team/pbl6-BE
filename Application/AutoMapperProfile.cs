@@ -119,7 +119,6 @@ namespace PBL6.Application
 
             CreateMap<Message, MessageDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
-                .ForMember(x => x.IsEdited, opt => opt.MapFrom(src => src.UpdatedAt != null))
                 .ForMember(x => x.SendAt, opt => opt.MapFrom(src => src.CreatedAt))
                 .ForMember(x => x.IsChannel, opt => opt.MapFrom(src => src.ToChannelId != null))
                 .ForMember(x => x.ChildCount, opt => opt.MapFrom(src => src.Children.Count))

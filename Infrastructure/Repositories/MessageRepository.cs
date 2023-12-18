@@ -89,14 +89,11 @@ namespace PBL6.Infrastructure.Repositories
             return result;
         }
 
-        public async Task<Message> GetMessageByFileId(Guid fileId)
+        public async Task<Message> GetMessageByFileIds(IEnumerable<Guid> fileIds)
         {
-            return (
-                await _apiDbContext.Files
-                    .Include(x => x.Message)
-                    .ThenInclude(x => x.Files)
-                    .FirstOrDefaultAsync(x => x.Id == fileId)
-            )?.Message;
+            return await _apiDbContext.Messages
+                .Include(x => x.Files)
+                .FirstOrDefaultAsync(x => x.Files.Any(x => fileIds.Contains(x.Id)));
         }
 
         public async Task<IEnumerable<Message>> GetMessagesOfChannelAsync(
@@ -113,6 +110,7 @@ namespace PBL6.Infrastructure.Repositories
                 .ThenInclude(x => x.Information)
                 .Include(x => x.Sender)
                 .ThenInclude(x => x.Information)
+                .Include(x => x.Files)
                 .Include(
                     x =>
                         x.Children.Where(
@@ -152,6 +150,7 @@ namespace PBL6.Infrastructure.Repositories
                 .ThenInclude(x => x.Information)
                 .Include(x => x.Sender)
                 .ThenInclude(x => x.Information)
+                .Include(x => x.Files)
                 .Include(
                     x =>
                         x.Children.Where(

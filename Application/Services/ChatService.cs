@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PBL6.Application.Contract.Chats;
 using PBL6.Application.Contract.Chats.Dtos;
-using PBL6.Application.Contract.Common;
 using PBL6.Application.Hubs;
 using PBL6.Common.Consts;
 using PBL6.Common.Enum;
@@ -30,34 +29,44 @@ namespace PBL6.Application.Services
             return name;
         }
 
-        public async Task DeleteFile(IEnumerable<Guid> ids)
+        public async Task<MessageDto> DeleteFile(IEnumerable<Guid> ids)
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            if (!ids.Any())
+            {
+                return null;
+            }
             var currentUserId = Guid.Parse(
                 _currentUser.UserId ?? throw new UnauthorizedException("User is not authorized")
             );
             var currentUser = await _unitOfWork.Users.FindAsync(currentUserId);
             List<string> urls = new();
+            var message =
+                await _unitOfWork.Messages.GetMessageByFileIds(ids)
+                ?? throw new NotFoundException<FileDomain>(ids.First().ToString());
             foreach (var id in ids)
             {
-                var message = await _unitOfWork.Messages.GetMessageByFileId(id) ?? throw new NotFoundException<FileDomain>(id.ToString());
                 if (message.CreatedBy != currentUserId)
                 {
                     throw new ForbidException();
                 }
                 var file = message.Files.FirstOrDefault(x => x.Id == id);
-                
+
                 if (file is not null)
                 {
-                    urls.Add(file.Url);                   
+                    urls.Add(file.Url);
                     message.Files.Remove(file);
-                    await _unitOfWork.Messages.UpdateAsync(message);
                 }
             }
+            message.IsEdited = true;
+            await _unitOfWork.Messages.UpdateAsync(message);
             await _fileService.DeleteFileUrlAsync(urls);
             await _unitOfWork.SaveChangeAsync();
+            MessageDto messageDto = _mapper.Map<MessageDto>(message);
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+            return messageDto;
         }
 
         public async Task<MessageDto> DeleteMessageAsync(Guid id, bool isDeleteEveryone = false)
@@ -185,11 +194,13 @@ namespace PBL6.Application.Services
                             LastMessageSenderAvatar = x.OrderByDescending(x => x.CreatedAt)
                                 .First()
                                 .Sender.Information.Picture,
-                            IsRead = x.OrderByDescending(x => x.CreatedAt)
-                                .First()
-                                .MessageTrackings.Any(
-                                    x => x.UserId == currentUserId && !x.IsDeleted && x.IsRead
-                                ),
+                            IsRead =
+                                x.OrderByDescending(x => x.CreatedAt).First().CreatedBy == currentUserId
+                                || x.OrderByDescending(x => x.CreatedAt)
+                                    .First()
+                                    .MessageTrackings.Any(
+                                        x => x.UserId == currentUserId && !x.IsDeleted && x.IsRead
+                                    ),
                             IsChannel =
                                 x.OrderByDescending(x => x.CreatedAt).First().ToChannelId != null,
                             Avatar =
@@ -200,7 +211,7 @@ namespace PBL6.Application.Services
                                         .Receiver.Information.Picture
                                     : x.OrderByDescending(x => x.CreatedAt)
                                         .First()
-                                        .Sender.Information.Picture
+                                        .Sender.Information.Picture,
                         }
                 )
                 .OrderByDescending(x => x.LastMessageTime)
@@ -208,9 +219,99 @@ namespace PBL6.Application.Services
                 .Take(input.Limit)
                 .ToListAsync();
 
+            foreach (var conversationDto in conversationDtos)
+            {
+                conversationDto.IsOnline = await ChatHub.IsUserOnline(conversationDto.Id);
+            }
+
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
             return conversationDtos;
+        }
+
+        public async Task<IEnumerable<FileInfoDto>> GetFilesAsync(GetFileDto input)
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not authorized")
+            );
+            IEnumerable<FileInfoDto> fileInfos = new List<FileInfoDto>();
+            if (input.ToChannelId is not null)
+            {
+                var isMember = _unitOfWork.Channels.CheckIsMemberAsync(
+                    input.ToChannelId.Value,
+                    currentUserId
+                );
+                if (!isMember.Result)
+                {
+                    throw new NotFoundException<Channel>(input.ToChannelId.Value.ToString());
+                }
+
+                fileInfos = (
+                    await _unitOfWork.Messages.GetMessagesOfChannelAsync(
+                        currentUserId,
+                        input.ToChannelId.Value,
+                        null,
+                        DateTimeOffset.UtcNow,
+                        int.MaxValue
+                    )
+                )
+                    .SelectMany(x => x.Files)
+                    .Select(
+                        x =>
+                            new FileInfoDto
+                            {
+                                Id = x.Id,
+                                Name = x.Name,
+                                Type = x.Type,
+                                Url = x.Url,
+                                CreatedAt = x.CreatedAt
+                            }
+                    )
+                    .OrderByDescending(x => x.CreatedAt)
+                    .Skip(input.Offset)
+                    .Take(input.Limit)
+                    .ToList();
+            }
+            else if (input.ToUserId is not null)
+            {
+                var isUser = _unitOfWork.Users.CheckIsUserAsync(input.ToUserId.Value);
+                if (!isUser.Result)
+                {
+                    throw new NotFoundException<User>(input.ToUserId.ToString());
+                }
+
+                fileInfos = (
+                    await _unitOfWork.Messages.GetMessagesOfUserAsync(
+                        currentUserId,
+                        input.ToUserId.Value,
+                        null,
+                        DateTimeOffset.UtcNow,
+                        int.MaxValue
+                    )
+                )
+                    .SelectMany(x => x.Files)
+                    .Select(
+                        x =>
+                            new FileInfoDto
+                            {
+                                Id = x.Id,
+                                Name = x.Name,
+                                Type = x.Type,
+                                Url = x.Url,
+                                CreatedAt = x.CreatedAt
+                            }
+                    )
+                    .OrderByDescending(x => x.CreatedAt)
+                    .Skip(input.Offset)
+                    .Take(input.Limit)
+                    .ToList();
+            }
+
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+            return fileInfos;
         }
 
         public async Task<List<MessageDto>> GetMessagesAsync(GetMessageDto input)
@@ -221,7 +322,7 @@ namespace PBL6.Application.Services
                 _currentUser.UserId ?? throw new UnauthorizedException("User is not authorized")
             );
             List<MessageDto> messageDtos;
-            IEnumerable<Message> messages;
+            IEnumerable<Message> messages = new List<Message>();
             if (input.ToChannelId is not null)
             {
                 var isMember = await _unitOfWork.Channels.CheckIsMemberAsync(
@@ -241,7 +342,7 @@ namespace PBL6.Application.Services
                     input.Count
                 );
             }
-            else
+            else if (input.ToUserId is not null)
             {
                 messages = await _unitOfWork.Messages.GetMessagesOfUserAsync(
                     currentUserId,
@@ -319,6 +420,48 @@ namespace PBL6.Application.Services
 
             await _unitOfWork.Messages.UpdateAsync(message);
             await _unitOfWork.SaveChangeAsync();
+            MessageDto messageDto = _mapper.Map<MessageDto>(message);
+            var reactions = message.MessageTrackings
+                .Where(x => !x.IsDeleted)
+                .Select(x => x.Reaction);
+            messageDto.ReactionCount = CommonFunctions.GetReactionCount(reactions);
+
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+            return messageDto;
+        }
+
+        public async Task<MessageDto> ReadMessageAsync(Guid messageId)
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var message =
+                await _unitOfWork.Messages.Get(messageId)
+                ?? throw new NotFoundException<Message>(messageId.ToString());
+            var currentUserId = Guid.Parse(_currentUser.UserId);
+            var messageTracking = message.MessageTrackings.FirstOrDefault(
+                x => x.UserId == currentUserId
+            );
+            if (messageTracking is null)
+            {
+                await _unitOfWork.MessageTrackings.AddAsync(
+                    new MessageTracking
+                    {
+                        UserId = currentUserId,
+                        IsDeleted = false,
+                        IsRead = true,
+                        Reaction = ""
+                    }
+                );
+            }
+            else
+            {
+                messageTracking.IsRead = true;
+                await _unitOfWork.MessageTrackings.UpdateAsync(messageTracking);
+            }
+
+            await _unitOfWork.SaveChangeAsync();
+            message = await _unitOfWork.Messages.Get(messageId);
             MessageDto messageDto = _mapper.Map<MessageDto>(message);
             var reactions = message.MessageTrackings
                 .Where(x => !x.IsDeleted)
@@ -550,6 +693,7 @@ namespace PBL6.Application.Services
             }
 
             message.Content = input.Content;
+            message.IsEdited = true;
             await _unitOfWork.Messages.UpdateAsync(message);
             await _unitOfWork.SaveChangeAsync();
             MessageDto messageDto = _mapper.Map<MessageDto>(message);
@@ -562,6 +706,5 @@ namespace PBL6.Application.Services
 
             return messageDto;
         }
-    
     }
 }
