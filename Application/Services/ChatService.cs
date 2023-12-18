@@ -366,6 +366,47 @@ namespace PBL6.Application.Services
             return messageDtos;
         }
 
+        public async Task<List<MessageDto>> GetPinMessage(GetPinMessageDto input)
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not authorized")
+            );
+            var messageDtos = new List<MessageDto>();
+            if (input.ToChannelId is not null)
+            {
+                var isMember = await _unitOfWork.Channels.CheckIsMemberAsync(
+                    input.ToChannelId.Value, currentUserId);
+                if (!isMember)
+                {
+                    throw new NotFoundException<Channel>(input.ToChannelId.Value.ToString());
+                }
+
+                IEnumerable<Message> messages = await _unitOfWork.Messages.GetPinMessagesOfChannelAsync(
+                    currentUserId,
+                    input.ToChannelId.Value,
+                    input.Offset,
+                    input.Limit
+                );
+                messageDtos = _mapper.Map<List<MessageDto>>(messages);
+            }
+            else if (input.ToUserId is not null)
+            {
+                IEnumerable<Message> messages = await _unitOfWork.Messages.GetPinMessagesOfUserAsync(
+                    currentUserId,
+                    input.ToUserId.Value,
+                    input.Offset,
+                    input.Limit
+                );
+                messageDtos = _mapper.Map<List<MessageDto>>(messages);
+            }
+
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+            return messageDtos;
+        }
+
         public async Task<MessageDto> ReactMessageAsync(ReactMessageDto input)
         {
             var method = GetActualAsyncMethodName();

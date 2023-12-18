@@ -52,4 +52,22 @@ public class MessagesController : ControllerBase
 
         return Ok(conversations);
     }
+
+    /// <summary>
+    /// get Pin messages
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    /// <response code="200">Returns Pin messages</response>
+    /// <response code="400">If the request is invalid</response>
+    /// <response code="500">If there was an internal server error</response>
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<MessageDto>))]
+    [HttpGet("pin")]
+    [AuthorizeFilter]
+    public async Task<IActionResult> GetPinMessage([FromQuery] GetPinMessageDto input)
+    {
+        List<MessageDto> messages = await _chatService.GetPinMessage(input);
+
+        return Ok(messages);
+    }
 }
