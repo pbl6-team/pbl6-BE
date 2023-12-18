@@ -21,7 +21,7 @@ public class UserService : BaseService, IUserService
 
     static string GetActualAsyncMethodName([CallerMemberName] string name = null) => name;
 
-    public async Task<IEnumerable<UserDto2>> GetByWorkspaceIdAsync(Guid workspaceId)
+    public async Task<IEnumerable<UserDetailDto>> GetByWorkspaceIdAsync(Guid workspaceId)
     {
         var method = GetActualAsyncMethodName();
         try
@@ -35,7 +35,7 @@ public class UserService : BaseService, IUserService
             users = users.Where(x => _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, x.Id).Result).ToList();
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
-            return _mapper.Map<IEnumerable<UserDto2>>(users);
+            return _mapper.Map<IEnumerable<UserDetailDto>>(users);
         }
         catch (Exception e)
         {
@@ -50,7 +50,7 @@ public class UserService : BaseService, IUserService
         }
     }
 
-    public async Task<IEnumerable<UserDto2>> GetByChannelIdAsync(Guid channelId)
+    public async Task<IEnumerable<UserDetailDto>> GetByChannelIdAsync(Guid channelId)
     {
         var method = GetActualAsyncMethodName();
         try
@@ -64,7 +64,7 @@ public class UserService : BaseService, IUserService
             users = users.Where(x => _unitOfWork.Channels.CheckIsMemberAsync(channelId, x.Id).Result).ToList();
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
-            return _mapper.Map<IEnumerable<UserDto2>>(users);
+            return _mapper.Map<IEnumerable<UserDetailDto>>(users);
         }
         catch (Exception e)
         {
@@ -174,7 +174,7 @@ public class UserService : BaseService, IUserService
 
     }
 
-    public async Task<UserDto2> GetByIdAsync(Guid userId)
+    public async Task<UserDetailDto> GetByIdAsync(Guid userId)
     {
         var method = GetActualAsyncMethodName();
         try
@@ -184,7 +184,7 @@ public class UserService : BaseService, IUserService
                                               .Include(x => x.Information)
                                               .FirstOrDefaultAsync(x => !x.IsDeleted && x.Id == userId);
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
-            return _mapper.Map<UserDto2>(user);
+            return _mapper.Map<UserDetailDto>(user);
         }
         catch (Exception e)
         {
@@ -199,7 +199,7 @@ public class UserService : BaseService, IUserService
         }
     }
 
-    public async Task<IEnumerable<UserDto2>> SearchUserAsync(string searchType, string searchValue, int numberOfResults)
+    public async Task<IEnumerable<UserDetailDto>> SearchUserAsync(string searchType, string searchValue, int numberOfResults)
     {
         var method = GetActualAsyncMethodName();
         try
@@ -228,7 +228,7 @@ public class UserService : BaseService, IUserService
             users = users.Take(numberOfResults).ToList();
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
-            return _mapper.Map<IEnumerable<UserDto2>>(users);
+            return _mapper.Map<IEnumerable<UserDetailDto>>(users);
         }
         catch (Exception e)
         {

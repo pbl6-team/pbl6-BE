@@ -929,7 +929,7 @@ namespace PBL6.Application.Services
             return _mapper.Map<IEnumerable<PermissionDto>>(permissions);
         }
 
-        public async Task<IEnumerable<UserDto2>> GetMembersByRoleIdAsync(
+        public async Task<IEnumerable<UserDetailDto>> GetMembersByRoleIdAsync(
             Guid workspaceId,
             Guid roleId
         )
@@ -964,10 +964,10 @@ namespace PBL6.Application.Services
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
-            return _mapper.Map<IEnumerable<UserDto2>>(members.Select(x => x.User));
+            return _mapper.Map<IEnumerable<UserDetailDto>>(members.Select(x => x.User));
         }
 
-        public async Task<IEnumerable<UserDto2>> GetMembersWithoutRoleAsync(Guid workspaceId)
+        public async Task<IEnumerable<UserDetailDto>> GetMembersWithoutRoleAsync(Guid workspaceId)
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
@@ -998,7 +998,7 @@ namespace PBL6.Application.Services
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
-            return _mapper.Map<IEnumerable<UserDto2>>(members.Select(x => x.User));
+            return _mapper.Map<IEnumerable<UserDetailDto>>(members.Select(x => x.User));
         }
 
         public async Task<IEnumerable<WorkspaceUserDto>> GetMembersAsync(Guid workspaceId)

@@ -1,6 +1,6 @@
 namespace PBL6.Application.Contract.Users.Dtos
 {
-    public class UserDto2
+    public class UserDetailDto
     {
         public string Id { get; set; }
         public string Username { get; set; }
