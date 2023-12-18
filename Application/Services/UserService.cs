@@ -142,7 +142,6 @@ public class UserService : BaseService, IUserService
 
     public async Task<Guid> UpdateAvatarAsync(Guid userId, UpdateUserPictureDto updateUserPictureDto)
     {
-
         var method = GetActualAsyncMethodName();
         try
         {
@@ -150,9 +149,10 @@ public class UserService : BaseService, IUserService
             var user = _unitOfWork.Users.Queryable()
                                         .Include(x => x.Information)
                                         .FirstOrDefault(x => !x.IsDeleted && x.Id == userId);
-            user.Information.Picture = await _fileService.UploadImageToImgbb(
-                updateUserPictureDto.Picture,
-                user.Id);
+            var file = updateUserPictureDto.Picture;
+            var fileName = user.Id + Path.GetExtension(file.FileName);
+            var url = await _fileService.UploadFileGetUrlAsync(fileName, file.OpenReadStream());
+            user.Information.Picture = url;
 
             await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.SaveChangeAsync();

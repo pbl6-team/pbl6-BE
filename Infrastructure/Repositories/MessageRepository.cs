@@ -89,6 +89,16 @@ namespace PBL6.Infrastructure.Repositories
             return result;
         }
 
+        public async Task<Message> GetMessageByFileId(Guid fileId)
+        {
+            return (
+                await _apiDbContext.Files
+                    .Include(x => x.Message)
+                    .ThenInclude(x => x.Files)
+                    .FirstOrDefaultAsync(x => x.Id == fileId)
+            )?.Message;
+        }
+
         public async Task<IEnumerable<Message>> GetMessagesOfChannelAsync(
             Guid currentUserId,
             Guid channelId,
@@ -99,18 +109,30 @@ namespace PBL6.Infrastructure.Repositories
         {
             return await _apiDbContext.Messages
                 .Include(x => x.MessageTrackings)
-                .ThenInclude(x => x.User).ThenInclude(x => x.Information)
+                .ThenInclude(x => x.User)
+                .ThenInclude(x => x.Information)
                 .Include(x => x.Sender)
                 .ThenInclude(x => x.Information)
-                .Include(x => x.Children.Where(x => !x.IsDeleted && !x.MessageTrackings.Any(x => x.UserId == currentUserId && !x.IsDeleted)))
+                .Include(
+                    x =>
+                        x.Children.Where(
+                            x =>
+                                !x.IsDeleted
+                                && !x.MessageTrackings.Any(
+                                    x => x.UserId == currentUserId && !x.IsDeleted
+                                )
+                        )
+                )
                 .ThenInclude(x => x.MessageTrackings)
                 .AsNoTracking()
-                .Where(x => 
-                    x.ToChannelId == channelId 
-                    && x.CreatedAt < timeCursor 
-                    && !x.IsDeleted
-                    && !x.MessageTrackings.Any(x => x.UserId == currentUserId && x.IsDeleted)
-                    && x.ParentId == parentId)
+                .Where(
+                    x =>
+                        x.ToChannelId == channelId
+                        && x.CreatedAt < timeCursor
+                        && !x.IsDeleted
+                        && !x.MessageTrackings.Any(x => x.UserId == currentUserId && x.IsDeleted)
+                        && x.ParentId == parentId
+                )
                 .OrderByDescending(x => x.CreatedAt)
                 .Take(count)
                 .ToListAsync();
@@ -130,8 +152,15 @@ namespace PBL6.Infrastructure.Repositories
                 .ThenInclude(x => x.Information)
                 .Include(x => x.Sender)
                 .ThenInclude(x => x.Information)
-                .Include(x => x.Children
-                    .Where(x => !x.IsDeleted && !x.MessageTrackings.Any(x => x.UserId == currentUserId && !x.IsDeleted))
+                .Include(
+                    x =>
+                        x.Children.Where(
+                            x =>
+                                !x.IsDeleted
+                                && !x.MessageTrackings.Any(
+                                    x => x.UserId == currentUserId && !x.IsDeleted
+                                )
+                        )
                 )
                 .ThenInclude(x => x.MessageTrackings)
                 .AsNoTracking()

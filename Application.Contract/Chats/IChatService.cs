@@ -10,5 +10,6 @@ namespace PBL6.Application.Contract.Chats
         Task<MessageDto> DeleteMessageAsync(Guid id, bool isDeleteEverywhere = false);
         Task<List<ConversationDto>> GetConversationsAsync(ConversationRequest input);
         Task<MessageDto> ReactMessageAsync(ReactMessageDto input);
+        Task DeleteFile (IEnumerable<Guid> ids);
     }
 }

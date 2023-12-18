@@ -29,5 +29,7 @@ namespace PBL6.Application.Contract.Chats.Dtos
         public bool IsChannel { get; set; }
 
         public Dictionary<string, int> ReactionCount { get; set; }
+
+        public List<FileInfoDto> Files { get; set; }
     }
 }
