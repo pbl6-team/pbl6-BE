@@ -340,7 +340,8 @@ namespace PBL6.Application.Services
                     input.ToChannelId.Value,
                     input.ParentId,
                     input.TimeCursor,
-                    input.Count
+                    input.Count,
+                    input.IsBefore
                 );
             }
             else if (input.ToUserId is not null)
@@ -350,7 +351,8 @@ namespace PBL6.Application.Services
                     input.ToUserId.Value,
                     input.ParentId,
                     input.TimeCursor,
-                    input.Count
+                    input.Count,
+                    input.IsBefore
                 );
             }
             messageDtos = _mapper.Map<List<MessageDto>>(messages);
@@ -412,7 +414,64 @@ namespace PBL6.Application.Services
             return messageDtos;
         }
 
-        public async Task<MessageDto> PinMessage(Guid messageId, bool isPin=true)
+        public async Task<List<MessageDto>> JumpToMessage(JumpToMessageDto input)
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not authorized")
+            );
+
+            var isInConversation = await _unitOfWork.Messages.CheckUserInConversation(
+                currentUserId,
+                input.MessageId
+            );
+            if (!isInConversation)
+            {
+                throw new NotFoundException<Message>(input.MessageId.ToString());
+            }
+
+            var message =
+                await _unitOfWork.Messages.Get(input.MessageId)
+                ?? throw new NotFoundException<Message>(input.MessageId.ToString());
+            List<MessageDto> messageDtos = await GetMessagesAsync(
+                new GetMessageDto
+                {
+                    ToChannelId = message.ToChannelId,
+                    ToUserId = message.ToUserId,
+                    ParentId = message.ParentId,
+                    TimeCursor = message.CreatedAt,
+                    Count = 10,
+                    IsBefore = true
+                }
+            );
+            var messageDto = _mapper.Map<MessageDto>(message);
+            var reactions = message.MessageTrackings
+                .Where(x => !x.IsDeleted)
+                .Select(x => x.Reaction);
+            messageDto.ReactionCount = CommonFunctions.GetReactionCount(reactions);
+
+            messageDtos.Add(messageDto);
+            messageDtos.AddRange(
+                await GetMessagesAsync(
+                    new GetMessageDto
+                    {
+                        ToChannelId = message.ToChannelId,
+                        ToUserId = message.ToUserId,
+                        ParentId = message.ParentId,
+                        TimeCursor = message.CreatedAt,
+                        Count = 10,
+                        IsBefore = false
+                    }
+                )
+            ); 
+
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+            return messageDtos;
+        }
+
+        public async Task<MessageDto> PinMessage(Guid messageId, bool isPin = true)
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);

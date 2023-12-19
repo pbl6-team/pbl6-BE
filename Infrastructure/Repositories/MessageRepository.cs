@@ -101,10 +101,11 @@ namespace PBL6.Infrastructure.Repositories
             Guid channelId,
             Guid? parentId,
             DateTimeOffset timeCursor,
-            int count
+            int count,
+            bool isBefore = true
         )
         {
-            return await _apiDbContext.Messages
+            var message =  _apiDbContext.Messages
                 .Include(x => x.MessageTrackings)
                 .ThenInclude(x => x.User)
                 .ThenInclude(x => x.Information)
@@ -126,14 +127,30 @@ namespace PBL6.Infrastructure.Repositories
                 .Where(
                     x =>
                         x.ToChannelId == channelId
-                        && x.CreatedAt < timeCursor
+                        && (
+                            isBefore
+                                ? x.CreatedAt < timeCursor
+                                : x.CreatedAt > timeCursor)
                         && !x.IsDeleted
                         && !x.MessageTrackings.Any(x => x.UserId == currentUserId && x.IsDeleted)
                         && x.ParentId == parentId
-                )
-                .OrderByDescending(x => x.CreatedAt)
-                .Take(count)
-                .ToListAsync();
+                );
+
+            if (isBefore)
+            {
+                return await message
+                    .OrderByDescending(x => x.CreatedAt)
+                    .Take(count)
+                    .ToListAsync();
+            }
+            else
+            {
+                return await message
+                    .OrderBy(x => x.CreatedAt)
+                    .Take(count)
+                    .OrderByDescending(x => x.CreatedAt)
+                    .ToListAsync();
+            }
         }
 
         public async Task<IEnumerable<Message>> GetMessagesOfUserAsync(
@@ -141,10 +158,11 @@ namespace PBL6.Infrastructure.Repositories
             Guid toUserId,
             Guid? parentId,
             DateTimeOffset timeCursor,
-            int count
+            int count,
+            bool isBefore = true
         )
         {
-            return await _apiDbContext.Messages
+            var message =  _apiDbContext.Messages
                 .Include(x => x.MessageTrackings)
                 .ThenInclude(x => x.User)
                 .ThenInclude(x => x.Information)
@@ -169,15 +187,31 @@ namespace PBL6.Infrastructure.Repositories
                             (x.ToUserId == currentUserId && x.CreatedBy == toUserId)
                             || (x.ToUserId == toUserId && x.CreatedBy == currentUserId)
                         )
-                        && x.CreatedAt < timeCursor
+                        && (
+                            isBefore
+                                ? x.CreatedAt < timeCursor
+                                : x.CreatedAt > timeCursor)
                         && !x.IsDeleted
                         && x.ToChannelId == null
                         && x.ParentId == parentId
                         && !x.MessageTrackings.Any(x => x.UserId == currentUserId && x.IsDeleted)
-                )
-                .OrderByDescending(x => x.CreatedAt)
-                .Take(count)
-                .ToListAsync();
+                );
+            
+            if (isBefore)
+            {
+                return await message
+                    .OrderByDescending(x => x.CreatedAt)
+                    .Take(count)
+                    .ToListAsync();
+            }
+            else
+            {
+                return await message
+                    .OrderBy(x => x.CreatedAt)
+                    .Take(count)
+                    .OrderByDescending(x => x.CreatedAt)
+                    .ToListAsync();
+            }
         }
 
         public async Task<IEnumerable<Message>> GetPinMessagesOfChannelAsync(

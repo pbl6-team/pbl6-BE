@@ -14,6 +14,7 @@ namespace PBL6.Application.Contract.Chats
         Task<MessageDto> ReadMessageAsync(Guid messageId);
         Task<MessageDto> PinMessage(Guid messageId, bool isPin=true);
         Task<IEnumerable<FileInfoDto>> GetFilesAsync(GetFileDto input);
-        Task<List<MessageDto>> GetPinMessage(GetPinMessageDto input);  
+        Task<List<MessageDto>> GetPinMessage(GetPinMessageDto input);
+        Task<List<MessageDto>> JumpToMessage(JumpToMessageDto input);
     }
 }
