@@ -12,10 +12,13 @@ namespace PBL6.Application.Contract.Chats.Dtos
 
         public Guid? ParentId { get; set; }
 
+        public bool IsBefore { get; set; }
+
         public GetMessageDto()
         {
             Count = 20;
             TimeCursor = DateTimeOffset.Now;
+            IsBefore = true;
         }
     }
 }
