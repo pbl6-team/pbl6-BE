@@ -195,7 +195,8 @@ namespace PBL6.Application.Services
                                 .First()
                                 .Sender.Information.Picture,
                             IsRead =
-                                x.OrderByDescending(x => x.CreatedAt).First().CreatedBy == currentUserId
+                                x.OrderByDescending(x => x.CreatedAt).First().CreatedBy
+                                    == currentUserId
                                 || x.OrderByDescending(x => x.CreatedAt)
                                     .First()
                                     .MessageTrackings.Any(
@@ -377,34 +378,61 @@ namespace PBL6.Application.Services
             if (input.ToChannelId is not null)
             {
                 var isMember = await _unitOfWork.Channels.CheckIsMemberAsync(
-                    input.ToChannelId.Value, currentUserId);
+                    input.ToChannelId.Value,
+                    currentUserId
+                );
                 if (!isMember)
                 {
                     throw new NotFoundException<Channel>(input.ToChannelId.Value.ToString());
                 }
 
-                IEnumerable<Message> messages = await _unitOfWork.Messages.GetPinMessagesOfChannelAsync(
-                    currentUserId,
-                    input.ToChannelId.Value,
-                    input.Offset,
-                    input.Limit
-                );
+                IEnumerable<Message> messages =
+                    await _unitOfWork.Messages.GetPinMessagesOfChannelAsync(
+                        currentUserId,
+                        input.ToChannelId.Value,
+                        input.Offset,
+                        input.Limit
+                    );
                 messageDtos = _mapper.Map<List<MessageDto>>(messages);
             }
             else if (input.ToUserId is not null)
             {
-                IEnumerable<Message> messages = await _unitOfWork.Messages.GetPinMessagesOfUserAsync(
-                    currentUserId,
-                    input.ToUserId.Value,
-                    input.Offset,
-                    input.Limit
-                );
+                IEnumerable<Message> messages =
+                    await _unitOfWork.Messages.GetPinMessagesOfUserAsync(
+                        currentUserId,
+                        input.ToUserId.Value,
+                        input.Offset,
+                        input.Limit
+                    );
                 messageDtos = _mapper.Map<List<MessageDto>>(messages);
             }
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
             return messageDtos;
+        }
+
+        public async Task<MessageDto> PinMessage(Guid messageId, bool isPin=true)
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var message =
+                await _unitOfWork.Messages.Get(messageId)
+                ?? throw new NotFoundException<Message>(messageId.ToString());
+            var currentUserId = Guid.Parse(_currentUser.UserId);
+            message.IsPined = isPin;
+
+            await _unitOfWork.SaveChangeAsync();
+            message = await _unitOfWork.Messages.Get(messageId);
+            MessageDto messageDto = _mapper.Map<MessageDto>(message);
+            var reactions = message.MessageTrackings
+                .Where(x => !x.IsDeleted)
+                .Select(x => x.Reaction);
+            messageDto.ReactionCount = CommonFunctions.GetReactionCount(reactions);
+
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+            return messageDto;
         }
 
         public async Task<MessageDto> ReactMessageAsync(ReactMessageDto input)

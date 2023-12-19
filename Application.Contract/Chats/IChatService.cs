@@ -12,6 +12,7 @@ namespace PBL6.Application.Contract.Chats
         Task<MessageDto> ReactMessageAsync(ReactMessageDto input);
         Task<MessageDto> DeleteFile (IEnumerable<Guid> ids);
         Task<MessageDto> ReadMessageAsync(Guid messageId);
+        Task<MessageDto> PinMessage(Guid messageId, bool isPin=true);
         Task<IEnumerable<FileInfoDto>> GetFilesAsync(GetFileDto input);
         Task<List<MessageDto>> GetPinMessage(GetPinMessageDto input);  
     }

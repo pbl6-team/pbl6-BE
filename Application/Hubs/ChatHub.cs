@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using PBL6.Application.Contract.Channels;
 using PBL6.Application.Contract.Chats;
@@ -23,6 +24,7 @@ namespace PBL6.Application.Hubs
         private readonly ICurrentUserService _currentUserService;
         private readonly IChannelService _channelService;
         private readonly IChatService _chatService;
+        // private readonly ILogger _logger;
 
         public static readonly ConcurrentDictionary<Guid, HubUser> Users = new();
 
@@ -40,12 +42,14 @@ namespace PBL6.Application.Hubs
             ICurrentUserService currentUserService,
             IChannelService channelService,
             IChatService chatService
+            // ILogger logger
         )
         {
             _hubContext = hubContext;
             _currentUserService = currentUserService;
             _channelService = channelService;
             _chatService = chatService;
+            // _logger = logger;
         }
 
         public override async Task OnConnectedAsync()
@@ -389,6 +393,9 @@ namespace PBL6.Application.Hubs
 
         void HandleException(Exception exception)
         {
+            // _logger.LogError($"Error: {exception.Message}");
+            // _logger.LogError(exception.StackTrace);
+
             ProblemDetails problemDetails = new();
             if (exception is CustomException customException)
             {
@@ -507,6 +514,39 @@ namespace PBL6.Application.Hubs
                         await Clients
                             .Clients(hubUser.ConnectionIds.ToList())
                             .SendAsync(REMOVE_USER_FROM_WORKSPACE, workspaceId);
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                HandleException(exception);
+            }
+        }
+
+        public async Task PinMessage(Guid messageId, bool isPin = true)
+        {
+            try
+            {
+                if (_currentUserService.UserId is null)
+                {
+                    throw new UnauthorizedException("User is not authorized");
+                }
+                MessageDto messageDto = await _chatService.PinMessage(messageId, isPin);
+
+                if (messageDto.IsChannel)
+                {
+                    await _hubContext.Clients
+                        .Group(messageDto.ReceiverId.ToString())
+                        .SendAsync(UPDATE_MESSAGE, messageDto, messageDto.ReceiverId);
+                }
+                else
+                {
+                    Users.TryGetValue(messageDto.ReceiverId, out var hubUser);
+                    if (hubUser is not null && hubUser.ConnectionIds.Any())
+                    {
+                        await _hubContext.Clients
+                            .Clients(hubUser.ConnectionIds.ToList())
+                            .SendAsync(UPDATE_MESSAGE, messageDto);
                     }
                 }
             }
