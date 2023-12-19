@@ -480,7 +480,7 @@ namespace PBL6.Application.Services
                 ?? throw new NotFoundException<Message>(messageId.ToString());
             var currentUserId = Guid.Parse(_currentUser.UserId);
             message.IsPined = isPin;
-
+            await _unitOfWork.Messages.UpdateAsync(message);
             await _unitOfWork.SaveChangeAsync();
             message = await _unitOfWork.Messages.Get(messageId);
             MessageDto messageDto = _mapper.Map<MessageDto>(message);

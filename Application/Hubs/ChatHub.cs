@@ -24,6 +24,7 @@ namespace PBL6.Application.Hubs
         private readonly ICurrentUserService _currentUserService;
         private readonly IChannelService _channelService;
         private readonly IChatService _chatService;
+
         // private readonly ILogger _logger;
 
         public static readonly ConcurrentDictionary<Guid, HubUser> Users = new();
@@ -42,7 +43,7 @@ namespace PBL6.Application.Hubs
             ICurrentUserService currentUserService,
             IChannelService channelService,
             IChatService chatService
-            // ILogger logger
+        // ILogger logger
         )
         {
             _hubContext = hubContext;
@@ -211,6 +212,14 @@ namespace PBL6.Application.Hubs
                 else
                 {
                     Users.TryGetValue(messageDto.ReceiverId, out var hubUser);
+                    if (hubUser is not null && hubUser.ConnectionIds.Any())
+                    {
+                        await _hubContext.Clients
+                            .Clients(hubUser.ConnectionIds.ToList())
+                            .SendAsync(UPDATE_MESSAGE, messageDto);
+                    }
+
+                    Users.TryGetValue(messageDto.SenderId, out hubUser);
                     if (hubUser is not null && hubUser.ConnectionIds.Any())
                     {
                         await _hubContext.Clients
@@ -542,6 +551,14 @@ namespace PBL6.Application.Hubs
                 else
                 {
                     Users.TryGetValue(messageDto.ReceiverId, out var hubUser);
+                    if (hubUser is not null && hubUser.ConnectionIds.Any())
+                    {
+                        await _hubContext.Clients
+                            .Clients(hubUser.ConnectionIds.ToList())
+                            .SendAsync(UPDATE_MESSAGE, messageDto);
+                    }
+
+                    Users.TryGetValue(messageDto.SenderId, out hubUser);
                     if (hubUser is not null && hubUser.ConnectionIds.Any())
                     {
                         await _hubContext.Clients
