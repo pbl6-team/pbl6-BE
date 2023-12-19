@@ -19,7 +19,7 @@ namespace PBL6.Infrastructure.Repositories
                 currentUserId == message.CreatedBy
                 || currentUserId == message.ToUserId
                 || currentUserId == message.ToChannel.CreatedBy
-                || currentUserId == message.ToChannel.Workspace.CreatedBy
+                // || currentUserId == message.ToChannel.Workspace.CreatedBy
                 || message.ToChannel.ChannelMembers.Any(
                     x => x.UserId == currentUserId && !x.IsDeleted
                 )

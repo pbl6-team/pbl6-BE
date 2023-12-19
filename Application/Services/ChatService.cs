@@ -446,6 +446,7 @@ namespace PBL6.Application.Services
             else
             {
                 messageTracking.IsRead = true;
+                messageTracking.Reaction ??= "";
                 if (messageTracking.Reaction.Contains(input.Emoji))
                 {
                     messageTracking.Reaction = messageTracking.Reaction.Replace(
