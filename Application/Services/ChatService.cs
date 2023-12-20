@@ -29,6 +29,17 @@ namespace PBL6.Application.Services
             return name;
         }
 
+        public async Task<int> CountUnreadMessage()
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var currentUserId = Guid.Parse(_currentUser.UserId);
+            var count = await _unitOfWork.Messages.CountUnreadMessage(currentUserId);
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+            return count;
+        }
+
         public async Task<MessageDto> DeleteFile(IEnumerable<Guid> ids)
         {
             var method = GetActualAsyncMethodName();

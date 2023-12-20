@@ -72,5 +72,13 @@ namespace PBL6.Domain.Models.Users
 
             await _apiDbContext.SaveChangesAsync();
         }
+
+        public Task<int> CountUnreadNotification(Guid userId, short? type = null)
+        {
+            return _dbSet
+                .Include(x => x.UserNotifications)
+                .Where(x => type == null || x.Type == type)
+                .CountAsync(x => x.UserNotifications.Any(y => y.UserId == userId && y.Status != (short)NOTIFICATION_STATUS.READ && !y.IsDeleted)  && !x.IsDeleted);
+        }
     }
 }

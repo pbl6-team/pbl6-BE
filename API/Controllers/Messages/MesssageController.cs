@@ -88,4 +88,23 @@ public class MessagesController : ControllerBase
 
         return Ok(messages);
     }
+
+    /// <summary>
+    /// Count unread messages
+    /// </summary>
+    /// <returns></returns>
+    /// <response code="200">Returns Count unread messages</response>
+    /// <response code="400">If the request is invalid</response>
+    /// <response code="500">If there was an internal server error</response>
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
+    [HttpGet("unread")]
+    [AuthorizeFilter]
+    public async Task<IActionResult> CountUnreadMessage()
+    {
+        int count = await _chatService.CountUnreadMessage();
+
+        return Ok(count);
+    }
+
+
 }

@@ -9,6 +9,7 @@ namespace PBL6.Application.Services
         Task<List<NotificationDto>> GetAllAsync(SearchDto dto);
         Task ReadAsync(Guid id);
         Task DeleteAsync(Guid id);
+        Task<int> CountUnreadNotification(short? type);
     }
 
     public class NotificationService : BaseService, INotificationService
@@ -55,6 +56,19 @@ namespace PBL6.Application.Services
             await _unitOfWork.Notifications.DeleteUserNotification(currentUserId, id);
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
+        }
+
+        public async Task<int> CountUnreadNotification(short? type)
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var currentUserId = Guid.Parse(_currentUser.UserId);
+            var count = await _unitOfWork.Notifications.CountUnreadNotification(
+                currentUserId, type
+            );
+
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+            return count;
         }
     }
 }

@@ -8,5 +8,6 @@ namespace PBL6.Domain.Data.Users
         Task<List<Notification>> GetUserNotifications(Guid userId, int offset, int limit);
         Task ReadUserNotification(Guid userId, Guid notificationId);
         Task DeleteUserNotification(Guid userId, Guid notificationId);
+        Task<int> CountUnreadNotification(Guid userId, short? type = null);
     }
 }

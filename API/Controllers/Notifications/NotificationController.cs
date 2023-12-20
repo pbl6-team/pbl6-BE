@@ -71,5 +71,24 @@ namespace PBL6.API.Controllers.Notifications
             await _notificationService.DeleteAsync(id);
             return NoContent();
         }
+
+        /// <summary>
+        /// count unread notification
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        /// <response code="200">Returns notification</response>
+        /// <response code="400">If the request is invalid</response>
+        /// <response code="404">If the notification is not found</response>
+        /// <response code="403">If the user is not authorized</response>
+        /// <response code="500">If there was an internal server error</response>\
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
+        [HttpGet("count")]
+        [AuthorizeFilter]
+        public async Task<IActionResult> CountUnreadNotification([FromQuery] short? type)
+        {
+            var count = await _notificationService.CountUnreadNotification(type);
+            return Ok(count);
+        }
     }
 }
