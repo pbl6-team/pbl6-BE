@@ -12,5 +12,6 @@ namespace PBL6.Domain.Data.Users
         Task<Message> GetMessageByFileIds(IEnumerable<Guid> fileIds);
         Task<IEnumerable<Message>> GetPinMessagesOfChannelAsync(Guid currentUserId, Guid channelId, int offset, int limit);
         Task<IEnumerable<Message>> GetPinMessagesOfUserAsync(Guid currentUserId, Guid value, int offset, int limit);
+        Task<int> CountUnreadMessage(Guid currentUserId);
     }
 }

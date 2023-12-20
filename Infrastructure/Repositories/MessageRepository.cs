@@ -31,6 +31,37 @@ namespace PBL6.Infrastructure.Repositories
             return false;
         }
 
+        public async Task<int> CountUnreadMessage(Guid currentUserId)
+        {
+            return await _dbSet
+                .Include(x => x.Sender)
+                .ThenInclude(x => x.Information)
+                .Include(x => x.Receiver)
+                .ThenInclude(x => x.Information)
+                .Include(x => x.MessageTrackings)
+                .ThenInclude(x => x.User)
+                .ThenInclude(x => x.Information)
+                .AsNoTracking()
+                .Where(
+                    x =>
+                        (x.ToUserId == currentUserId || x.CreatedBy == currentUserId)
+                        && x.ToChannelId == null
+                        && !x.IsDeleted
+                )
+                .OrderByDescending(x => x.CreatedAt)
+                .GroupBy(x => currentUserId == x.CreatedBy ? x.ToUserId : x.CreatedBy)
+                .OrderByDescending(x => x.First().CreatedAt)
+                .CountAsync(
+                    x =>
+                        !(x.OrderByDescending(x => x.CreatedAt).First().CreatedBy == currentUserId
+                        || x.OrderByDescending(x => x.CreatedAt)
+                            .First()
+                            .MessageTrackings.Any(
+                                x => x.UserId == currentUserId && !x.IsDeleted && x.IsRead
+                            ))
+                );
+        }
+
         public async Task<Message> Get(Guid id)
         {
             return await _apiDbContext.Messages
@@ -105,7 +136,7 @@ namespace PBL6.Infrastructure.Repositories
             bool isBefore = true
         )
         {
-            var message =  _apiDbContext.Messages
+            var message = _apiDbContext.Messages
                 .Include(x => x.MessageTrackings)
                 .ThenInclude(x => x.User)
                 .ThenInclude(x => x.Information)
@@ -127,10 +158,7 @@ namespace PBL6.Infrastructure.Repositories
                 .Where(
                     x =>
                         x.ToChannelId == channelId
-                        && (
-                            isBefore
-                                ? x.CreatedAt < timeCursor
-                                : x.CreatedAt > timeCursor)
+                        && (isBefore ? x.CreatedAt < timeCursor : x.CreatedAt > timeCursor)
                         && !x.IsDeleted
                         && !x.MessageTrackings.Any(x => x.UserId == currentUserId && x.IsDeleted)
                         && x.ParentId == parentId
@@ -138,10 +166,7 @@ namespace PBL6.Infrastructure.Repositories
 
             if (isBefore)
             {
-                return await message
-                    .OrderByDescending(x => x.CreatedAt)
-                    .Take(count)
-                    .ToListAsync();
+                return await message.OrderByDescending(x => x.CreatedAt).Take(count).ToListAsync();
             }
             else
             {
@@ -162,7 +187,7 @@ namespace PBL6.Infrastructure.Repositories
             bool isBefore = true
         )
         {
-            var message =  _apiDbContext.Messages
+            var message = _apiDbContext.Messages
                 .Include(x => x.MessageTrackings)
                 .ThenInclude(x => x.User)
                 .ThenInclude(x => x.Information)
@@ -187,22 +212,16 @@ namespace PBL6.Infrastructure.Repositories
                             (x.ToUserId == currentUserId && x.CreatedBy == toUserId)
                             || (x.ToUserId == toUserId && x.CreatedBy == currentUserId)
                         )
-                        && (
-                            isBefore
-                                ? x.CreatedAt < timeCursor
-                                : x.CreatedAt > timeCursor)
+                        && (isBefore ? x.CreatedAt < timeCursor : x.CreatedAt > timeCursor)
                         && !x.IsDeleted
                         && x.ToChannelId == null
                         && x.ParentId == parentId
                         && !x.MessageTrackings.Any(x => x.UserId == currentUserId && x.IsDeleted)
                 );
-            
+
             if (isBefore)
             {
-                return await message
-                    .OrderByDescending(x => x.CreatedAt)
-                    .Take(count)
-                    .ToListAsync();
+                return await message.OrderByDescending(x => x.CreatedAt).Take(count).ToListAsync();
             }
             else
             {
@@ -254,7 +273,12 @@ namespace PBL6.Infrastructure.Repositories
             ;
         }
 
-        public async Task<IEnumerable<Message>> GetPinMessagesOfUserAsync(Guid currentUserId, Guid UserId, int offset, int limit)
+        public async Task<IEnumerable<Message>> GetPinMessagesOfUserAsync(
+            Guid currentUserId,
+            Guid UserId,
+            int offset,
+            int limit
+        )
         {
             return await _apiDbContext.Messages
                 .Include(x => x.MessageTrackings)

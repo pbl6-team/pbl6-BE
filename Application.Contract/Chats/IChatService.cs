@@ -16,5 +16,6 @@ namespace PBL6.Application.Contract.Chats
         Task<IEnumerable<FileInfoDto>> GetFilesAsync(GetFileDto input);
         Task<List<MessageDto>> GetPinMessage(GetPinMessageDto input);
         Task<List<MessageDto>> JumpToMessage(JumpToMessageDto input);
+        Task<int> CountUnreadMessage();
     }
 }
