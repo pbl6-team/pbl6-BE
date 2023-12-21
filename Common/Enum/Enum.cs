@@ -34,4 +34,11 @@ namespace PBL6.Common.Enum
         WORKSPACE_INVITATION = 6,
         WORKSPACE_REMOVED = 7,
     }
+
+    public enum WORKSPACE_STATUS
+    {
+        ACTIVE = 1,
+        SUSPENDED = 2,
+    }
+
 }

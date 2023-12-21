@@ -43,6 +43,18 @@ namespace PBL6.Application
                                 )
                         )
                 );
+            CreateMap<Workspace, AdminWorkspaceDto>()
+                .IncludeBase<FullAuditedEntity, FullAuditedDto>()
+                .ForMember(
+                    x => x.OwnerName,
+                    opt =>
+                        opt.MapFrom(
+                            src =>
+                                src.Owner.Information.FirstName
+                                + " "
+                                + src.Owner.Information.LastName
+                        )
+                );
             CreateMap<CreateWorkspaceDto, Workspace>();
             CreateMap<CreateWorkspaceDto, WorkspaceDto>();
             CreateMap<UpdateWorkspaceDto, Workspace>();

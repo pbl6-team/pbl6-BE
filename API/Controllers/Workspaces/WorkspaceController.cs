@@ -49,6 +49,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [AuthorizeFilter]
+        [WorkspaceFilter]
         public async Task<IActionResult> Update(
             [FromRoute] Guid workspaceId,
             [FromBody] UpdateWorkspaceDto input
@@ -69,6 +70,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [AuthorizeFilter]
+        [WorkspaceFilter]
         public async Task<IActionResult> UpdateAvatar(
             [FromRoute] Guid workspaceId,
             [FromForm] UpdateAvatarWorkspaceDto input
@@ -88,6 +90,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [AuthorizeFilter]
+        [WorkspaceFilter]
         public async Task<IActionResult> Delete([FromRoute] Guid workspaceId)
         {
             return Ok(new { Id = await _workspaceService.DeleteAsync(workspaceId) });
@@ -119,6 +122,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(WorkspaceDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [WorkspaceFilter]
         public async Task<IActionResult> GetById([FromRoute] Guid workspaceId)
         {
             return Ok(await _workspaceService.GetByIdAsync(workspaceId));
@@ -135,6 +139,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<WorkspaceDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [WorkspaceFilter]
         public async Task<IActionResult> GetByName([FromRoute] string workspaceName)
         {
             return Ok(await _workspaceService.GetByNameAsync(workspaceName));
@@ -202,6 +207,7 @@ namespace PBL6.API.Controllers.Workspaces
         )]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [WorkspaceFilter]
         public async Task<IActionResult> GetRoles([FromRoute] Guid workspaceId)
         {
             return Ok(await _workspaceService.GetRolesAsync(workspaceId));
@@ -219,6 +225,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDetailDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [WorkspaceFilter]
         public async Task<IActionResult> GetMembersByRoleId([FromRoute] Guid workspaceId, [FromRoute] Guid roleId)
         {
             return Ok(await _workspaceService.GetMembersByRoleIdAsync(workspaceId, roleId));
@@ -235,6 +242,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDetailDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [WorkspaceFilter]
         public async Task<IActionResult> GetMembersWithoutRole([FromRoute] Guid workspaceId)
         {
             return Ok(await _workspaceService.GetMembersWithoutRoleAsync(workspaceId));
@@ -252,6 +260,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<PermissionDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [WorkspaceFilter]
         public async Task<IActionResult> GetPermissionsByWorkspaceRoleId(
             [FromRoute] Guid workspaceId,
             [FromRoute] Guid roleId
@@ -272,6 +281,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<PermissionDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [WorkspaceFilter]
         public async Task<IActionResult> GetPermissions()
         {
             return Ok(await _workspaceService.GetPermissions());
@@ -289,6 +299,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(WorkspaceRoleDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [WorkspaceFilter]
         public async Task<IActionResult> GetRole(
             [FromRoute] Guid workspaceId,
             [FromRoute] Guid roleId
@@ -310,6 +321,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
+        [WorkspaceFilter]
         public async Task<IActionResult> UpdateRole(
             [FromRoute] Guid workspaceId,
             [FromRoute] Guid roleId,
@@ -332,6 +344,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [AuthorizeFilter]
+        [WorkspaceFilter]
         public async Task<IActionResult> AddRole(
             [FromRoute] Guid workspaceId,
             [FromBody] CreateUpdateWorkspaceRoleDto input
@@ -355,6 +368,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
+        [WorkspaceFilter]
         public async Task<IActionResult> DeleteRole(
             [FromRoute] Guid workspaceId,
             [FromRoute] Guid roleId
@@ -377,6 +391,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
+        [WorkspaceFilter]
         public async Task<IActionResult> SetRole(
             [FromRoute] Guid workspaceId,
             [FromRoute] Guid userId,
@@ -398,6 +413,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
+        [WorkspaceFilter]
         public async Task<IActionResult> GetMembers([FromRoute] Guid workspaceId)
         {
             return Ok(await _workspaceService.GetMembersAsync(workspaceId));
