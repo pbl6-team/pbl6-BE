@@ -12,7 +12,7 @@ namespace PBL6.Common.Exceptions
     public class SuspendedWorkspaceException : CustomException
     {
         public SuspendedWorkspaceException()
-            : base("Workspace is suspended", (int)HttpStatusCode.BadRequest) { }
+            : base("Workspace is suspended", (int)HttpStatusCode.UnavailableForLegalReasons) { }
 
     }
 }
