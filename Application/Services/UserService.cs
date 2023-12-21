@@ -1,9 +1,12 @@
 using System.Runtime.CompilerServices;
+using Application.Contract.Users.Dtos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using OneSignalApi.Model;
 using PBL6.Application.Contract.Users;
 using PBL6.Application.Contract.Users.Dtos;
 using PBL6.Application.Services;
+using PBL6.Common.Enum;
 using PBL6.Common.Exceptions;
 
 namespace Application.Services;
@@ -239,6 +242,73 @@ public class UserService : BaseService, IUserService
                 e.Message
             );
 
+            throw;
+        }
+    }
+
+    public async Task<IEnumerable<AdminUserDto>> GetAllAsync()
+    {
+        var method = GetActualAsyncMethodName();
+        try
+        {
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var users = await _unitOfWork.Users.Queryable()
+                                           .Include(x => x.Information)
+                                           .Where(x => !x.IsDeleted)
+                                           .ToListAsync();
+
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+            return _mapper.Map<IEnumerable<AdminUserDto>>(users);
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation(
+                "[{_className}][{method}] Error: {message}",
+                _className,
+                method,
+                e.Message
+            );
+
+            throw;
+        }
+
+    }
+
+    public async Task<Guid> UpdateUserStatusAsync(Guid userId, short status)
+    {
+        var method = GetActualAsyncMethodName();
+        try
+        {
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+
+            var user = await _unitOfWork.Users.Queryable()
+                                              .Include(x => x.Information)
+                                              .FirstOrDefaultAsync(x => !x.IsDeleted && x.Id == userId);
+            switch (status)
+            {
+                case (short)USER.BLOCKED:
+                    user.Information.Status = (short)USER.BLOCKED;
+                    break;
+                case (short)USER.VERIFIED:
+                    user.Information.Status = (short)USER.VERIFIED;
+                    break;
+                default:
+                    throw new BadRequestException("Status is not valid");
+            }
+            await _unitOfWork.Users.UpdateAsync(user);
+            await _unitOfWork.SaveChangeAsync();
+
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+            return user.Id;
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation(
+                "[{_className}][{method}] Error: {message}",
+                _className,
+                method,
+                e.Message
+            );
             throw;
         }
     }

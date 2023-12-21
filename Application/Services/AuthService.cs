@@ -329,6 +329,7 @@ namespace PBL6.Application.Services
                     await _unitOfWork.Users
                         .Queryable()
                         .Include(x => x.UserTokens)
+                        .Include(x => x.Information)
                         .FirstOrDefaultAsync(
                             x =>
                                 (x.Username == userLogin.Username || x.Email == userLogin.Username)
@@ -339,6 +340,13 @@ namespace PBL6.Application.Services
                 if (existedUser.Password != hashPassword)
                 {
                     throw new InvalidUsernamePasswordException();
+                }
+
+                var isBlocked = existedUser.Information.Status == (short)USER.BLOCKED;
+
+                if (isBlocked)
+                {
+                    throw new BlockedUserException();
                 }
 
                 ClaimData claimData =

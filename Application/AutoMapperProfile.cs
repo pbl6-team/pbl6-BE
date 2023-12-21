@@ -9,6 +9,7 @@ using PBL6.Application.Contract.Chats.Dtos;
 using Application.Contract.Workspaces.Dtos;
 using PBL6.Application.Contract.Notifications.Dtos;
 using PBL6.Common.Enum;
+using Application.Contract.Users.Dtos;
 
 namespace PBL6.Application
 {
@@ -109,6 +110,16 @@ namespace PBL6.Application
                 .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.Information.BirthDay))
                 .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.Information.Picture));
 
+            CreateMap<User, AdminUserDto>()
+                .ForMember(x => x.Username, opt => opt.MapFrom(src => src.Username))
+                .ForMember(x => x.FirstName, opt => opt.MapFrom(src => src.Information.FirstName))
+                .ForMember(x => x.LastName, opt => opt.MapFrom(src => src.Information.LastName))
+                .ForMember(x => x.Gender, opt => opt.MapFrom(src => src.Information.Gender))
+                .ForMember(x => x.Phone, opt => opt.MapFrom(src => src.Information.Phone))
+                .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.Information.BirthDay))
+                .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.Information.Picture))
+                .ForMember(x => x.Status, opt => opt.MapFrom(src => src.Information.Status));
+                
             CreateMap<UpdateUserDto, User>()
                 .ForPath(x => x.Information.FirstName, opt => opt.MapFrom(src => src.FirstName))
                 .ForPath(x => x.Information.LastName, opt => opt.MapFrom(src => src.LastName))

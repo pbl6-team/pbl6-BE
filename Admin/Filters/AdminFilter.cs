@@ -15,6 +15,18 @@ namespace PBL6.Admin.Filters
         {
             var configuration = context.HttpContext.RequestServices.GetService<IConfiguration>();
             var token = GetValue(context, "Authorization");
+            if (string.IsNullOrEmpty(token))
+                {
+                    if (context.HttpContext.Request.Path.StartsWithSegments("/chathub"))
+                    {
+                        token = context.HttpContext.Request.Query["access_token"];
+                    }
+                    else
+                    {
+                        throw new UnauthorizedException("Token is required");
+                    }
+                }
+                
             if (token.ToString().StartsWith("Bearer "))
             {
                 token = token.ToString()[7..];
