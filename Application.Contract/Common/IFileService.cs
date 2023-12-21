@@ -8,6 +8,7 @@ namespace PBL6.Application.Contract.Common
         Task DeleteFileAsync(List<string> fileNames);
         Task CopyFileAsync(string fileName, string newFileName);
         Task DeleteFileUrlAsync(List<string> filePath);
+        Task SoftDeleteFileAsync(List<string> filePaths);
         string GetBaseUrl();
         Task<string> UploadFileGetUrlAsync(string fileName, Stream stream, string contentType = "");
     }

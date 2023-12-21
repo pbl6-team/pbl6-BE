@@ -67,12 +67,12 @@ namespace PBL6.Application.Services
                 if (file is not null)
                 {
                     urls.Add(file.Url);
-                    message.Files.Remove(file);
+                    file.IsDeleted = true;
                 }
             }
             message.IsEdited = true;
             await _unitOfWork.Messages.UpdateAsync(message);
-            await _fileService.DeleteFileUrlAsync(urls);
+            await _fileService.SoftDeleteFileAsync(urls);
             await _unitOfWork.SaveChangeAsync();
             MessageDto messageDto = _mapper.Map<MessageDto>(message);
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
