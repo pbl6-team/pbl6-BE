@@ -30,6 +30,6 @@ namespace PBL6.Domain.Models.Users
 
         public User Receiver { get; set; }
 
-        public ICollection<FileDomain> Files { get; set; }
+        public ICollection<FileOfMessage> Files { get; set; }
     }
 }

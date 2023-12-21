@@ -55,7 +55,7 @@ namespace PBL6.Application.Services
             List<string> urls = new();
             var message =
                 await _unitOfWork.Messages.GetMessageByFileIds(ids)
-                ?? throw new NotFoundException<FileDomain>(ids.First().ToString());
+                ?? throw new NotFoundException<FileOfMessage>(ids.First().ToString());
             foreach (var id in ids)
             {
                 if (message.CreatedBy != currentUserId)
@@ -475,7 +475,7 @@ namespace PBL6.Application.Services
                         IsBefore = false
                     }
                 )
-            ); 
+            );
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
@@ -613,6 +613,31 @@ namespace PBL6.Application.Services
             return messageDto;
         }
 
+        public async Task<FileInfoDto> SaveFileAsync(SendFileInfoDto input)
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            Guid id = Guid.NewGuid();
+            var file = _unitOfWork
+                .Repository<FileOfMessage>()
+                .AddAsync(
+                    new FileOfMessage
+                    {
+                        Id = id,
+                        Name = input.Name,
+                        Type = input.Type,
+                        Url = input.Url,
+                        CreatedAt = DateTimeOffset.UtcNow
+                    }
+                );
+
+            await _unitOfWork.SaveChangeAsync();
+
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+            return _mapper.Map<FileInfoDto>(file);
+        }
+
         public async Task<MessageDto> SendMessageAsync(SendMessageDto input)
         {
             var method = GetActualAsyncMethodName();
@@ -622,18 +647,25 @@ namespace PBL6.Application.Services
             );
             var currentUser = await _unitOfWork.Users.GetUserByIdAsync(currentUserId);
 
-            List<FileDomain> fileInfos = new();
+            List<FileOfMessage> fileInfos = new();
             if (input.Files is not null)
             {
-                foreach (var file in input.Files)
+                foreach (var fileId in input.Files)
                 {
-                    var fileInfo = new FileDomain
+                    var fileInfo = await _unitOfWork.Repository<FileOfMessage>().Queryable().Where(
+                        x => x.Id == fileId 
+                        && !x.IsDeleted
+                        && x.MessageId == null
+                    ).FirstOrDefaultAsync();
+
+                    if (fileInfo is not null)
                     {
-                        Name = file.Name,
-                        Type = file.Type,
-                        Url = file.Url,
-                    };
-                    fileInfos.Add(fileInfo);
+                        fileInfos.Add(fileInfo);
+                    }
+                    else
+                    {
+                        throw new NotFoundException<FileOfMessage>(fileId.ToString());
+                    }
                 }
             }
 

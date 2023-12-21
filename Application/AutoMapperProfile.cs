@@ -248,7 +248,7 @@ namespace PBL6.Application
                 )
                 .ForMember(x => x.Data, opt => opt.MapFrom(src => src.Data));
 
-            CreateMap<FileDomain, FileInfoDto>()
+            CreateMap<FileOfMessage, FileInfoDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(x => x.Name, opt => opt.MapFrom(src => src.Name))
                 .ForMember(x => x.Type, opt => opt.MapFrom(src => src.Type))

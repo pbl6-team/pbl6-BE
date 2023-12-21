@@ -158,7 +158,7 @@ namespace PBL6.Application.Hubs
             }
         }
 
-        public async Task<Guid?> SendMessageAsync(SendMessageDto input)
+        public async Task<MessageDto> SendMessageAsync(SendMessageDto input)
         {
             try
             {
@@ -166,7 +166,7 @@ namespace PBL6.Application.Hubs
                 {
                     throw new UnauthorizedException("User is not authorized");
                 }
-                var messageDto = await _chatService.SendMessageAsync(input);
+                MessageDto messageDto = await _chatService.SendMessageAsync(input);
 
                 if (input.IsChannel)
                 {
@@ -184,7 +184,7 @@ namespace PBL6.Application.Hubs
                             .SendAsync(RECEIVE_MESSAGE, messageDto);
                     }
                 }
-                return messageDto.Id;
+                return messageDto;
             }
             catch (Exception exception)
             {
