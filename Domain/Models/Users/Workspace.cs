@@ -23,6 +23,8 @@ namespace PBL6.Domain.Models.Users
 
         public User Owner { get; set; }
 
+        public short Status { get; set; }
+
         public ICollection<Channel> Channels { get; set; }
 
         public ICollection<WorkspaceMember> Members { get; set; }

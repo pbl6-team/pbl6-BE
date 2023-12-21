@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using PBL6.Application.Contract.Workspaces;
+using PBL6.Common.Enum;
 using PBL6.Common.Exceptions;
 using PBL6.Common.Functions;
 
@@ -8,11 +9,15 @@ namespace PBL6.Application.Filters
     [AttributeUsage(AttributeTargets.All)]
     public class WorkspaceFilter : Attribute, IAsyncAuthorizationFilter
     {
-        private readonly string _policyName;
+        private readonly string _policyName = string.Empty;
 
         public WorkspaceFilter(string policyName)
         {
             _policyName = policyName;
+        }
+
+        public WorkspaceFilter()
+        {
         }
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
@@ -25,17 +30,24 @@ namespace PBL6.Application.Filters
 
             var workspaceService =
                 context.HttpContext.RequestServices.GetService<IWorkspaceService>();
-
-            var userId = context.HttpContext.User.Claims
-                .FirstOrDefault(x => x.Type == CustomClaimTypes.UserId)
-                ?.Value;
-            var permissions = await workspaceService.GetPermissionOfUser(
-                Guid.Parse(workspaceId),
-                Guid.Parse(userId)
-            );
-            if (!permissions.Any(x => x.Code == _policyName))
+            var workspace = await workspaceService.GetByIdAsync(Guid.Parse(workspaceId));
+            if (workspace.Status == (short)WORKSPACE_STATUS.SUSPENDED)
             {
-                throw new ForbidException();
+                throw new SuspendedWorkspaceException();
+            }
+            if (_policyName != string.Empty)
+            {
+                var userId = context.HttpContext.User.Claims
+                    .FirstOrDefault(x => x.Type == CustomClaimTypes.UserId)
+                    ?.Value;
+                var permissions = await workspaceService.GetPermissionOfUser(
+                    Guid.Parse(workspaceId),
+                    Guid.Parse(userId)
+                );
+                if (!permissions.Any(x => x.Code == _policyName))
+                {
+                    throw new ForbidException();
+                }
             }
         }
 

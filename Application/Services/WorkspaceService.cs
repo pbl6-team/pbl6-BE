@@ -82,7 +82,7 @@ namespace PBL6.Application.Services
                     // TODO: Change roleId, status
                     new() { UserId = userId, AddBy = userId }
                 };
-
+                workspace.Status = (short)WORKSPACE_STATUS.ACTIVE;
                 workspace = await _unitOfWork.Workspaces.AddAsync(workspace);
                 await _unitOfWork.SaveChangeAsync();
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
@@ -212,17 +212,17 @@ namespace PBL6.Application.Services
                     .ThenInclude(u => u.Information)
                     .FirstOrDefaultAsync(x => x.Id == workspaceId);
 
-                workspace.Channels = workspace.Channels.Where(c => !c.IsDeleted).ToList();
-                workspace.Members = workspace.Members.Where(m => !m.IsDeleted).ToList();
-
-                if (workspace is null)
-                    throw new NotFoundException<Workspace>(workspaceId.ToString());
                 var userId = Guid.Parse(
                     _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
                 );
-
+                
                 if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, userId))
                     throw new ForbidException();
+
+                workspace.Channels = workspace.Channels.Where(c => !c.IsDeleted).ToList();
+                workspace.Members = workspace.Members.Where(m => !m.IsDeleted).ToList();
+
+
 
                 var channels = await _channelService.GetAllChannelsOfAWorkspaceAsync(workspace.Id);
                 foreach (var channel in channels)
@@ -1034,6 +1034,61 @@ namespace PBL6.Application.Services
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
             return _mapper.Map<IEnumerable<WorkspaceUserDto>>(members);
+        }
+
+        public async Task<IEnumerable<AdminWorkspaceDto>> GetAllForAdminAsync()
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+
+            var workspaces = await _unitOfWork.Workspaces
+                .Queryable()
+                .Include(x => x.Owner)
+                .ThenInclude(o => o.Information)
+                .ToListAsync();
+
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+            return _mapper.Map<IEnumerable<AdminWorkspaceDto>>(workspaces);
+        }
+
+        public async Task<Guid> UpdateWorkspaceStatusAsync(Guid workspaceId, short status)
+        {
+            var method = GetActualAsyncMethodName();
+            try
+            {
+                _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+
+                var workspace = await _unitOfWork.Workspaces.Queryable()
+                    .FirstOrDefaultAsync(x => x.Id == workspaceId);
+                switch (status)
+                {
+                    case (short)WORKSPACE_STATUS.SUSPENDED:
+                        workspace.Status = (short)WORKSPACE_STATUS.SUSPENDED;
+                        break;
+                    case (short)WORKSPACE_STATUS.ACTIVE:
+                        workspace.Status = (short)WORKSPACE_STATUS.ACTIVE;
+                        break;
+                    default:
+                        throw new BadRequestException("Status is not valid");
+                }
+                await _unitOfWork.Workspaces.UpdateAsync(workspace);
+                await _unitOfWork.SaveChangeAsync();
+
+                _logger.LogInformation("[{_className}][{method}] End", _className, method);
+                return workspace.Id;
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation(
+                    "[{_className}][{method}] Error: {message}",
+                    _className,
+                    method,
+                    e.Message
+                );
+                throw;
+            }
+
         }
     }
 }
