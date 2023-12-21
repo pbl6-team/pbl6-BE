@@ -73,6 +73,7 @@ namespace PBL6.Infrastructure.Repositories
                 .Include(x => x.ToChannel)
                 .ThenInclude(x => x.ChannelMembers)
                 .Include(x => x.MessageTrackings)
+                .Include(x => x.Files)
                 .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
         }
 
