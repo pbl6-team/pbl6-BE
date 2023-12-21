@@ -9,6 +9,7 @@ namespace PBL6.Application.Services
     public class FileService : IFileService
     {
         private string BucketName => _config["Minio:BucketName"];
+        private string TrashBucketName => _config["Minio:TrashBucketName"] ?? "trash";
         private readonly string _baseUrl;
 
         private readonly IMinioClient _minioClient;
@@ -141,6 +142,38 @@ namespace PBL6.Application.Services
         public string GetBaseUrl()
         {
             return _baseUrl;
+        }
+
+        public async Task SoftDeleteFileAsync(List<string> filePaths)
+        {
+            foreach (var filePath in filePaths)
+            {
+                try
+                {
+                    var fileName = filePath.Replace(_baseUrl, "");
+                    var cpSrcArgs = new CopySourceObjectArgs()
+                        .WithBucket(BucketName)
+                        .WithObject(fileName);
+                    var args = new CopyObjectArgs()
+                        .WithBucket(TrashBucketName)
+                        .WithObject(fileName)
+                        .WithCopyObjectSource(cpSrcArgs);
+                    await _minioClient.CopyObjectAsync(args).ConfigureAwait(false);
+                    Console.WriteLine(
+                        "Copied object {0} from bucket {1} to bucket {2}",
+                        fileName,
+                        BucketName,
+                        TrashBucketName
+                    );
+                    Console.WriteLine();
+                }
+                catch
+                {
+                    continue;
+                }
+            }
+
+            return;
         }
     }
 }

@@ -176,7 +176,7 @@ namespace PBL6.Application
                         opt.MapFrom(
                             src =>
                                 src.MessageTrackings
-                                    .Where(x => x.ReadTime != null)
+                                    .Where(x => x.ReadTime != null && x.IsDeleted)
                                     .Select(
                                         x =>
                                             new Reader
@@ -192,7 +192,7 @@ namespace PBL6.Application
                                     )
                         )
                 )
-                .ForMember(x => x.Files, opt => opt.MapFrom(src => src.Files));
+                .ForMember(x => x.Files, opt => opt.MapFrom(src => src.Files.Where(x => !x.IsDeleted)));
 
             CreateMap<WorkspaceMember, WorkspaceUserDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.UserId))
