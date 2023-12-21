@@ -37,4 +37,10 @@ namespace PBL6.Common
         public InvalidExternalAuthenticationException()
             : base($"Invalid External Authentication") { }
     }
+
+    public class BlockedUserException : CustomException
+    {
+        public BlockedUserException()
+            : base($"Your account has been blocked") { }
+    }
 }

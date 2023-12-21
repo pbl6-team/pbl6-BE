@@ -1,3 +1,4 @@
+using Application.Contract.Users.Dtos;
 using PBL6.Application.Contract.Users.Dtos;
 
 namespace PBL6.Application.Contract.Users
@@ -10,5 +11,7 @@ namespace PBL6.Application.Contract.Users
         Task<UserDetailDto> GetByIdAsync(Guid userId);
         Task<Guid> UpdateAsync(Guid userId, UpdateUserDto updateUserDto);
         Task<Guid> UpdateAvatarAsync(Guid userId, UpdateUserPictureDto updateUserPictureDto);
+        Task<IEnumerable<AdminUserDto>> GetAllAsync();
+        Task<Guid> UpdateUserStatusAsync(Guid userId, short status);
     }
 }

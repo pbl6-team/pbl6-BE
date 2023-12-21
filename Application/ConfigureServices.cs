@@ -25,6 +25,7 @@ namespace PBL6.Application
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<PBL6.Application.Contract.Admins.IAuthService, PBL6.Application.Services.Admins.AuthService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IWorkspaceService, WorkspaceService>();
             services.AddScoped<IChannelService, ChannelService>();
