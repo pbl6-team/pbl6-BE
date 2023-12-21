@@ -18,7 +18,7 @@ namespace PBL6.Application.Services
         {
             _config = config;
             _baseUrl =
-                $"{(_config["Minio:UseSSL"] == "False" ? "http://" : "https://")}{_config["Minio:EndPoint"]}/{BucketName}/";
+                $"{(_config["Minio:UseSSL"] == "True" ? "https://" : "http://")}{_config["Minio:EndPoint"]}/{BucketName}/";
             _minioClient = new MinioClient()
                 .WithEndpoint(_config["Minio:EndPoint"])
                 .WithCredentials(_config["Minio:AccessKey"], _config["Minio:SecretKey"])
@@ -132,7 +132,7 @@ namespace PBL6.Application.Services
 
                 return $"{_baseUrl}{fileName}";
             }
-            catch (MinioException ex)
+            catch (Exception ex)
             {
                 throw ex;
             }

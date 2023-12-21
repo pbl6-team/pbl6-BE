@@ -36,9 +36,11 @@ namespace PBL6.API.Controllers.Files
             var fileInfos = new List<SendFileInfoDto>();
             foreach (var file in files)
             {
+                var extension = Path.GetExtension(file.FileName);
+                var fileName = $"{Guid.NewGuid()}{extension}";
                 if (file.Length <= 0) continue;
                 var url = await _fileService.UploadFileGetUrlAsync(
-                    file.FileName,
+                    fileName,
                     file.OpenReadStream(),
                     file.ContentType
                 );
