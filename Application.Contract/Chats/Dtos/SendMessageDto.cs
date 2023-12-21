@@ -10,6 +10,6 @@ namespace PBL6.Application.Contract.Chats.Dtos
 
         public bool IsChannel { get; set; }
 
-        public List<SendFileInfoDto> Files { get; set; }
+        public List<Guid> Files { get; set; }
     }
 }

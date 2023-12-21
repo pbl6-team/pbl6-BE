@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PBL6.API.Filters;
 using PBL6.Application.Contract.Chats;
@@ -28,12 +27,12 @@ namespace PBL6.API.Controllers.Files
         /// <response code="200">Returns file info</response>
         /// <response code="400">If the request is invalid</response>
         /// <response code="500">If there was an internal server error</response>
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<SendFileInfoDto>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<FileInfoDto>))]
         [HttpPost]
         [AuthorizeFilter]
         public async Task<IActionResult> UploadFile([FromForm] List<IFormFile> files)
         {
-            var fileInfos = new List<SendFileInfoDto>();
+            var fileInfos = new List<FileInfoDto>();
             foreach (var file in files)
             {
                 var extension = Path.GetExtension(file.FileName);
@@ -45,12 +44,12 @@ namespace PBL6.API.Controllers.Files
                     file.ContentType
                 );
 
-                var fileInfo = new SendFileInfoDto
+                var fileInfo = await _chatService.SaveFileAsync(new SendFileInfoDto
                 {
                     Name = file.FileName,
                     Type = file.ContentType,
                     Url = url
-                };
+                });
 
                 fileInfos.Add(fileInfo);
             }

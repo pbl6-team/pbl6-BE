@@ -42,7 +42,7 @@ namespace PBL6.Infrastructure.Data
         public DbSet<PermissionsOfChannelRole> PermissionsOfChanelRoles { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<MessageTracking> MessageTrackings { get; set; }
-        public DbSet<FileDomain> Files { get; set; }
+        public DbSet<FileOfMessage> Files { get; set; }
 
         public ApiDbContext() { }
 
