@@ -30,5 +30,6 @@ namespace PBL6.Application.Contract.Channels
         Task<IEnumerable<ChannelUserDto>> GetMembersAsync(Guid channelId);
         Task AcceptInvitationAsync(Guid channelId);
         Task DeclineInvitationAsync(Guid channelId);
+        Task<Guid> LeaveChannelAsync(Guid channelId);
     }
 }

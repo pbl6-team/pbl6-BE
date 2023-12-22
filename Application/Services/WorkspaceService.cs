@@ -1137,5 +1137,58 @@ namespace PBL6.Application.Services
                 );
             }
         }
+
+        public async Task<Guid> LeaveWorkspaceAsync(Guid workspaceId)
+        {
+            var method = GetActualAsyncMethodName();
+            try
+            {
+                _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+
+                var userId = Guid.Parse(
+                    _currentUser.UserId ?? throw new UnauthorizedAccessException()
+                );
+                var workspace = await _unitOfWork.Workspaces.GetAsync(workspaceId);
+                if (workspace is null)
+                    throw new NotFoundException<Workspace>(workspaceId.ToString());
+
+                var member = await _unitOfWork.Workspaces.GetMemberByUserId(workspaceId, userId);
+                if (member is null)
+                    throw new NotFoundException<WorkspaceMember>(userId.ToString());
+
+                var channels = await _unitOfWork.Channels
+                    .Queryable()
+                    .Include(x => x.ChannelMembers)
+                    .Where(x => x.WorkspaceId == workspaceId)
+                    .ToListAsync();
+                foreach (var channel in channels)
+                {
+                    var channelMember = channel.ChannelMembers.FirstOrDefault(x => x.UserId == userId);
+                    if (channelMember is not null)
+                    {
+                        channelMember.Status = (short)CHANNEL_MEMBER_STATUS.REMOVED;
+                        await _unitOfWork.ChannelMembers.DeleteAsync(channelMember);   
+                    }
+                }
+                member.Status = (short)WORKSPACE_MEMBER_STATUS.REMOVED;
+                await _unitOfWork.WorkspaceMembers.DeleteAsync(member);
+                await _unitOfWork.SaveChangeAsync();
+
+                _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+                return workspace.Id;
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation(
+                    "[{_className}][{method}] Error: {message}",
+                    _className,
+                    GetActualAsyncMethodName(),
+                    e.Message
+                );
+
+                throw;
+            }
+        }
     }
 }

@@ -1027,4 +1027,22 @@ public class ChannelService : BaseService, IChannelService
        
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
     }
+
+    public async Task<Guid> LeaveChannelAsync(Guid channelId)
+    {
+        var method = GetActualAsyncMethodName();
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
+        var isMember = await _unitOfWork.Channels.CheckIsMemberAsync(channelId, userId);
+        if (!isMember)
+        {
+            throw new ForbidException();
+        }
+        var member = await _unitOfWork.Channels.GetMemberByUserId(channelId, userId);
+        await _unitOfWork.ChannelMembers.DeleteAsync(member);
+        member.Status = (short)CHANNEL_MEMBER_STATUS.REMOVED;
+        await _unitOfWork.SaveChangeAsync();
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
+        return channelId;
+    }
 }

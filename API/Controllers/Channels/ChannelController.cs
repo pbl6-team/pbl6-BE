@@ -429,5 +429,22 @@ namespace PBL6.API.Controllers.Channels
             await _channelService.DeclineInvitationAsync(channelId);
             return NoContent();
         }
+
+        /// <summary>
+        /// Leave channel - cần đăng nhập
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <returns></returns>
+        /// <response code="200">Leave thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpPost("{channelId}/leave")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [AuthorizeFilter]
+        public async Task<IActionResult> LeaveChannel([FromRoute] Guid channelId)
+        {
+            await _channelService.LeaveChannelAsync(channelId);
+            return NoContent();
+        }
     }
 }

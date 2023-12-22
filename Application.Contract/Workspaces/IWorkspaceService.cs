@@ -32,5 +32,6 @@ namespace PBL6.Application.Contract.Workspaces
         Task<Guid> UpdateWorkspaceStatusAsync(Guid workspaceId, short status);
         Task AcceptInvitationAsync(Guid workspaceId);
         Task DeclineInvitationAsync(Guid workspaceId);
+        Task<Guid> LeaveWorkspaceAsync(Guid workspaceId);
     }
 }
