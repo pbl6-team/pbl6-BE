@@ -13,5 +13,6 @@ namespace PBL6.Application.Contract.Users
         Task<Guid> UpdateAvatarAsync(Guid userId, UpdateUserPictureDto updateUserPictureDto);
         Task<IEnumerable<AdminUserDto>> GetAllAsync();
         Task<Guid> UpdateUserStatusAsync(Guid userId, short status);
+        Task<AdminUserDto> GetByIdForAdminAsync(Guid userId);
     }
 }

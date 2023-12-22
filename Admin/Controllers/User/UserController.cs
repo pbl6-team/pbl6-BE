@@ -2,6 +2,7 @@ using Application.Contract.Users.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using PBL6.Admin.Filters;
 using PBL6.Application.Contract.Users;
+using PBL6.Application.Contract.Users.Dtos;
 
 namespace Admin.Controllers.User;
 
@@ -49,5 +50,21 @@ public class UserController : ControllerBase
     {
         await _userService.UpdateUserStatusAsync(userId, status);
         return Ok();
+    }
+
+    /// <summary>
+    /// API get user by id - cần đăng nhập
+    /// </summary>
+    /// <returns></returns>
+    /// <response code="200">Get thành công</response>
+    /// <response code="400">Có lỗi xảy ra</response>
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AdminUserDto))]
+    [AdminFilter]
+    [HttpGet("{userId}")]
+    public async Task<ActionResult> GetUserById([FromRoute] Guid userId)
+    {
+        var user = await _userService.GetByIdForAdminAsync(userId);
+        return Ok(user);
     }
 }
