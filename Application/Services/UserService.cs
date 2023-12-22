@@ -312,4 +312,29 @@ public class UserService : BaseService, IUserService
             throw;
         }
     }
+
+    public async Task<AdminUserDto> GetByIdForAdminAsync(Guid userId)
+    {
+        var method = GetActualAsyncMethodName();
+        try
+        {
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var user = await _unitOfWork.Users.Queryable()
+                                              .Include(x => x.Information)
+                                              .FirstOrDefaultAsync(x => !x.IsDeleted && x.Id == userId);
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+            return _mapper.Map<AdminUserDto>(user);
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation(
+                "[{_className}][{method}] Error: {message}",
+                _className,
+                method,
+                e.Message
+            );
+
+            throw;
+        }
+    }
 }

@@ -51,5 +51,21 @@ namespace PBL6.API.Controllers.Workspaces
             await _workspaceService.UpdateWorkspaceStatusAsync(workspaceId, status);
             return Ok();
         }
+
+        /// <summary>
+        /// API get workspace by id - cần đăng nhập
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(WorkspaceDto))]
+        [AdminFilter]
+        [HttpGet("{workspaceId}")]
+        public async Task<ActionResult> GetWorkspaceById([FromRoute] Guid workspaceId)
+        {
+            var workspace = await _workspaceService.GetByIdForAdminAsync(workspaceId);
+            return Ok(workspace);
+        }
     }
 }

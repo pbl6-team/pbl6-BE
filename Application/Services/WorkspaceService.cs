@@ -1190,5 +1190,34 @@ namespace PBL6.Application.Services
                 throw;
             }
         }
+
+        public async Task<WorkspaceDto> GetByIdForAdminAsync(Guid workspaceId)
+        {
+            var method = GetActualAsyncMethodName();
+            try
+            {
+                _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+
+                var workspace = await _unitOfWork.Workspaces.GetAsync(workspaceId);
+
+                var userId = Guid.Parse(
+                    _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+                );
+
+                _logger.LogInformation("[{_className}][{method}] End", _className, method);
+                return _mapper.Map<WorkspaceDto>(workspace);
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation(
+                    "[{_className}][{method}] Error: {message}",
+                    _className,
+                    method,
+                    e.Message
+                );
+
+                throw;
+            }
+        }
     }
 }
