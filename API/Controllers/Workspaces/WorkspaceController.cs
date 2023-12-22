@@ -453,5 +453,23 @@ namespace PBL6.API.Controllers.Workspaces
             await _workspaceService.DeclineInvitationAsync(workspaceId);
             return NoContent();
         }
+
+        /// <summary>
+        /// Leave workspace - cần đăng nhập
+        /// </summary>
+        /// <param name="workspaceId"></param>
+        /// <returns></returns>
+        /// <response code="200">Leave thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpPost("{workspaceId}/leave")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [AuthorizeFilter]
+        [WorkspaceFilter]
+        public async Task<IActionResult> LeaveWorkspace([FromRoute] Guid workspaceId)
+        {
+            await _workspaceService.LeaveWorkspaceAsync(workspaceId);
+            return NoContent();
+        }
     }
 }
