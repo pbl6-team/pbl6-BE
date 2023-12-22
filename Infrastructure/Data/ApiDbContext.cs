@@ -139,6 +139,10 @@ namespace PBL6.Infrastructure.Data
                .HasForeignKey(x => x.WorkspaceId)
                .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<WorkspaceMember>()
+                .Property(x => x.Status)
+                .HasDefaultValue(1);
+
             modelBuilder.Entity<WorkspaceRole>()
                .HasMany(x => x.Members)
                .WithOne(x => x.WorkspaceRole)
@@ -150,6 +154,10 @@ namespace PBL6.Infrastructure.Data
                .WithOne(x => x.WorkspaceRole)
                .HasForeignKey(x => x.WorkspaceRoleId)
                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ChannelMember>()
+               .Property(x => x.Status)
+                .HasDefaultValue(1);
 
             modelBuilder.Entity<ChannelRole>()
                .HasMany(x => x.Permissions)
