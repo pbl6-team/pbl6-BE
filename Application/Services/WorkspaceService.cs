@@ -206,8 +206,8 @@ namespace PBL6.Application.Services
 
                 var workspace = await _unitOfWork.Workspaces
                     .Queryable()
-                    .Include(x => x.Channels)
-                    .Include(x => x.Members)
+                    .Include(x => x.Channels.Where(c => !c.IsDeleted))
+                    .Include(x => x.Members.Where(m => !m.IsDeleted))
                     .ThenInclude(m => m.User)
                     .ThenInclude(u => u.Information)
                     .FirstOrDefaultAsync(x => x.Id == workspaceId);
@@ -218,11 +218,6 @@ namespace PBL6.Application.Services
                 
                 if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, userId))
                     throw new ForbidException();
-
-                workspace.Channels = workspace.Channels.Where(c => !c.IsDeleted).ToList();
-                workspace.Members = workspace.Members.Where(m => !m.IsDeleted).ToList();
-
-
 
                 var channels = await _channelService.GetAllChannelsOfAWorkspaceAsync(workspace.Id);
                 foreach (var channel in channels)
