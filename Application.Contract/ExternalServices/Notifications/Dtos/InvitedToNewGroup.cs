@@ -6,6 +6,8 @@ namespace PBL6.Application.Contract.ExternalServices.Notifications.Dtos
 
         public string GroupName { get; set; }
 
+        public string GroupAvatar { get; set; }
+
         public Guid InviterId { get; set; }
 
         public string InviterName { get; set; }

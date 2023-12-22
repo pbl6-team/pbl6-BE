@@ -24,5 +24,13 @@ namespace PBL6.Infrastructure.Repositories
                 .Include(x => x.Information)
                 .FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted);
         }
+
+        public Task<User> GetUserByEmailAsync(string email)
+        {
+            return _apiDbContext.Users
+                .Include(x => x.UserTokens)
+                .Include(x => x.Information)
+                .FirstOrDefaultAsync(x => x.Email == email && !x.IsDeleted);
+        }
     }
 }

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using PBL6.Common.Enum;
 using PBL6.Common.Exceptions;
 using PBL6.Domain.Data.Users;
 using PBL6.Domain.Models.Users;
@@ -39,6 +40,17 @@ namespace PBL6.Infrastructure.Repositories
             );
         }
 
+        public Task<bool> CheckIsInvitedAsync(Guid workspaceId, Guid userId)
+        {
+            return _apiDbContext.WorkspaceMembers.AnyAsync(
+                x => !x.IsDeleted
+                    && x.WorkspaceId == workspaceId 
+                    && x.UserId == userId 
+                    && x.Status == ((short)WORKSPACE_MEMBER_STATUS.INVITED
+                )
+            );
+        }
+
         public async Task<bool> CheckIsMemberAsync(Guid workspaceId, Guid userId)
         {
             if (!await CheckIsExistAsync(workspaceId))
@@ -47,15 +59,29 @@ namespace PBL6.Infrastructure.Repositories
             }
 
             return await _apiDbContext.WorkspaceMembers.AnyAsync(
-                x => !x.IsDeleted && x.WorkspaceId == workspaceId && x.UserId == userId
+                x => !x.IsDeleted
+                    && x.WorkspaceId == workspaceId 
+                    && x.UserId == userId 
+                    && x.Status == ((short)WORKSPACE_MEMBER_STATUS.ACTIVE
+                )
             );
         }
 
         public Task<bool> CheckIsOwnerAsync(Guid workspaceId, Guid userId)
         {
-            return  _apiDbContext.Workspaces.AnyAsync(
+            return _apiDbContext.Workspaces.AnyAsync(
                 x => x.Id == workspaceId && x.OwnerId == userId
-            );            
+            );
+        }
+
+        public Task<Workspace> GetAsync(Guid id)
+        {
+            return _apiDbContext.Workspaces
+                .Include(x => x.Members.Where(x => !x.IsDeleted && x.Status != ((short)WORKSPACE_MEMBER_STATUS.REMOVED)))
+                    .ThenInclude(m => m.User)
+                    .ThenInclude(u => u.Information)
+                .Include(x => x.Channels.Where(x => !x.IsDeleted))
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<WorkspaceMember> GetMemberByUserId(Guid workspaceId, Guid userId)

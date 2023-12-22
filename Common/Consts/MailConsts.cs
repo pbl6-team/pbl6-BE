@@ -19,5 +19,11 @@ namespace PBL6.Common.Consts
             public const string Subject = "[FIRA] Forgot password";
             public const string Template = "ForgotPassword.cshtml";
         }
+
+        public static class InviteToWorkspace
+        {
+            public const string Subject = "[FIRA] Invite to workspace";
+            public const string Template = "InviteToWorkspace.cshtml";
+        }
     }
 }

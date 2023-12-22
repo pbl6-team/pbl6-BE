@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using PBL6.Common.Enum;
 using PBL6.Common.Exceptions;
 using PBL6.Domain.Data.Users;
 using PBL6.Domain.Models.Users;
@@ -47,7 +48,9 @@ namespace PBL6.Infrastructure.Repositories
             }
 
             return await _apiDbContext.ChannelMembers.AnyAsync(
-                x => !x.IsDeleted && x.ChannelId == channelId && x.UserId == userId
+                x => !x.IsDeleted && x.ChannelId == channelId 
+                    && x.UserId == userId
+                    && x.Status == ((short)CHANNEL_MEMBER_STATUS.ACTIVE)
             );
         }
 
@@ -110,6 +113,15 @@ namespace PBL6.Infrastructure.Repositories
                 .SelectMany(x => x.ChannelMembers)
                 .Select(m => m.UserId)
                 .ToListAsync();
+        }
+
+        public Task<bool> CheckIsInvitedAsync(Guid channelId, Guid userId)
+        {
+            return _apiDbContext.ChannelMembers.AnyAsync(
+                x => !x.IsDeleted && x.ChannelId == channelId 
+                    && x.UserId == userId 
+                    && x.Status == ((short)CHANNEL_MEMBER_STATUS.INVITED)
+            );
         }
     }
 }

@@ -8,7 +8,7 @@ namespace PBL6.Common.Enum
         SUSPENDED,
         PREMIUM,
     }
-    
+
     public enum OTP_TYPE
     {
         VERIFY_USER = 1,
@@ -41,4 +41,21 @@ namespace PBL6.Common.Enum
         SUSPENDED = 2,
     }
 
+    public enum WORKSPACE_MEMBER_STATUS
+    {
+        ACTIVE = 1,
+        SUSPENDED = 2,
+        INVITED = 3,
+        REMOVED = 4,
+        DECLINED = 5,
+    }
+
+    public enum CHANNEL_MEMBER_STATUS
+    {
+        ACTIVE = 1,
+        SUSPENDED = 2,
+        INVITED = 3,
+        REMOVED = 4,
+        DECLINED = 5,
+    }
 }

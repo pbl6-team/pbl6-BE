@@ -160,11 +160,11 @@ namespace PBL6.API.Controllers.Workspaces
         [WorkspaceFilter(WorkSpacePolicy.INVITE_MEMBER)]
         public async Task<IActionResult> AddMember(
             [FromRoute] Guid workspaceId,
-            [FromBody] List<Guid> userIds
+            [FromBody] List<string> emails
         )
         {
             return Ok(
-                new { Id = await _workspaceService.AddMemberToWorkspaceAsync(workspaceId, userIds) }
+                new { Id = await _workspaceService.InviteMemberToWorkspaceAsync(workspaceId, emails) }
             );
         }
 
@@ -281,7 +281,6 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<PermissionDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
-        [WorkspaceFilter]
         public async Task<IActionResult> GetPermissions()
         {
             return Ok(await _workspaceService.GetPermissions());
@@ -417,6 +416,42 @@ namespace PBL6.API.Controllers.Workspaces
         public async Task<IActionResult> GetMembers([FromRoute] Guid workspaceId)
         {
             return Ok(await _workspaceService.GetMembersAsync(workspaceId));
+        }
+
+        /// <summary>
+        /// Accept invitation - cần đăng nhập
+        /// </summary>
+        /// <param name="workspaceId"></param>
+        /// <returns></returns>
+        /// <response code="200">Accept thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpPost("{workspaceId}/accept")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [AuthorizeFilter]
+        [WorkspaceFilter]
+        public async Task<IActionResult> AcceptInvitation([FromRoute] Guid workspaceId)
+        {
+            await _workspaceService.AcceptInvitationAsync(workspaceId);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Decline invitation - cần đăng nhập
+        /// </summary>
+        /// <param name="workspaceId"></param>
+        /// <returns></returns>
+        /// <response code="200">Decline thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpPost("{workspaceId}/decline")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [AuthorizeFilter]
+        [WorkspaceFilter]
+        public async Task<IActionResult> DeclineInvitation([FromRoute] Guid workspaceId)
+        {
+            await _workspaceService.DeclineInvitationAsync(workspaceId);
+            return NoContent();
         }
     }
 }

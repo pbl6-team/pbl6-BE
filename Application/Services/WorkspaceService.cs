@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PBL6.Application.Contract.Channels;
+using PBL6.Application.Contract.ExternalServices.Mails;
 using PBL6.Application.Contract.ExternalServices.Notifications.Dtos;
 using PBL6.Application.Contract.Users.Dtos;
 using PBL6.Application.Contract.Workspaces;
@@ -204,20 +205,17 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
 
-                var workspace = await _unitOfWork.Workspaces
-                    .Queryable()
-                    .Include(x => x.Channels.Where(c => !c.IsDeleted))
-                    .Include(x => x.Members.Where(m => !m.IsDeleted))
-                    .ThenInclude(m => m.User)
-                    .ThenInclude(u => u.Information)
-                    .FirstOrDefaultAsync(x => x.Id == workspaceId);
+                var workspace = await _unitOfWork.Workspaces.GetAsync(workspaceId);
 
                 var userId = Guid.Parse(
                     _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
                 );
-                
+
                 if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, userId))
                     throw new ForbidException();
+
+                workspace.Channels = workspace.Channels.Where(c => !c.IsDeleted).ToList();
+                workspace.Members = workspace.Members.Where(m => !m.IsDeleted).ToList();
 
                 var channels = await _channelService.GetAllChannelsOfAWorkspaceAsync(workspace.Id);
                 foreach (var channel in channels)
@@ -307,21 +305,11 @@ namespace PBL6.Application.Services
                 var userId = Guid.Parse(
                     _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
                 );
-                var workspace = await _unitOfWork.Workspaces
-                    .Queryable()
-                    .Include(x => x.Members.Where(m => !m.IsDeleted))
-                    .FirstOrDefaultAsync(x => x.Id == workspaceId);
-
-                if (workspace is null)
-                    throw new NotFoundException<Workspace>(workspaceId.ToString());
-
+                var workspace = await _unitOfWork.Workspaces.GetAsync(workspaceId) ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
                 if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, userId))
                     throw new ForbidException();
 
-                if (updateWorkspaceDto.Description is null)
-                {
-                    updateWorkspaceDto.Description = string.Empty;
-                }
+                updateWorkspaceDto.Description ??= string.Empty;
 
                 _mapper.Map(updateWorkspaceDto, workspace);
                 await _unitOfWork.Workspaces.UpdateAsync(workspace);
@@ -355,13 +343,7 @@ namespace PBL6.Application.Services
                 var userId = Guid.Parse(
                     _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
                 );
-                var workspace = await _unitOfWork.Workspaces
-                    .Queryable()
-                    .Include(x => x.Members.Where(m => !m.IsDeleted))
-                    .FirstOrDefaultAsync(x => x.Id == workspaceId);
-
-                if (workspace is null)
-                    throw new NotFoundException<Workspace>(workspaceId.ToString());
+                var workspace = await _unitOfWork.Workspaces.GetAsync(workspaceId) ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
 
                 if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, userId))
                     throw new ForbidException();
@@ -377,10 +359,7 @@ namespace PBL6.Application.Services
                         "image/png"
                     );
                 }
-                else
-                {
-                    workspace.AvatarUrl = CommonConsts.DEFAULT_WORKSPACE_AVATAR;
-                }
+
                 await _unitOfWork.Workspaces.UpdateAsync(workspace);
                 await _unitOfWork.SaveChangeAsync();
 
@@ -401,7 +380,7 @@ namespace PBL6.Application.Services
             }
         }
 
-        public async Task<Guid> AddMemberToWorkspaceAsync(Guid workspaceId, List<Guid> userIds)
+        public async Task<Guid> InviteMemberToWorkspaceAsync(Guid workspaceId, List<string> emails)
         {
             var method = GetActualAsyncMethodName();
             try
@@ -411,16 +390,7 @@ namespace PBL6.Application.Services
                     _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
                 );
                 var currentUser = await _unitOfWork.Users.GetUserByIdAsync(currentUserId);
-                var workspace = await _unitOfWork.Workspaces
-                    .Queryable()
-                    .Include(x => x.Members.Where(m => !m.IsDeleted))
-                    .FirstOrDefaultAsync(x => x.Id == workspaceId);
-
-                if (workspace is null)
-                {
-                    throw new NotFoundException<Workspace>(workspaceId.ToString());
-                }
-
+                var workspace = await _unitOfWork.Workspaces.GetAsync(workspaceId) ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
                 if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, currentUserId))
                 {
                     throw new ForbidException();
@@ -448,6 +418,7 @@ namespace PBL6.Application.Services
                                         InviterName =
                                             $"{currentUser.Information.FirstName} {currentUser.Information.LastName}",
                                         InviterAvatar = currentUser.Information.Picture,
+                                        GroupAvatar = workspace.AvatarUrl ?? CommonConsts.DEFAULT_WORKSPACE_AVATAR,
                                     }
                                 )
                             },
@@ -457,34 +428,34 @@ namespace PBL6.Application.Services
                     UserNotifications = new List<UserNotification>()
                 };
                 workspace.Members ??= new List<WorkspaceMember>();
-                foreach (var userId in userIds)
+                foreach (var email in emails)
                 {
-                    var user = await _unitOfWork.Users.FindAsync(userId);
+                    var user = await _unitOfWork.Users.GetUserByEmailAsync(email);
                     if (user is null)
                     {
-                        throw new NotFoundException<User>(userId.ToString());
-                    }
-
-                    if (!user.IsActive)
-                    {
-                        throw new BadRequestException("User is not active yet");
+                            await InviteNewUserToWorkspaceAsync(workspaceId, email);
                     }
 
                     var member = workspace.Members.FirstOrDefault(
-                        x => x.UserId == userId && !x.IsDeleted
+                        x => x.UserId == user.Id && !x.IsDeleted
                     );
                     if (member is not null)
                     {
-                        throw new BadRequestException("User is already a member of this workspace");
+                        if (member.Status == (short)WORKSPACE_MEMBER_STATUS.INVITED || member.Status == (short)WORKSPACE_MEMBER_STATUS.ACTIVE)
+                        {
+                            continue;
+                        }
+
+                        member.Status = (short)WORKSPACE_MEMBER_STATUS.INVITED;
                     }
 
                     workspace.Members.Add(
-                        new WorkspaceMember { UserId = userId, AddBy = currentUserId }
+                        new WorkspaceMember { UserId = user.Id, AddBy = currentUserId, Status = (short)WORKSPACE_MEMBER_STATUS.INVITED }
                     );
                     notification.UserNotifications.Add(
                         new UserNotification
                         {
-                            UserId = userId,
+                            UserId = user.Id,
                             Status = (short)NOTIFICATION_STATUS.PENDING,
                             SendAt = DateTimeOffset.UtcNow
                         }
@@ -541,11 +512,7 @@ namespace PBL6.Application.Services
                 var currentUser = await _unitOfWork.Users.GetUserByIdAsync(currentUserId);
 
                 var workspace =
-                    await _unitOfWork.Workspaces
-                        .Queryable()
-                        .Include(x => x.Members.Where(m => !m.IsDeleted))
-                        .FirstOrDefaultAsync(x => x.Id == workspaceId)
-                    ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
+                    await _unitOfWork.Workspaces.GetAsync(workspaceId) ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
                 if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, currentUserId))
                 {
                     throw new ForbidException();
@@ -573,6 +540,7 @@ namespace PBL6.Application.Services
                                         RemoverName =
                                             $"{currentUser.Information.FirstName} {currentUser.Information.LastName}",
                                         RemoverAvatar = currentUser.Information.Picture,
+                                        GroupAvatar = workspace.AvatarUrl ?? CommonConsts.DEFAULT_WORKSPACE_AVATAR,
                                     }
                                 )
                             },
@@ -588,7 +556,8 @@ namespace PBL6.Application.Services
                         ?? throw new BadRequestException(
                             $"User {userId} is not a member of this workspace"
                         );
-                    await _unitOfWork.WorkspaceMembers.DeleteAsync(member);
+                    // await _unitOfWork.WorkspaceMembers.DeleteAsync(member);
+                    member.Status = (short)WORKSPACE_MEMBER_STATUS.REMOVED;
 
                     var channels = await _unitOfWork.Channels
                         .Queryable()
@@ -602,7 +571,7 @@ namespace PBL6.Application.Services
                         );
                         if (channelMember is not null)
                         {
-                            await _unitOfWork.ChannelMembers.DeleteAsync(channelMember);
+                            channelMember.Status = (short)CHANNEL_MEMBER_STATUS.REMOVED;
                         }
                     }
                     notification.UserNotifications.Add(
@@ -1056,17 +1025,12 @@ namespace PBL6.Application.Services
 
                 var workspace = await _unitOfWork.Workspaces.Queryable()
                     .FirstOrDefaultAsync(x => x.Id == workspaceId);
-                switch (status)
+                workspace.Status = status switch
                 {
-                    case (short)WORKSPACE_STATUS.SUSPENDED:
-                        workspace.Status = (short)WORKSPACE_STATUS.SUSPENDED;
-                        break;
-                    case (short)WORKSPACE_STATUS.ACTIVE:
-                        workspace.Status = (short)WORKSPACE_STATUS.ACTIVE;
-                        break;
-                    default:
-                        throw new BadRequestException("Status is not valid");
-                }
+                    (short)WORKSPACE_STATUS.SUSPENDED => (short)WORKSPACE_STATUS.SUSPENDED,
+                    (short)WORKSPACE_STATUS.ACTIVE => (short)WORKSPACE_STATUS.ACTIVE,
+                    _ => throw new BadRequestException("Status is not valid"),
+                };
                 await _unitOfWork.Workspaces.UpdateAsync(workspace);
                 await _unitOfWork.SaveChangeAsync();
 
@@ -1084,6 +1048,94 @@ namespace PBL6.Application.Services
                 throw;
             }
 
+        }
+
+        public async Task AcceptInvitationAsync(Guid workspaceId)
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
+            var isInvited = await _unitOfWork.Workspaces.CheckIsInvitedAsync(workspaceId, userId);
+            if (!isInvited)
+            {
+                throw new BadRequestException("You are not invited to this workspace");
+            }
+            var member = await _unitOfWork.Workspaces.GetMemberByUserId(workspaceId, userId);
+            member.Status = (short)WORKSPACE_MEMBER_STATUS.ACTIVE;
+            await _unitOfWork.WorkspaceMembers.UpdateAsync(member);
+            await _unitOfWork.SaveChangeAsync();
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+        }
+
+        public async Task DeclineInvitationAsync(Guid workspaceId)
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
+            var isInvited = await _unitOfWork.Workspaces.CheckIsInvitedAsync(workspaceId, userId);
+            if (!isInvited)
+            {
+                throw new BadRequestException("You are not invited to this workspace");
+            }
+            var member = await _unitOfWork.Workspaces.GetMemberByUserId(workspaceId, userId);
+            member.Status = (short)WORKSPACE_MEMBER_STATUS.DECLINED;
+            await _unitOfWork.WorkspaceMembers.UpdateAsync(member);
+            await _unitOfWork.SaveChangeAsync();
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+        }
+
+        private async Task InviteNewUserToWorkspaceAsync(Guid workspaceId, string email)
+        {
+            try
+            {
+                var workspace = await _unitOfWork.Workspaces.GetAsync(workspaceId);
+                var currentUserId = Guid.Parse(
+                    _currentUser.UserId ?? throw new UnauthorizedAccessException()
+                );
+
+                var mailData = new MailData 
+                {
+                    JsonData = JsonConvert.SerializeObject(
+                                    new InvitedToNewGroup
+                                    {
+                                        GroupId = workspace.Id,
+                                        GroupName = workspace.Name,
+                                        InviterId = currentUserId,
+                                        InviterName = currentUserId.ToString(),
+                                        InviterAvatar = string.Empty,
+                                        GroupAvatar = workspace.AvatarUrl ?? CommonConsts.DEFAULT_WORKSPACE_AVATAR,
+                                    }
+                                )
+                };
+
+                _backgroundJobClient.Enqueue(
+                    () => _mailService.Send(
+                            email,
+                            "You have been invited to join a workspace",
+                            MailConst.InviteToWorkspace.Template,
+                            JsonConvert.SerializeObject(
+                                new InvitedToNewGroup
+                                {
+                                    GroupId = workspace.Id,
+                                    GroupName = workspace.Name,
+                                    InviterId = currentUserId,
+                                    InviterName = currentUserId.ToString(),
+                                    InviterAvatar = string.Empty,
+                                    GroupAvatar = workspace.AvatarUrl ?? CommonConsts.DEFAULT_WORKSPACE_AVATAR,
+                                }
+                            )
+                        )
+                );
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation(
+                    "[{_className}][{method}] Error: {message}",
+                    _className,
+                    GetActualAsyncMethodName(),
+                    e.Message
+                );
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ using PBL6.Application.Contract.Channels.Dtos;
 using PBL6.Application.Contract.ExternalServices.Notifications.Dtos;
 using PBL6.Application.Contract.Users.Dtos;
 using PBL6.Application.Contract.Workspaces.Dtos;
+using PBL6.Common.Consts;
 using PBL6.Common.Enum;
 using PBL6.Common.Exceptions;
 using PBL6.Domain.Models.Users;
@@ -142,7 +143,8 @@ public class ChannelService : BaseService, IChannelService
                                         currentUser.Information.FirstName
                                         + " "
                                         + currentUser.Information.LastName,
-                                    InviterAvatar = currentUser.Information.Picture
+                                    InviterAvatar = currentUser.Information.Picture,
+                                    GroupAvatar = CommonConsts.DEFAULT_CHANNEL_AVATAR
                                 }
                             )
                         },
@@ -202,9 +204,6 @@ public class ChannelService : BaseService, IChannelService
                     await _unitOfWork.SaveChangeAsync();
                     _backgroundJobClient.Enqueue(
                         () => _notificationService.SendNotificationAsync(notification.Id)
-                    );
-                    _backgroundJobClient.Enqueue(
-                        () => _hubService.AddUsersToChannelHub(channelId, userIds)
                     );
                 }
             }
@@ -648,7 +647,8 @@ public class ChannelService : BaseService, IChannelService
                                         currentUser.Information.FirstName
                                         + " "
                                         + currentUser.Information.LastName,
-                                    RemoverAvatar = currentUser.Information.Picture
+                                    RemoverAvatar = currentUser.Information.Picture,
+                                    GroupAvatar = CommonConsts.DEFAULT_CHANNEL_AVATAR
                                 }
                             )
                         },
@@ -975,5 +975,56 @@ public class ChannelService : BaseService, IChannelService
             .ToListAsync();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
         return _mapper.Map<IEnumerable<ChannelUserDto>>(members);
+    }
+
+    public async Task AcceptInvitationAsync(Guid channelId)
+    {
+        var method = GetActualAsyncMethodName();
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
+        var isInvited = await _unitOfWork.Channels.CheckIsInvitedAsync(channelId, userId);
+        if (!isInvited)
+        {
+            throw new BadRequestException("Invitation is not exist");
+        }
+        var member = await _unitOfWork.Channels.GetMemberByUserId(channelId, userId);
+        member.Status = (short)CHANNEL_MEMBER_STATUS.ACTIVE;
+        await _unitOfWork.ChannelMembers.UpdateAsync(member);
+        await _unitOfWork.SaveChangeAsync();
+
+         try
+        {
+            _backgroundJobClient.Enqueue(
+                () => _hubService.AddUsersToChannelHub(channelId, new List<Guid> { userId })
+            );
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation(
+                "[{_className}][{method}] Error: {message}",
+                _className,
+                method,
+                e.Message
+            );
+        }
+        
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
+    }
+
+    public async Task DeclineInvitationAsync(Guid channelId)
+    {
+        var method = GetActualAsyncMethodName();
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
+        var isInvited = await _unitOfWork.Channels.CheckIsInvitedAsync(channelId, userId);
+        if (!isInvited)
+        {
+            throw new BadRequestException("Invitation is not exist");
+        }
+        var member = await _unitOfWork.Channels.GetMemberByUserId(channelId, userId);
+        await _unitOfWork.ChannelMembers.DeleteAsync(member);
+        await _unitOfWork.SaveChangeAsync();
+       
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
     }
 }
