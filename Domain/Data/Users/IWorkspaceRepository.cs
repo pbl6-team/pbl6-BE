@@ -4,8 +4,10 @@ namespace PBL6.Domain.Data.Users
 {
     public interface IWorkspaceRepository : IRepository<Workspace>
     {
+        Task<Workspace> GetAsync(Guid id);
         Task<bool> CheckIsExistAsync(Guid id);
         Task<bool> CheckIsMemberAsync(Guid workspaceId, Guid userId);
+        Task<bool> CheckIsInvitedAsync(Guid workspaceId, Guid userId);
         Task<bool> CheckIsExistRole(Guid workspaceId, Guid roleId);
         Task<IEnumerable<WorkspaceRole>> GetRoles(Guid workspaceId);
         Task<WorkspaceRole> AddRoleAsync(Guid workspaceId, WorkspaceRole role);

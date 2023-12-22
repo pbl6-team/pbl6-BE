@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using PBL6.Common.Enum;
 using PBL6.Domain.Data.Users;
 using PBL6.Domain.Models.Users;
 using PBL6.Infrastructure.Data;
@@ -21,7 +22,9 @@ namespace PBL6.Infrastructure.Repositories
                 || currentUserId == message.ToChannel.CreatedBy
                 // || currentUserId == message.ToChannel.Workspace.CreatedBy
                 || message.ToChannel.ChannelMembers.Any(
-                    x => x.UserId == currentUserId && !x.IsDeleted
+                    x => x.UserId == currentUserId 
+                        && !x.IsDeleted 
+                        && x.Status == (short)CHANNEL_MEMBER_STATUS.ACTIVE
                 )
             )
             {

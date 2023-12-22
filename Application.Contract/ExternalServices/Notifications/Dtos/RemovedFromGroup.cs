@@ -11,5 +11,7 @@ namespace PBL6.Application.Contract.ExternalServices.Notifications.Dtos
         public string RemoverName { get; set; }
 
         public string RemoverAvatar { get; set; }
+
+        public string GroupAvatar { get; set; }
     }
 }

@@ -14,7 +14,7 @@ namespace PBL6.Application.Contract.Workspaces
         Task<Guid> UpdateAvatarAsync(Guid workspaceId, UpdateAvatarWorkspaceDto updateAvatarWorkspaceDto);
         Task<Guid> AddAsync(CreateWorkspaceDto createWorkspaceDto);
         Task<Guid> DeleteAsync(Guid workspaceId);
-        Task<Guid> AddMemberToWorkspaceAsync(Guid workspaceId, List<Guid> userIds);
+        Task<Guid> InviteMemberToWorkspaceAsync(Guid workspaceId, List<string> emails);
         Task<Guid> RemoveMemberFromWorkspaceAsync(Guid workspaceId, List<Guid> userIds);
         Task<IEnumerable<WorkspaceRoleDto>> GetRolesAsync(Guid workspaceId);
         Task UpdateRoleAsync(Guid workspaceId, Guid roleId, CreateUpdateWorkspaceRoleDto input);
@@ -30,5 +30,7 @@ namespace PBL6.Application.Contract.Workspaces
         Task<IEnumerable<WorkspaceUserDto>> GetMembersAsync(Guid workspaceId);
         Task<IEnumerable<AdminWorkspaceDto>> GetAllForAdminAsync();
         Task<Guid> UpdateWorkspaceStatusAsync(Guid workspaceId, short status);
+        Task AcceptInvitationAsync(Guid workspaceId);
+        Task DeclineInvitationAsync(Guid workspaceId);
     }
 }

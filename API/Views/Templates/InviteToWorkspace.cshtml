@@ -1,0 +1,29 @@
+@model MailData
+@{
+    InvitedToNewGroup data = Newtonsoft.Json.JsonConvert.DeserializeObject<InvitedToNewGroup>(Model.JsonData);
+}
+@using PBL6.Application.Contract.ExternalServices.Notifications.Dtos;
+
+<div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
+  <div style="margin:50px auto;width:70%;padding:20px 0">
+    <div style="border-bottom:1px solid #eee">
+      <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">FIRA</a>
+    </div>
+    <p style="font-size:1.1em">Hi,</p>
+    <p style="font-size:1.1em">You have been invited to join a new group.</p>
+    <img src="@data.GroupAvatar" alt="Group Avatar" style="width: 100px; height: 100px; border-radius: 50%; margin: 10px 0px 10px 0px;"/>
+    <p style="font-size:1.1em">Group name: @data.GroupName</p>
+    <p style="font-size:1.1em">Invited by @data.InviterName</p>
+    <p>If you don't have an account, please register at <a href="https://web.firar.live/signup">here</a> and join the group.</p>
+    <p>
+        If you have an account, please login at <a href="https://web.firar.live/login">here</a> and join the group. 
+    </p>
+    <p style="font-size:0.9em;">Regards,<br />FIRA Team</p>
+    <hr style="border:none;border-top:1px solid #eee" />
+    <div style="float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300">
+      <p>FIRA Inc</p>
+      <p>54 Nguyen Luong Bang</p>
+      <p>Da Nang, Viet Nam</p>
+    </div>
+  </div>
+</div>
