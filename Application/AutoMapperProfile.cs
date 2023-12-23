@@ -10,6 +10,7 @@ using Application.Contract.Workspaces.Dtos;
 using PBL6.Application.Contract.Notifications.Dtos;
 using PBL6.Common.Enum;
 using Application.Contract.Users.Dtos;
+using System.Security.Cryptography.X509Certificates;
 
 namespace PBL6.Application
 {
@@ -33,12 +34,13 @@ namespace PBL6.Application
                             src =>
                                 src.Members.Select(
                                     m =>
-                                        new UserDto
+                                        new LessDetailWorkspaceUserDto
                                         {
                                             Id = m.UserId,
                                             FirstName = m.User.Information.FirstName,
                                             LastName = m.User.Information.LastName,
-                                            Picture = m.User.Information.Picture
+                                            Picture = m.User.Information.Picture,
+                                            Status = m.Status
                                         }
                                 )
                         )
@@ -212,7 +214,8 @@ namespace PBL6.Application
                     opt => opt.MapFrom(src => src.User.Information.BirthDay)
                 )
                 .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.User.Information.Picture))
-                .ForMember(x => x.Role, opt => opt.MapFrom(src => src.WorkspaceRole));
+                .ForMember(x => x.Role, opt => opt.MapFrom(src => src.WorkspaceRole))
+                .ForMember(x => x.Status, opt => opt.MapFrom(src => src.Status));
 
             CreateMap<ChannelMember, ChannelUserDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.UserId))
@@ -232,7 +235,8 @@ namespace PBL6.Application
                     opt => opt.MapFrom(src => src.User.Information.BirthDay)
                 )
                 .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.User.Information.Picture))
-                .ForMember(x => x.Role, opt => opt.MapFrom(src => src.ChannelRole));
+                .ForMember(x => x.Role, opt => opt.MapFrom(src => src.ChannelRole))
+                .ForMember(x => x.Status, opt => opt.MapFrom(src => src.Status));
 
             CreateMap<Notification, NotificationDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))

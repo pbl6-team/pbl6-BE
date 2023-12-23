@@ -413,7 +413,7 @@ public class ChannelService : BaseService, IChannelService
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
             var channels = await _unitOfWork.Channels
                 .GetChannelsWithMembers()
-                .Where(x => x.Name.Contains(channelName))
+                .Where(x => x.Name.ToUpper().Contains(channelName.ToUpper()))
                 .ToListAsync();
 
             var currentUserId = Guid.Parse(
@@ -946,7 +946,7 @@ public class ChannelService : BaseService, IChannelService
         return _mapper.Map<IEnumerable<UserDetailDto>>(result.Select(x => x.User));
     }
 
-    public async Task<IEnumerable<ChannelUserDto>> GetMembersAsync(Guid channelId)
+    public async Task<IEnumerable<ChannelUserDto>> GetMembersAsync(Guid channelId, short status = (short)CHANNEL_MEMBER_STATUS.ACTIVE)
     {
         var method = GetActualAsyncMethodName();
         _logger.LogInformation("[{_className}][{method}] Start", _className, method);
@@ -968,7 +968,7 @@ public class ChannelService : BaseService, IChannelService
         var members = await _unitOfWork.ChannelMembers
             .GetMembers()
             .Include(x => x.ChannelRole)
-            .Where(x => x.ChannelId == channelId)
+            .Where(x => x.ChannelId == channelId && x.Status == status)
             .ToListAsync();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
         return _mapper.Map<IEnumerable<ChannelUserDto>>(members);

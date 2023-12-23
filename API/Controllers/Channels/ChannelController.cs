@@ -384,16 +384,17 @@ namespace PBL6.API.Controllers.Channels
         /// API get users with their role by channelId - cần đăng nhập
         /// </summary>
         /// <param name="channelId"></param>
+        /// <param name="status"></param>
         /// <returns></returns>
         /// <response code="200">Get thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpGet("{channelId}/users")]
+        [HttpGet("{channelId}/users/{status?}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
-        public async Task<IActionResult> GetMembers([FromRoute] Guid channelId)
+        public async Task<IActionResult> GetMembers([FromRoute] Guid channelId, [FromRoute] short status = 1)
         {
-            return Ok(await _channelService.GetMembersAsync(channelId));
+            return Ok(await _channelService.GetMembersAsync(channelId, status));
         }
 
         /// <summary>

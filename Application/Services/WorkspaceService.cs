@@ -954,7 +954,7 @@ namespace PBL6.Application.Services
             return _mapper.Map<IEnumerable<UserDetailDto>>(members.Select(x => x.User));
         }
 
-        public async Task<IEnumerable<WorkspaceUserDto>> GetMembersAsync(Guid workspaceId)
+        public async Task<IEnumerable<WorkspaceUserDto>> GetMembersAsync(Guid workspaceId, short status = (short)WORKSPACE_MEMBER_STATUS.ACTIVE)
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
@@ -981,7 +981,7 @@ namespace PBL6.Application.Services
                 .Include(x => x.User)
                 .ThenInclude(x => x.Information)
                 .Include(x => x.WorkspaceRole)
-                .Where(x => x.WorkspaceId == workspaceId)
+                .Where(x => x.WorkspaceId == workspaceId && x.Status == status)
                 .ToListAsync();
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
