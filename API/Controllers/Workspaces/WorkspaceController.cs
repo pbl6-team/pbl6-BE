@@ -478,7 +478,7 @@ namespace PBL6.API.Controllers.Workspaces
         /// <returns></returns>
         /// <response code="200">Transfer thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [HttpPost("{workspaceId}/transfer/{userId}")]
+        [HttpPut("{workspaceId}/ownership/{userId}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]

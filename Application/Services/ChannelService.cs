@@ -271,7 +271,7 @@ public class ChannelService : BaseService, IChannelService
             {
                 throw new BadRequestException("Cannot delete default channel");
             }
-            
+
             var currentUserId = Guid.Parse(
                 _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
             );
@@ -350,7 +350,7 @@ public class ChannelService : BaseService, IChannelService
                 currentUserId,
                 workspaceId
             );
-            
+
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return _mapper.Map<IEnumerable<ChannelDto>>(channels);
         }
@@ -989,7 +989,7 @@ public class ChannelService : BaseService, IChannelService
         await _unitOfWork.ChannelMembers.UpdateAsync(member);
         await _unitOfWork.SaveChangeAsync();
 
-         try
+        try
         {
             _backgroundJobClient.Enqueue(
                 () => _hubService.AddUsersToChannelHub(channelId, new List<Guid> { userId })
@@ -1004,7 +1004,7 @@ public class ChannelService : BaseService, IChannelService
                 e.Message
             );
         }
-        
+
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
     }
 
@@ -1021,7 +1021,7 @@ public class ChannelService : BaseService, IChannelService
         var member = await _unitOfWork.Channels.GetMemberByUserId(channelId, userId);
         await _unitOfWork.ChannelMembers.DeleteAsync(member);
         await _unitOfWork.SaveChangeAsync();
-       
+
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
     }
 
@@ -1039,12 +1039,12 @@ public class ChannelService : BaseService, IChannelService
         {
             throw new ForbidException();
         }
-        
+
         if (channel.OwnerId == userId)
         {
             throw new BadRequestException("You can't leave the channel because you are the owner");
         }
-        
+
         if (channel.Category == (short)CHANNEL_CATEGORY.DEFAULT)
         {
             throw new BadRequestException("You can't leave the default channel");
@@ -1055,5 +1055,61 @@ public class ChannelService : BaseService, IChannelService
         await _unitOfWork.SaveChangeAsync();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
         return channelId;
+    }
+
+    public async Task<Guid> TransferOwnershipAsync(Guid channelId, Guid userId)
+    {
+        var method = GetActualAsyncMethodName();
+        try
+        {
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedAccessException()
+            );
+            var channel = await _unitOfWork.Channels
+                .GetChannelsWithMembers()
+                .Where(x => x.Id == channelId)
+                .FirstOrDefaultAsync();
+            if (channel is null)
+                throw new NotFoundException<Channel>(channelId.ToString());
+
+            var member = await _unitOfWork.Channels.GetMemberByUserId(channelId, userId);
+            if (member is null)
+                throw new NotFoundException<ChannelMember>(userId.ToString());
+
+            if (channel.OwnerId != currentUserId)
+                throw new ForbidException();
+
+            if (channel.OwnerId == userId)
+                throw new BadRequestException("User is already owner");
+
+            var currentOwner = await _unitOfWork.Channels.GetMemberByUserId(
+                channelId,
+                currentUserId
+            );
+            if (currentOwner is null)
+                throw new NotFoundException<ChannelMember>(currentUserId.ToString());
+
+            channel.OwnerId = userId;
+            await _unitOfWork.Channels.UpdateAsync(channel);
+            await _unitOfWork.SaveChangeAsync();
+
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+            return channel.Id;
+        }
+        catch (Exception e)
+        {
+            _logger.LogInformation(
+                "[{_className}][{method}] Error: {message}",
+                _className,
+                GetActualAsyncMethodName(),
+                e.Message
+            );
+
+            throw;
+        }
+
     }
 }

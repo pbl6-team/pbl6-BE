@@ -446,5 +446,26 @@ namespace PBL6.API.Controllers.Channels
             await _channelService.LeaveChannelAsync(channelId);
             return NoContent();
         }
+
+        /// <summary>
+        /// Transfer ownership - cần đăng nhập
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <response code="200">Transfer thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpPut("{channelId}/ownership/{userId}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [AuthorizeFilter]
+        public async Task<IActionResult> TransferOwnership(
+            [FromRoute] Guid channelId,
+            [FromRoute] Guid userId
+        )
+        {
+            await _channelService.TransferOwnershipAsync(channelId, userId);
+            return NoContent();
+        }
     }
 }

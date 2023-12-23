@@ -1246,7 +1246,10 @@ namespace PBL6.Application.Services
                 var member = await _unitOfWork.Workspaces.GetMemberByUserId(workspaceId, userId);
                 if (member is null)
                     throw new NotFoundException<WorkspaceMember>(userId.ToString());
-
+                    
+                if (workspace.OwnerId != currentUserId)
+                    throw new ForbidException();
+                    
                 if (workspace.OwnerId == userId)
                     throw new BadRequestException("User is already owner");
 
