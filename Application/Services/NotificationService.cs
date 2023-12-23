@@ -8,7 +8,7 @@ namespace PBL6.Application.Services
     {
         Task<List<NotificationDto>> GetAllAsync(SearchDto dto);
         Task ReadAsync(Guid id);
-        Task DeleteAsync(Guid id);
+        Task DeleteAsync(List<Guid> ids);
         Task<int> CountUnreadNotification(short? type);
     }
 
@@ -48,12 +48,15 @@ namespace PBL6.Application.Services
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(List<Guid> ids)
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
             var currentUserId = Guid.Parse(_currentUser.UserId);
-            await _unitOfWork.Notifications.DeleteUserNotification(currentUserId, id);
+            for (int i = 0; i < ids.Count; i++)
+            {
+                await _unitOfWork.Notifications.DeleteUserNotification(currentUserId, ids[i]);
+            }
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
         }
