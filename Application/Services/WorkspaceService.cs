@@ -150,7 +150,7 @@ namespace PBL6.Application.Services
                 var userId = Guid.Parse(
                     _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
                 );
-                workspaces = workspaces.Where(x => x.Members.Any(m => m.UserId == userId && m.Status == (short)WORKSPACE_MEMBER_STATUS.ACTIVE)).ToList();
+                workspaces = workspaces.Where(x => x.Members.Any(m => m.UserId == userId)).ToList();
 
                 foreach (var workspace in workspaces)
                 {
