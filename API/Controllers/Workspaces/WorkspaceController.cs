@@ -469,5 +469,27 @@ namespace PBL6.API.Controllers.Workspaces
             await _workspaceService.LeaveWorkspaceAsync(workspaceId);
             return NoContent();
         }
+
+        /// <summary>
+        /// Transfer ownership - cần đăng nhập
+        /// </summary>
+        /// <param name="workspaceId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <response code="200">Transfer thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpPost("{workspaceId}/transfer/{userId}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [AuthorizeFilter]
+        [WorkspaceFilter]
+        public async Task<IActionResult> TransferOwnership(
+            [FromRoute] Guid workspaceId,
+            [FromRoute] Guid userId
+        )
+        {
+            await _workspaceService.TransferOwnershipAsync(workspaceId, userId);
+            return NoContent();
+        }
     }
 }
