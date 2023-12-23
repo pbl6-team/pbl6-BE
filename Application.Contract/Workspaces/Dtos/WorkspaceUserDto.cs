@@ -12,6 +12,7 @@ public class WorkspaceUserDto
     public string Phone { get; set; }
     public string Email { get; set; }
     public string Picture { get; set; }
+    public short Status { get; set; }
     public DateTimeOffset BirthDay { get; set; }
     public WorkspaceRoleDto Role { get; set; }
 

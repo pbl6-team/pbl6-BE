@@ -27,7 +27,7 @@ namespace PBL6.Application.Contract.Channels
         Task<IEnumerable<UserDetailDto>> GetMembersByRoleIdAsync(Guid channelId, Guid roleId);
         Task<IEnumerable<UserDetailDto>> GetMembersWithoutRoleAsync(Guid channelId);
         Task<IEnumerable<UserDetailDto>> GetMembersThatNotInTheChannel(Guid workspaceId, Guid channelId);
-        Task<IEnumerable<ChannelUserDto>> GetMembersAsync(Guid channelId);
+        Task<IEnumerable<ChannelUserDto>> GetMembersAsync(Guid channelId, short status = 1);
         Task AcceptInvitationAsync(Guid channelId);
         Task DeclineInvitationAsync(Guid channelId);
         Task<Guid> LeaveChannelAsync(Guid channelId);

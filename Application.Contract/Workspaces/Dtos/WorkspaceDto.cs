@@ -14,7 +14,7 @@ namespace PBL6.Application.Contract.Workspaces.Dtos
 
         public short Status { get; set; }
         
-        public IEnumerable<UserDto> Members { get; set; }
+        public IEnumerable<LessDetailWorkspaceUserDto> Members { get; set; }
  
         public IEnumerable<Guid> Channels { get; set; }
     }
