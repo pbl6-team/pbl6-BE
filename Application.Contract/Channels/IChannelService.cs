@@ -31,5 +31,7 @@ namespace PBL6.Application.Contract.Channels
         Task AcceptInvitationAsync(Guid channelId);
         Task DeclineInvitationAsync(Guid channelId);
         Task<Guid> LeaveChannelAsync(Guid channelId);
+        Task<Guid> TransferOwnershipAsync(Guid channelId, Guid userId);
+
     }
 }
