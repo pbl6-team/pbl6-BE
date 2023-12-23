@@ -1058,7 +1058,7 @@ namespace PBL6.Application.Services
             var isInvited = await _unitOfWork.Workspaces.CheckIsInvitedAsync(workspaceId, userId);
             if (!isInvited)
             {
-                throw new BadRequestException("You are not invited to this workspace");
+                throw new BadRequestException("Invitation is expired or you already accepted it");
             }
             var member = await _unitOfWork.Workspaces.GetMemberByUserId(workspaceId, userId);
             member.Status = (short)WORKSPACE_MEMBER_STATUS.ACTIVE;
@@ -1075,7 +1075,7 @@ namespace PBL6.Application.Services
             var isInvited = await _unitOfWork.Workspaces.CheckIsInvitedAsync(workspaceId, userId);
             if (!isInvited)
             {
-                throw new BadRequestException("You are not invited to this workspace");
+                throw new BadRequestException("Invitation is expired or you already accepted it");
             }
             var member = await _unitOfWork.Workspaces.GetMemberByUserId(workspaceId, userId);
             member.Status = (short)WORKSPACE_MEMBER_STATUS.DECLINED;
