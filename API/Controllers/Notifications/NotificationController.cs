@@ -3,6 +3,7 @@ using PBL6.Api.Controllers;
 using PBL6.API.Filters;
 using PBL6.Application.Contract.Notifications.Dtos;
 using PBL6.Application.Services;
+using Microsoft.AspNetCore.Http;
 
 namespace PBL6.API.Controllers.Notifications
 {
@@ -44,9 +45,10 @@ namespace PBL6.API.Controllers.Notifications
         /// <response code="404">If the notification is not found</response>
         /// <response code="403">If the user is not authorized</response>
         /// <response code="500">If there was an internal server error</response>
-        [ProducesResponseType(StatusCodes.Status200OK)]
         [HttpPut("{id}")]
         [AuthorizeFilter]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesDefaultResponseType]
         public async Task<IActionResult> ReadNotification(Guid id)
         {
             await _notificationService.ReadAsync(id);
@@ -56,19 +58,20 @@ namespace PBL6.API.Controllers.Notifications
         /// <summary>
         /// delete notification
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="ids"></param>
         /// <returns></returns>
-        /// <response code="200">Returns notification</response>
+        /// <response code="204">Delete success</response>
         /// <response code="400">If the request is invalid</response>
         /// <response code="404">If the notification is not found</response>
         /// <response code="403">If the user is not authorized</response>
         /// <response code="500">If there was an internal server error</response>\
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [HttpDelete("{id}")]
+        [HttpDelete()]
         [AuthorizeFilter]
-        public async Task<IActionResult> DeleteNotification(Guid id)
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesDefaultResponseType]
+        public async Task<IActionResult> DeleteNotification(List<Guid> ids)
         {
-            await _notificationService.DeleteAsync(id);
+            await _notificationService.DeleteAsync(ids);
             return NoContent();
         }
 

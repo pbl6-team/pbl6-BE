@@ -61,6 +61,10 @@ namespace PBL6.Domain.Models.Users
             var userNotification = notification.UserNotifications.FirstOrDefault(
                 x => x.UserId == userId
             );
+            if (userNotification == null)
+            {
+                return;
+            }
             if (notification.Type == ((short)NOTIFICATION_TYPE.NEW_MESSAGE))
             {
                 notification.UserNotifications.Remove(userNotification);
