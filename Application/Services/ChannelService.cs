@@ -1039,8 +1039,8 @@ public class ChannelService : BaseService, IChannelService
             throw new ForbidException();
         }
         var member = await _unitOfWork.Channels.GetMemberByUserId(channelId, userId);
-        await _unitOfWork.ChannelMembers.DeleteAsync(member);
         member.Status = (short)CHANNEL_MEMBER_STATUS.REMOVED;
+        await _unitOfWork.ChannelMembers.UpdateAsync(member);
         await _unitOfWork.SaveChangeAsync();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
         return channelId;

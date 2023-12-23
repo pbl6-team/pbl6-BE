@@ -1167,11 +1167,11 @@ namespace PBL6.Application.Services
                     if (channelMember is not null)
                     {
                         channelMember.Status = (short)CHANNEL_MEMBER_STATUS.REMOVED;
-                        await _unitOfWork.ChannelMembers.DeleteAsync(channelMember);   
+                        await _unitOfWork.ChannelMembers.UpdateAsync(channelMember);   
                     }
                 }
                 member.Status = (short)WORKSPACE_MEMBER_STATUS.REMOVED;
-                await _unitOfWork.WorkspaceMembers.DeleteAsync(member);
+                await _unitOfWork.WorkspaceMembers.UpdateAsync(member);
                 await _unitOfWork.SaveChangeAsync();
 
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
