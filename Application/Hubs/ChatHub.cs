@@ -260,7 +260,7 @@ namespace PBL6.Application.Hubs
                                 .Clients(hubUser.ConnectionIds.ToList())
                                 .SendAsync(UPDATE_MESSAGE, messageDto);
                         }
-                        Users.TryGetValue(messageDto.SenderId, out var hubUser);
+                        Users.TryGetValue(messageDto.SenderId, out hubUser);
                         if (hubUser is not null && hubUser.ConnectionIds.Any())
                         {
                             await _hubContext.Clients
@@ -411,7 +411,7 @@ namespace PBL6.Application.Hubs
         {
             // _logger.LogError($"Error: {exception.Message}");
             // _logger.LogError(exception.StackTrace);
-
+            Console.WriteLine($"Error: {exception.Message}");
             ProblemDetails problemDetails = new();
             if (exception is CustomException customException)
             {

@@ -33,4 +33,12 @@ public class WorkspaceMemberRepository : Repository<WorkspaceMember>, IWorkspace
             .AsNoTracking()
             .ToListAsync();
     }
+
+    public IQueryable<WorkspaceMember> GetMembers()
+    {
+        return _apiDbContext.WorkspaceMembers.Where(x => !x.IsDeleted)
+            .Include(x => x.User)
+            .ThenInclude(x => x.Information)
+            .AsQueryable();
+    }
 }

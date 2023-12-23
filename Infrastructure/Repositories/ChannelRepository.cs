@@ -1,3 +1,4 @@
+using System.Collections;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PBL6.Common.Enum;
@@ -122,6 +123,24 @@ namespace PBL6.Infrastructure.Repositories
                     && x.UserId == userId 
                     && x.Status == ((short)CHANNEL_MEMBER_STATUS.INVITED)
             );
+        }
+
+        public async Task<IEnumerable<Channel>> GetChannelByUserIdAndWorkspaceId(Guid userId, Guid workspaceId)
+        {
+            return await _dbSet.Where(c => !c.IsDeleted)
+                .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted && c.Status == ((short)CHANNEL_MEMBER_STATUS.ACTIVE)))
+                .Where(
+                    x =>
+                        x.WorkspaceId == workspaceId
+                        && x.ChannelMembers.Any(c => !c.IsDeleted && c.UserId == userId && c.Status == ((short)CHANNEL_MEMBER_STATUS.ACTIVE))
+                ).ToListAsync();
+        }
+
+        public IQueryable<Channel> GetChannelsWithMembers()
+        {
+            return _apiDbContext.Channels.Where(x => !x.IsDeleted)
+                .Include(x => x.ChannelMembers.Where(x => !x.IsDeleted && x.Status == ((short)CHANNEL_MEMBER_STATUS.ACTIVE)))
+                .AsQueryable();
         }
     }
 }
