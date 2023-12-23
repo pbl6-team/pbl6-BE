@@ -418,7 +418,7 @@ namespace PBL6.Application.Services
                     var user = await _unitOfWork.Users.GetUserByEmailAsync(email);
                     if (user is null)
                     {
-                            await InviteNewUserToWorkspaceAsync(workspaceId, email);
+                        await InviteNewUserToWorkspaceAsync(workspaceId, email);
                     }
 
                     var member = workspace.Members.FirstOrDefault(
@@ -503,11 +503,6 @@ namespace PBL6.Application.Services
                     throw new ForbidException();
                 }
 
-                if (workspace.OwnerId == currentUserId)
-                {
-                    throw new BadRequestException("Owner cannot remove himself from workspace");
-                }
-
                 var notification = new Notification
                 {
                     Title = "You have been removed from a workspace",
@@ -547,6 +542,10 @@ namespace PBL6.Application.Services
                         ?? throw new BadRequestException(
                             $"User {userId} is not a member of this workspace"
                         );
+                    if (workspace.OwnerId == userId)
+                    {
+                        throw new BadRequestException("Cannot remove owner from workspace");
+                    }
                     // await _unitOfWork.WorkspaceMembers.DeleteAsync(member);
                     member.Status = (short)WORKSPACE_MEMBER_STATUS.REMOVED;
 
@@ -1101,7 +1100,7 @@ namespace PBL6.Application.Services
                     _currentUser.UserId ?? throw new UnauthorizedAccessException()
                 );
 
-                var mailData = new MailData 
+                var mailData = new MailData
                 {
                     JsonData = JsonConvert.SerializeObject(
                                     new InvitedToNewGroup
@@ -1177,7 +1176,7 @@ namespace PBL6.Application.Services
                     if (channelMember is not null)
                     {
                         channelMember.Status = (short)CHANNEL_MEMBER_STATUS.REMOVED;
-                        await _unitOfWork.ChannelMembers.UpdateAsync(channelMember);   
+                        await _unitOfWork.ChannelMembers.UpdateAsync(channelMember);
                     }
                 }
                 member.Status = (short)WORKSPACE_MEMBER_STATUS.REMOVED;
@@ -1223,6 +1222,52 @@ namespace PBL6.Application.Services
                     "[{_className}][{method}] Error: {message}",
                     _className,
                     method,
+                    e.Message
+                );
+
+                throw;
+            }
+        }
+
+        public async Task<Guid> TransferOwnershipAsync(Guid workspaceId, Guid userId)
+        {
+            var method = GetActualAsyncMethodName();
+            try
+            {
+                _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+
+                var currentUserId = Guid.Parse(
+                    _currentUser.UserId ?? throw new UnauthorizedAccessException()
+                );
+                var workspace = await _unitOfWork.Workspaces.GetAsync(workspaceId);
+                if (workspace is null)
+                    throw new NotFoundException<Workspace>(workspaceId.ToString());
+
+                var member = await _unitOfWork.Workspaces.GetMemberByUserId(workspaceId, userId);
+                if (member is null)
+                    throw new NotFoundException<WorkspaceMember>(userId.ToString());
+
+                if (workspace.OwnerId == userId)
+                    throw new BadRequestException("User is already owner");
+
+                var currentOwner = await _unitOfWork.Workspaces.GetMemberByUserId(workspaceId, currentUserId);
+                if (currentOwner is null)
+                    throw new NotFoundException<WorkspaceMember>(currentUserId.ToString());
+
+                workspace.OwnerId = userId;
+                await _unitOfWork.Workspaces.UpdateAsync(workspace);
+                await _unitOfWork.SaveChangeAsync();
+
+                _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+                return workspace.Id;
+            }
+            catch (Exception e)
+            {
+                _logger.LogInformation(
+                    "[{_className}][{method}] Error: {message}",
+                    _className,
+                    GetActualAsyncMethodName(),
                     e.Message
                 );
 

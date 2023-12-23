@@ -669,6 +669,10 @@ public class ChannelService : BaseService, IChannelService
                 {
                     throw new BadRequestException($"User {userId} is not in this channel");
                 }
+                if (channel.OwnerId == userId)
+                {
+                    throw new BadRequestException("Cannot remove owner from channel");
+                }
                 notification.UserNotifications.Add(
                     new UserNotification
                     {
@@ -1035,6 +1039,12 @@ public class ChannelService : BaseService, IChannelService
         {
             throw new ForbidException();
         }
+        
+        if (channel.OwnerId == userId)
+        {
+            throw new BadRequestException("You can't leave the channel because you are the owner");
+        }
+        
         if (channel.Category == (short)CHANNEL_CATEGORY.DEFAULT)
         {
             throw new BadRequestException("You can't leave the default channel");
