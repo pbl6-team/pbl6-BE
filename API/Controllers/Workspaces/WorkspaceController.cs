@@ -403,6 +403,7 @@ namespace PBL6.API.Controllers.Workspaces
 
         /// <summary>
         /// API get users with their role by workspaceId - cần đăng nhập
+        /// status = 1 - active, 3 - invited
         /// </summary>
         /// <param name="workspaceId"></param>
         /// <param name="status"></param>

@@ -898,7 +898,7 @@ public class ChannelService : BaseService, IChannelService
         return _mapper.Map<IEnumerable<UserDetailDto>>(members.Select(x => x.User));
     }
 
-    public async Task<IEnumerable<UserDetailDto>> GetMembersThatNotInTheChannel(
+    public async Task<IEnumerable<UserNotInChannelDto>> GetMembersThatNotInTheChannel(
         Guid workspaceId,
         Guid channelId
     )
@@ -930,20 +930,43 @@ public class ChannelService : BaseService, IChannelService
             throw new ForbidException();
         }
 
-        var members = await _unitOfWork.WorkspaceMembers
+        var workspaceMemberUserIds = await _unitOfWork.WorkspaceMembers
             .GetMembers()
             .Where(x => x.WorkspaceId == workspaceId)
-            .ToListAsync();
+            .Select(x => x.UserId).Distinct().ToListAsync();
 
-        var channelMembers = await _unitOfWork.ChannelMembers
+        var invitedChannelMemberUserIds = await _unitOfWork.ChannelMembers
+            .GetMembers()
+            .Where(x => x.ChannelId == channelId && x.Status == (short)CHANNEL_MEMBER_STATUS.INVITED)
+            .Select(x => x.UserId).Distinct().ToListAsync();
+
+        var channelMemberUserIds = await _unitOfWork.ChannelMembers
             .GetMembers()
             .Where(x => x.ChannelId == channelId)
-            .ToListAsync();
+            .Select(x => x.UserId).Distinct().ToListAsync();
 
-        var result = members.Where(x => !channelMembers.Select(x => x.UserId).Contains(x.UserId));
+        var memberUserIdThatIsNotInChannel = workspaceMemberUserIds
+            .Except(channelMemberUserIds)
+            .ToList();
+        
+        var users1 = _mapper.Map<List<UserNotInChannelDto>>(await _unitOfWork.Users
+            .Queryable()
+            .Include(x => x.Information)
+            .Where(x => memberUserIdThatIsNotInChannel.Contains(x.Id))
+            .ToListAsync());
+        users1.ForEach(x => x.IsInvited = false);
 
+        var users2 = _mapper.Map<List<UserNotInChannelDto>>(await _unitOfWork.Users
+            .Queryable()
+            .Include(x => x.Information)
+            .Where(x => invitedChannelMemberUserIds.Contains(x.Id))
+            .ToListAsync());
+        users2.ForEach(x => x.IsInvited = true);
+        
+        var result = users1.Concat(users2).ToList();
+        
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
-        return _mapper.Map<IEnumerable<UserDetailDto>>(result.Select(x => x.User));
+        return _mapper.Map<IEnumerable<UserNotInChannelDto>>(result);
     }
 
     public async Task<IEnumerable<ChannelUserDto>> GetMembersAsync(Guid channelId, short status = (short)CHANNEL_MEMBER_STATUS.ACTIVE)

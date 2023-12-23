@@ -124,6 +124,15 @@ namespace PBL6.Application
                 .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.Information.BirthDay))
                 .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.Information.Picture));
 
+            CreateMap<User, UserNotInChannelDto>()
+                .ForMember(x => x.Username, opt => opt.MapFrom(src => src.Username))
+                .ForMember(x => x.FirstName, opt => opt.MapFrom(src => src.Information.FirstName))
+                .ForMember(x => x.LastName, opt => opt.MapFrom(src => src.Information.LastName))
+                .ForMember(x => x.Gender, opt => opt.MapFrom(src => src.Information.Gender))
+                .ForMember(x => x.Phone, opt => opt.MapFrom(src => src.Information.Phone))
+                .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.Information.BirthDay))
+                .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.Information.Picture));
+
             CreateMap<User, AdminUserDto>()
                 .ForMember(x => x.Username, opt => opt.MapFrom(src => src.Username))
                 .ForMember(x => x.FirstName, opt => opt.MapFrom(src => src.Information.FirstName))
@@ -199,6 +208,7 @@ namespace PBL6.Application
             CreateMap<WorkspaceMember, WorkspaceUserDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.UserId))
                 .ForMember(x => x.Username, opt => opt.MapFrom(src => src.User.Username))
+                .ForMember(x => x.Email, opt => opt.MapFrom(src => src.User.Email))
                 .ForMember(
                     x => x.FirstName,
                     opt => opt.MapFrom(src => src.User.Information.FirstName)
