@@ -429,7 +429,6 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
-        [WorkspaceFilter]
         public async Task<IActionResult> AcceptInvitation([FromRoute] Guid workspaceId)
         {
             await _workspaceService.AcceptInvitationAsync(workspaceId);
@@ -447,7 +446,6 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
-        [WorkspaceFilter]
         public async Task<IActionResult> DeclineInvitation([FromRoute] Guid workspaceId)
         {
             await _workspaceService.DeclineInvitationAsync(workspaceId);

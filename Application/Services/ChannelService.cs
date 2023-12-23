@@ -985,7 +985,7 @@ public class ChannelService : BaseService, IChannelService
         var isInvited = await _unitOfWork.Channels.CheckIsInvitedAsync(channelId, userId);
         if (!isInvited)
         {
-            throw new BadRequestException("Invitation is not exist");
+            throw new BadRequestException("Invitation is expired or you already accepted it");
         }
         var member = await _unitOfWork.Channels.GetMemberByUserId(channelId, userId);
         member.Status = (short)CHANNEL_MEMBER_STATUS.ACTIVE;
@@ -1019,7 +1019,7 @@ public class ChannelService : BaseService, IChannelService
         var isInvited = await _unitOfWork.Channels.CheckIsInvitedAsync(channelId, userId);
         if (!isInvited)
         {
-            throw new BadRequestException("Invitation is not exist");
+            throw new BadRequestException("Invitation is expired or you already accepted it");
         }
         var member = await _unitOfWork.Channels.GetMemberByUserId(channelId, userId);
         await _unitOfWork.ChannelMembers.DeleteAsync(member);
