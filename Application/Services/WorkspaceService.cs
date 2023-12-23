@@ -71,6 +71,7 @@ namespace PBL6.Application.Services
                         OwnerId = userId,
                         Name = CommonConsts.DEFAULT_CHANNEL,
                         Description = string.Empty,
+                        Category = (short)CHANNEL_CATEGORY.DEFAULT,
                         ChannelMembers = new List<ChannelMember>
                         {
                             // TODO: Change roleId, status
@@ -118,7 +119,10 @@ namespace PBL6.Application.Services
 
                 if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, currentUserId))
                     throw new ForbidException();
-
+                foreach (var channel in workspace.Channels)
+                {
+                    await _unitOfWork.Channels.DeleteAsync(channel);
+                }
                 await _unitOfWork.Workspaces.DeleteAsync(workspace);
                 await _unitOfWork.SaveChangeAsync();
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
@@ -498,6 +502,12 @@ namespace PBL6.Application.Services
                 {
                     throw new ForbidException();
                 }
+
+                if (workspace.OwnerId == currentUserId)
+                {
+                    throw new BadRequestException("Owner cannot remove himself from workspace");
+                }
+
                 var notification = new Notification
                 {
                     Title = "You have been removed from a workspace",
@@ -1041,6 +1051,24 @@ namespace PBL6.Application.Services
                 throw new BadRequestException("Invitation is expired or you already accepted it");
             }
             var member = await _unitOfWork.Workspaces.GetMemberByUserId(workspaceId, userId);
+
+            var channel = await _unitOfWork.Channels
+                .GetChannelsWithMembers()
+                .Where(x => x.WorkspaceId == workspaceId && x.Category == (short)CHANNEL_CATEGORY.DEFAULT)
+                .FirstOrDefaultAsync();
+            if (channel is null)
+            {
+                throw new NotFoundException<Channel>("Workspace does not exist");
+            }
+            channel.ChannelMembers.Add(
+                new ChannelMember
+                {
+                    UserId = userId,
+                    Status = (short)CHANNEL_MEMBER_STATUS.ACTIVE,
+                    AddBy = member.AddBy
+                }
+            );
+
             member.Status = (short)WORKSPACE_MEMBER_STATUS.ACTIVE;
             await _unitOfWork.WorkspaceMembers.UpdateAsync(member);
             await _unitOfWork.SaveChangeAsync();
@@ -1135,6 +1163,9 @@ namespace PBL6.Application.Services
                 var member = await _unitOfWork.Workspaces.GetMemberByUserId(workspaceId, userId);
                 if (member is null)
                     throw new NotFoundException<WorkspaceMember>(userId.ToString());
+
+                if (workspace.OwnerId == userId)
+                    throw new BadRequestException("Owner cannot leave workspace");
 
                 var channels = await _unitOfWork.Channels
                     .GetChannelsWithMembers()

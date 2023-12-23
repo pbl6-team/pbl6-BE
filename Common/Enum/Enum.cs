@@ -58,4 +58,10 @@ namespace PBL6.Common.Enum
         REMOVED = 4,
         DECLINED = 5,
     }
+
+    public enum CHANNEL_CATEGORY
+    {
+        DEFAULT = 1,
+        PRIVATE = 2,
+    }
 }

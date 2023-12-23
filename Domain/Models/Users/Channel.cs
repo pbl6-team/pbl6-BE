@@ -13,7 +13,7 @@ namespace PBL6.Domain.Models.Users
 
         public Guid OwnerId { get; set; }
         
-        public Guid? CategoryId { get; set; }
+        public short Category { get; set; }
 
         [StringLength(255)]
         [Required]
