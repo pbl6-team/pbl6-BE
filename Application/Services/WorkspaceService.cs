@@ -110,11 +110,7 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var workspace = await _unitOfWork.Workspaces
-                    .Queryable()
-                    .Include(x => x.Members.Where(m => !m.IsDeleted))
-                    .FirstOrDefaultAsync(x => x.Id == workspaceId);
-                if (workspace is null)
-                    throw new NotFoundException<Workspace>(workspaceId.ToString());
+                    .GetAsync(workspaceId) ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
 
                 var currentUserId = Guid.Parse(
                     _currentUser.UserId ?? throw new UnauthorizedAccessException()
@@ -149,18 +145,7 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var workspaces = await _unitOfWork.Workspaces
-                    .Queryable()
-                    .Include(x => x.Channels)
-                    .Include(x => x.Members)
-                    .ThenInclude(m => m.User)
-                    .ThenInclude(u => u.Information)
-                    .ToListAsync();
-
-                workspaces.ForEach(w =>
-                {
-                    w.Channels = w.Channels.Where(c => !c.IsDeleted).ToList();
-                    w.Members = w.Members.Where(m => !m.IsDeleted).ToList();
-                });
+                    .GetWorkspaces().ToListAsync();
 
                 var userId = Guid.Parse(
                     _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
@@ -251,12 +236,8 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
                 var workspaces = await _unitOfWork.Workspaces
-                    .Queryable()
-                    .Include(x => x.Channels.Where(c => !c.IsDeleted))
-                    .Include(x => x.Members.Where(m => !m.IsDeleted))
-                    .ThenInclude(m => m.User)
-                    .ThenInclude(u => u.Information)
-                    .Where(x => x.Name.Contains(workspaceName))
+                    .GetWorkspaces()
+                    .Where(x => x.Name.ToUpper().Contains(workspaceName.ToUpper()))
                     .ToListAsync();
 
                 var userId = Guid.Parse(
@@ -560,8 +541,7 @@ namespace PBL6.Application.Services
                     member.Status = (short)WORKSPACE_MEMBER_STATUS.REMOVED;
 
                     var channels = await _unitOfWork.Channels
-                        .Queryable()
-                        .Include(c => c.ChannelMembers.Where(m => !m.IsDeleted))
+                        .GetChannelsWithMembers()
                         .Where(x => x.WorkspaceId == workspaceId)
                         .ToListAsync();
                     foreach (var channel in channels)
@@ -1157,8 +1137,7 @@ namespace PBL6.Application.Services
                     throw new NotFoundException<WorkspaceMember>(userId.ToString());
 
                 var channels = await _unitOfWork.Channels
-                    .Queryable()
-                    .Include(x => x.ChannelMembers)
+                    .GetChannelsWithMembers()
                     .Where(x => x.WorkspaceId == workspaceId)
                     .ToListAsync();
                 foreach (var channel in channels)

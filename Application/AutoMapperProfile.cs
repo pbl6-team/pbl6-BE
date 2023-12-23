@@ -144,7 +144,7 @@ namespace PBL6.Application
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(x => x.SendAt, opt => opt.MapFrom(src => src.CreatedAt))
                 .ForMember(x => x.IsChannel, opt => opt.MapFrom(src => src.ToChannelId != null))
-                .ForMember(x => x.ChildCount, opt => opt.MapFrom(src => src.Children.Count))
+                .ForMember(x => x.ChildCount, opt => opt.MapFrom(src => src.Children.Where(x => !x.IsDeleted).Count()))
                 .ForMember(
                     x => x.ReceiverId,
                     opt => opt.MapFrom(src => src.ToChannelId ?? src.ToUserId)

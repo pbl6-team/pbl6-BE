@@ -74,10 +74,10 @@ namespace PBL6.Infrastructure.Repositories
             );
         }
 
-        public Task<Workspace> GetAsync(Guid id)
+        public Task<Workspace> GetAsync(Guid id, short status = (short)WORKSPACE_MEMBER_STATUS.ACTIVE)
         {
             return _apiDbContext.Workspaces
-                .Include(x => x.Members.Where(x => !x.IsDeleted && x.Status != ((short)WORKSPACE_MEMBER_STATUS.REMOVED)))
+                .Include(x => x.Members.Where(x => !x.IsDeleted && x.Status == status))
                     .ThenInclude(m => m.User)
                     .ThenInclude(u => u.Information)
                 .Include(x => x.Channels.Where(x => !x.IsDeleted))
@@ -110,5 +110,23 @@ namespace PBL6.Infrastructure.Repositories
                 .Include(x => x.Members)
                 .AsEnumerable();
         }
+
+        public IQueryable<Workspace> GetWorkspaces(short status = (short)WORKSPACE_MEMBER_STATUS.ACTIVE)
+        {
+            return _apiDbContext.Workspaces
+                .Include(x => x.Members.Where(x => !x.IsDeleted && x.Status == status))
+                    .ThenInclude(m => m.User)
+                    .ThenInclude(u => u.Information)
+                .Include(x => x.Channels.Where(x => !x.IsDeleted))
+                .AsQueryable();
+        }
+
+        public IQueryable<Workspace> GetWorkspacesWithMembers()
+        {
+            return _apiDbContext.Workspaces.Where(x => !x.IsDeleted)
+                .Include(x => x.Members.Where(x => !x.IsDeleted))
+                .AsQueryable();
+        }
+
     }
 }

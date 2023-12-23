@@ -25,4 +25,12 @@ public class ChannelMemberRepository : Repository<ChannelMember>, IChannelMember
             .Select(x => x.Permission)
             .ToListAsync();
     }
+
+    public IQueryable<ChannelMember> GetMembers()
+    {
+        return _apiDbContext.ChannelMembers.Where(x => !x.IsDeleted)
+            .Include(x => x.User)
+            .ThenInclude(x => x.Information)
+            .AsQueryable();
+    }
 }

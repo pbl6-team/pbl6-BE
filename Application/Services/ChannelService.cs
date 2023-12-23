@@ -39,8 +39,7 @@ public class ChannelService : BaseService, IChannelService
             );
 
             var workspace = await _unitOfWork.Workspaces
-                .Queryable()
-                .Include(x => x.Members.Where(m => !m.IsDeleted))
+                .GetWorkspacesWithMembers()
                 .Where(x => x.Id == channel.WorkspaceId)
                 .FirstOrDefaultAsync();
 
@@ -102,8 +101,7 @@ public class ChannelService : BaseService, IChannelService
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
             var channel = await _unitOfWork.Channels
-                .Queryable()
-                .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
+                .GetChannelsWithMembers()
                 .Where(x => x.Id == channelId)
                 .FirstOrDefaultAsync();
             var currentUserId = Guid.Parse(
@@ -160,8 +158,7 @@ public class ChannelService : BaseService, IChannelService
             foreach (var userId in userIds)
             {
                 var workspace = await _unitOfWork.Workspaces
-                    .Queryable()
-                    .Include(x => x.Members.Where(m => !m.IsDeleted))
+                    .GetWorkspacesWithMembers()
                     .Where(w => w.Id == channel.WorkspaceId)
                     .FirstOrDefaultAsync();
                 if (!workspace.Members.Any(x => x.UserId == userId))
@@ -262,8 +259,7 @@ public class ChannelService : BaseService, IChannelService
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
             var channel = await _unitOfWork.Channels
-                .Queryable()
-                .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
+                .GetChannelsWithMembers()
                 .Where(x => x.Id == channelId)
                 .FirstOrDefaultAsync();
 
@@ -344,15 +340,11 @@ public class ChannelService : BaseService, IChannelService
                 throw new ForbidException();
             }
 
-            var channels = await _unitOfWork.Channels
-                .Queryable()
-                .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
-                .Where(
-                    x =>
-                        x.WorkspaceId == workspaceId
-                        && x.ChannelMembers.Any(c => c.UserId == currentUserId)
-                )
-                .ToListAsync();
+            var channels = await _unitOfWork.Channels.GetChannelByUserIdAndWorkspaceId(
+                currentUserId,
+                workspaceId
+            );
+            
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return _mapper.Map<IEnumerable<ChannelDto>>(channels);
         }
@@ -376,8 +368,7 @@ public class ChannelService : BaseService, IChannelService
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
             var channel = await _unitOfWork.Channels
-                .Queryable()
-                .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
+                .GetChannelsWithMembers()
                 .FirstOrDefaultAsync(x => x.Id == channelId);
 
             if (channel is null)
@@ -415,8 +406,7 @@ public class ChannelService : BaseService, IChannelService
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
             var channels = await _unitOfWork.Channels
-                .Queryable()
-                .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
+                .GetChannelsWithMembers()
                 .Where(x => x.Name.Contains(channelName))
                 .ToListAsync();
 
@@ -448,8 +438,7 @@ public class ChannelService : BaseService, IChannelService
         var method = GetActualAsyncMethodName();
         _logger.LogInformation("[{_className}][{method}] Start", _className, method);
         var channels = await _unitOfWork.Channels
-            .Queryable()
-            .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
+            .GetChannelsWithMembers()
             .Where(x => x.ChannelMembers.Any(c => c.UserId == userId) && !x.IsDeleted)
             .ToListAsync();
 
@@ -606,8 +595,7 @@ public class ChannelService : BaseService, IChannelService
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
             var channel = await _unitOfWork.Channels
-                .Queryable()
-                .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
+                .GetChannelsWithMembers()
                 .Where(x => x.Id == channelId)
                 .FirstOrDefaultAsync();
 
@@ -761,8 +749,7 @@ public class ChannelService : BaseService, IChannelService
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
             var channel = await _unitOfWork.Channels
-                .Queryable()
-                .Include(x => x.ChannelMembers.Where(c => !c.IsDeleted))
+                .GetChannelsWithMembers()
                 .Where(x => x.Id == channelId)
                 .FirstOrDefaultAsync();
             var currentUserId = Guid.Parse(
@@ -928,17 +915,13 @@ public class ChannelService : BaseService, IChannelService
         }
 
         var members = await _unitOfWork.WorkspaceMembers
-            .Queryable()
-            .Include(x => x.User)
-            .ThenInclude(x => x.Information)
-            .Where(x => x.WorkspaceId == workspaceId && !x.IsDeleted)
+            .GetMembers()
+            .Where(x => x.WorkspaceId == workspaceId)
             .ToListAsync();
 
         var channelMembers = await _unitOfWork.ChannelMembers
-            .Queryable()
-            .Include(x => x.User)
-            .ThenInclude(x => x.Information)
-            .Where(x => x.ChannelId == channelId && !x.IsDeleted)
+            .GetMembers()
+            .Where(x => x.ChannelId == channelId)
             .ToListAsync();
 
         var result = members.Where(x => !channelMembers.Select(x => x.UserId).Contains(x.UserId));
@@ -967,9 +950,7 @@ public class ChannelService : BaseService, IChannelService
         }
 
         var members = await _unitOfWork.ChannelMembers
-            .Queryable()
-            .Include(x => x.User)
-            .ThenInclude(x => x.Information)
+            .GetMembers()
             .Include(x => x.ChannelRole)
             .Where(x => x.ChannelId == channelId)
             .ToListAsync();
