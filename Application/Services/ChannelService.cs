@@ -1,3 +1,4 @@
+using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Hangfire;
@@ -74,7 +75,7 @@ public class ChannelService : BaseService, IChannelService
                 );
             }
 
-            channel.CategoryId = Guid.Empty;
+            channel.Category = (short)CHANNEL_CATEGORY.PRIVATE;
             channel = await _unitOfWork.Channels.AddAsync(channel);
             await _unitOfWork.SaveChangeAsync();
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
@@ -266,6 +267,11 @@ public class ChannelService : BaseService, IChannelService
             if (channel is null)
                 throw new NotFoundException<Channel>(channelId.ToString());
 
+            if (channel.Category == (short)CHANNEL_CATEGORY.DEFAULT)
+            {
+                throw new BadRequestException("Cannot delete default channel");
+            }
+            
             var currentUserId = Guid.Parse(
                 _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
             );
@@ -612,6 +618,12 @@ public class ChannelService : BaseService, IChannelService
             {
                 throw new ForbidException();
             }
+
+            if (channel.Category == (short)CHANNEL_CATEGORY.DEFAULT)
+            {
+                throw new BadRequestException("Cannot remove member from default channel");
+            }
+
             var notification = new Notification
             {
                 Title = "You have been removed from channel",
@@ -1014,10 +1026,18 @@ public class ChannelService : BaseService, IChannelService
         var method = GetActualAsyncMethodName();
         _logger.LogInformation("[{_className}][{method}] Start", _className, method);
         var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
+        var channel = await _unitOfWork.Channels
+            .GetChannelsWithMembers()
+            .Where(x => x.Id == channelId)
+            .FirstOrDefaultAsync();
         var isMember = await _unitOfWork.Channels.CheckIsMemberAsync(channelId, userId);
         if (!isMember)
         {
             throw new ForbidException();
+        }
+        if (channel.Category == (short)CHANNEL_CATEGORY.DEFAULT)
+        {
+            throw new BadRequestException("You can't leave the default channel");
         }
         var member = await _unitOfWork.Channels.GetMemberByUserId(channelId, userId);
         member.Status = (short)CHANNEL_MEMBER_STATUS.REMOVED;
