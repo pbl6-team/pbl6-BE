@@ -6,12 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using PBL6.Application.Contract.Channels;
 using PBL6.Application.Contract.Chats;
 using PBL6.Application.Contract.Chats.Dtos;
 using PBL6.Application.Contract.Common;
+using PBL6.Application.ExternalServices;
 using PBL6.Application.Hubs.Schemas;
 using PBL6.Common.Exceptions;
 using PBL6.Common.Functions;
@@ -24,6 +24,7 @@ namespace PBL6.Application.Hubs
         private readonly ICurrentUserService _currentUserService;
         private readonly IChannelService _channelService;
         private readonly IChatService _chatService;
+        private readonly IMeetingService _meetingService;
 
         // private readonly ILogger _logger;
 
@@ -42,6 +43,7 @@ namespace PBL6.Application.Hubs
             IHubContext<ChatHub> hubContext,
             ICurrentUserService currentUserService,
             IChannelService channelService,
+            IMeetingService meetingService,
             IChatService chatService
         // ILogger logger
         )
@@ -50,6 +52,7 @@ namespace PBL6.Application.Hubs
             _currentUserService = currentUserService;
             _channelService = channelService;
             _chatService = chatService;
+            _meetingService = meetingService;
             // _logger = logger;
         }
 
@@ -592,6 +595,16 @@ namespace PBL6.Application.Hubs
         {
             Users.TryGetValue(userId, out var hubUser);
             return Task.FromResult(hubUser?.ConnectionIds.Any() ?? false);
+        }
+
+        public async Task<string> CreateSession(string session)
+        {
+            return await _meetingService.CreateSession(session);
+        }
+
+        public async Task<string> CreateToken(string sessionId)
+        {
+            return await _meetingService.CreateToken(sessionId);
         }
     }
 }
