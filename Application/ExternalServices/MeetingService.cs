@@ -1,12 +1,13 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text;
+using PBL6.Application.Contract.ExternalServices.Meetings.Dtos;
 
 namespace PBL6.Application.ExternalServices
 {
     public interface IMeetingService
     {
-        Task<string> CreateSession(string session);
+        Task<string> CreateSession(Session session);
         Task<string> CreateToken(string sessionId);
     }
 
@@ -20,10 +21,10 @@ namespace PBL6.Application.ExternalServices
                 clientFactory ?? throw new ArgumentNullException(nameof(clientFactory));
         }
 
-        public async Task<string> CreateSession(string session)
+        public async Task<string> CreateSession(Session session)
         {
             var client = _clientFactory.CreateClient("Meeting");
-            var content = new StringContent(session, Encoding.UTF8, "application/json");
+            var content = JsonContent.Create(session);
             var response = await client.PostAsync("openvidu/api/sessions", content);
             if (response.StatusCode == HttpStatusCode.Conflict)
             {
