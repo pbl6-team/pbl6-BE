@@ -67,5 +67,24 @@ namespace PBL6.API.Controllers.Workspaces
             var workspace = await _workspaceService.GetByIdForAdminAsync(workspaceId);
             return Ok(workspace);
         }
+
+        /// <summary>
+        /// API Search workspace - cần đăng nhập
+        /// searchtype : 1 - name, 2 - owner name, 3 - status
+        /// </summary>
+        /// <param name="searchType"></param>
+        /// <param name="searchValue"></param>
+        /// <param name="numberOfResults"></param>
+        /// <returns></returns>
+        /// <response code="200">Get thành công</response>
+        /// <response code="400">Có lỗi xảy ra</response>
+        [HttpGet("search/{searchType}/{searchValue}/{numberOfResults}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<AdminWorkspaceDto>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [AdminFilter]
+        public async Task<IActionResult> SearchWorkspaces([FromRoute] short searchType, [FromRoute] string searchValue, [FromRoute] int numberOfResults)
+        {
+            return Ok(await _workspaceService.SearchForAdminAsync(searchType, searchValue, numberOfResults));
+        }
     }
 }
