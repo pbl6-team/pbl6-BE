@@ -1,3 +1,5 @@
+using System.Net.Http.Headers;
+using System.Text;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +19,12 @@ namespace PBL6.Infrastructure
                     .EnableSensitiveDataLogging()
                     .EnableDetailedErrors());
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+             services.AddHttpClient("Meeting", client =>
+            {
+                client.BaseAddress = new Uri(configuration.GetValue<string>("Meeting:ServerUrl"));
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes($"OPENVIDUAPP:{configuration.GetValue<string>("Meeting:SecretKey")}")));
+            });
 
             return services;
         }
