@@ -11,6 +11,7 @@ using PBL6.Application.Contract.Channels;
 using PBL6.Application.Contract.Chats;
 using PBL6.Application.Contract.Chats.Dtos;
 using PBL6.Application.Contract.Common;
+using PBL6.Application.Contract.ExternalServices.Meetings.Dtos;
 using PBL6.Application.ExternalServices;
 using PBL6.Application.Hubs.Schemas;
 using PBL6.Common.Exceptions;
@@ -597,7 +598,7 @@ namespace PBL6.Application.Hubs
             return Task.FromResult(hubUser?.ConnectionIds.Any() ?? false);
         }
 
-        public async Task<string> CreateSession(string session)
+        public async Task<string> CreateSession(Session session)
         {
             return await _meetingService.CreateSession(session);
         }
