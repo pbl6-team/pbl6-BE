@@ -337,4 +337,30 @@ public class UserService : BaseService, IUserService
             throw;
         }
     }
+
+    public async Task<IEnumerable<AdminUserDto>> SearchUserForAdminAsync(short searchType, string searchValue, int numberOfResults)
+    {
+        var method = GetActualAsyncMethodName();
+        
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var users = await _unitOfWork.Users.Queryable()
+                                       .Include(x => x.Information)
+                                       .Where(x => !x.IsDeleted)
+                                       .ToListAsync();
+
+        searchValue = searchValue.ToUpper();
+        users = searchType switch
+        {
+            (short)USER_ADMIN_SEARCH_TYPE.USERNAME => users.Where(x => x.Username.ToUpper().Contains(searchValue)).ToList(),
+            (short)USER_ADMIN_SEARCH_TYPE.FULLNAME => users.Where(x => (x.Information.FirstName + " " + x.Information.LastName).ToUpper().Contains(searchValue)).ToList(),
+            (short)USER_ADMIN_SEARCH_TYPE.EMAIL => users.Where(x => x.Email.ToUpper().Contains(searchValue)).ToList(),
+            (short)USER_ADMIN_SEARCH_TYPE.PHONE => users.Where(x => x.Information.Phone.Contains(searchValue)).ToList(),
+            (short)USER_ADMIN_SEARCH_TYPE.STATUS => users.Where(x => x.Information.Status == short.Parse(searchValue)).ToList(),
+            (short)USER_ADMIN_SEARCH_TYPE.GENDER => users.Where(x => x.Information.Gender == bool.Parse(searchValue)).ToList(),
+            _ => throw new BadRequestException("Search type is not valid"),
+        };
+        users = users.Take(numberOfResults).ToList();
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
+        return _mapper.Map<IEnumerable<AdminUserDto>>(users);
+    }
 }

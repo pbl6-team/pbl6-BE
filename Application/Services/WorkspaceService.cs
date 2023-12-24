@@ -1246,10 +1246,10 @@ namespace PBL6.Application.Services
                 var member = await _unitOfWork.Workspaces.GetMemberByUserId(workspaceId, userId);
                 if (member is null)
                     throw new NotFoundException<WorkspaceMember>(userId.ToString());
-                    
+
                 if (workspace.OwnerId != currentUserId)
                     throw new ForbidException();
-                    
+
                 if (workspace.OwnerId == userId)
                     throw new BadRequestException("User is already owner");
 
@@ -1276,6 +1276,26 @@ namespace PBL6.Application.Services
 
                 throw;
             }
+        }
+
+        public async Task<IEnumerable<AdminWorkspaceDto>> SearchForAdminAsync(short searchType, string searchValue, int numberOfResults)
+        {
+
+            var method = GetActualAsyncMethodName();
+
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var workspaces = await _unitOfWork.Workspaces.Queryable().Include(x => x.Owner).ThenInclude(x => x.Information).ToListAsync();
+            searchValue = searchValue.ToUpper();
+            workspaces = searchType switch
+            {
+                (short)WORKSPACE_ADMIN_SEARCH_TYPE.NAME => workspaces.Where(x => x.Name.ToUpper().Contains(searchValue)).ToList(),
+                (short)WORKSPACE_ADMIN_SEARCH_TYPE.OWNER_NAME => workspaces.Where(x => (x.Owner.Information.FirstName + " " + x.Owner.Information.LastName).ToUpper().Contains(searchValue)).ToList(),
+                (short)WORKSPACE_ADMIN_SEARCH_TYPE.STATUS => workspaces.Where(x => x.Status == short.Parse(searchValue)).ToList(),
+                _ => throw new BadRequestException("Search type is not valid")
+            };
+            workspaces = workspaces.Take(numberOfResults).ToList();
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+            return _mapper.Map<IEnumerable<AdminWorkspaceDto>>(workspaces);
         }
     }
 }

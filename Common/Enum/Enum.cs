@@ -79,4 +79,21 @@ namespace PBL6.Common.Enum
         ACTIVE = 1,
         BLOCKED = 2,
     }
+
+    public enum WORKSPACE_ADMIN_SEARCH_TYPE
+    {
+        NAME = 1,
+        OWNER_NAME = 2,
+        STATUS = 3,
+    }
+
+    public enum USER_ADMIN_SEARCH_TYPE
+    {
+        USERNAME = 1,
+        EMAIL = 2,
+        PHONE = 3,
+        FULLNAME = 4,
+        STATUS = 5,
+        GENDER = 6,
+    }
 }

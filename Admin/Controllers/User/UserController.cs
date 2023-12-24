@@ -67,4 +67,23 @@ public class UserController : ControllerBase
         var user = await _userService.GetByIdForAdminAsync(userId);
         return Ok(user);
     }
+
+    /// <summary>
+    /// API Search user - cần đăng nhập
+    /// searchtype : 1 - username, 2 - email, 3 - phone, 4 - fullname, 5 - status, 6 - gender
+    /// </summary>
+    /// <param name="searchType"></param>
+    /// <param name="searchValue"></param>
+    /// <param name="numberOfResults"></param>
+    /// <returns></returns>
+    /// <response code="200">Get thành công</response>
+    /// <response code="400">Có lỗi xảy ra</response>
+    [HttpGet("search/{searchType}/{searchValue}/{numberOfResults}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<AdminUserDto>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [AdminFilter]
+    public async Task<IActionResult> SearchUser([FromRoute] short searchType, [FromRoute] string searchValue, [FromRoute] int numberOfResults)
+    {
+        return Ok(await _userService.SearchUserForAdminAsync(searchType, searchValue, numberOfResults));
+    }
 }
