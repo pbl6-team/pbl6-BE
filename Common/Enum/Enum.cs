@@ -64,4 +64,19 @@ namespace PBL6.Common.Enum
         DEFAULT = 1,
         PRIVATE = 2,
     }
+
+    public enum ADMIN_SEARCH_TYPE
+    {
+        USERNAME = 1,
+        EMAIL = 2,
+        PHONE = 3,
+        FULLNAME = 4,
+        STATUS = 5,
+    }
+
+    public enum ADMIN_STATUS
+    {
+        ACTIVE = 1,
+        BLOCKED = 2,
+    }
 }

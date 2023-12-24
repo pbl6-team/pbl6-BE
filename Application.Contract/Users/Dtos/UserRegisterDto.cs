@@ -61,7 +61,7 @@ namespace PBL6.Application.Contract.Users.Dtos
         /// <example>0523061xxx</example>
         [StringLength(20)]
         [JsonPropertyName("Phone")]
-        [RegularExpression(@"[0-9]")]
+        [RegularExpression(@"^\d{10}$")]
         public string Phone { get; set; }
 
         /// <summary>

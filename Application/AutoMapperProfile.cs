@@ -11,6 +11,8 @@ using PBL6.Application.Contract.Notifications.Dtos;
 using PBL6.Common.Enum;
 using Application.Contract.Users.Dtos;
 using System.Security.Cryptography.X509Certificates;
+using PBL6.Domain.Models.Admins;
+using Application.Contract.Admins.Dtos;
 
 namespace PBL6.Application
 {
@@ -267,6 +269,32 @@ namespace PBL6.Application
                 .ForMember(x => x.Name, opt => opt.MapFrom(src => src.Name))
                 .ForMember(x => x.Type, opt => opt.MapFrom(src => src.Type))
                 .ForMember(x => x.Url, opt => opt.MapFrom(src => src.Url));
+            
+            CreateMap<AdminAccount, AdminDto>() 
+                .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(x => x.FirstName, opt => opt.MapFrom(src => src.Information.FirstName))
+                .ForMember(x => x.LastName, opt => opt.MapFrom(src => src.Information.LastName))
+                .ForMember(x => x.Phone, opt => opt.MapFrom(src => src.Information.Phone))
+                .ForMember(x => x.Email, opt => opt.MapFrom(src => src.Email))
+                .ForMember(x => x.Username, opt => opt.MapFrom(src => src.Username))
+                .ForMember(x => x.Status, opt => opt.MapFrom(src => src.Information.Status));
+            CreateMap<AdminAccount, AdminDetailDto>()
+                .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(x => x.FirstName, opt => opt.MapFrom(src => src.Information.FirstName))
+                .ForMember(x => x.LastName, opt => opt.MapFrom(src => src.Information.LastName))
+                .ForMember(x => x.Phone, opt => opt.MapFrom(src => src.Information.Phone))
+                .ForMember(x => x.Email, opt => opt.MapFrom(src => src.Email))
+                .ForMember(x => x.Username, opt => opt.MapFrom(src => src.Username))
+                .ForMember(x => x.Status, opt => opt.MapFrom(src => src.Information.Status))
+                .ForMember(x => x.Gender, opt => opt.MapFrom(src => src.Information.Gender))
+                .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.Information.BirthDate));
+            CreateMap<UpdateAdminDto, AdminAccount>()
+                .ForPath(x => x.Information.FirstName, opt => opt.MapFrom(src => src.FirstName))
+                .ForPath(x => x.Information.LastName, opt => opt.MapFrom(src => src.LastName))
+                .ForMember(x => x.Email, opt => opt.MapFrom(src => src.Email))
+                .ForPath(x => x.Information.Phone, opt => opt.MapFrom(src => src.Phone))
+                .ForPath(x => x.Information.Gender, opt => opt.MapFrom(src => src.Gender))
+                .ForPath(x => x.Information.BirthDate, opt => opt.MapFrom(src => src.BirthDay));
         }
     }
 }

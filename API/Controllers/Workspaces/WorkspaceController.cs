@@ -149,7 +149,7 @@ namespace PBL6.API.Controllers.Workspaces
         /// API Add member to workspace - cần đăng nhập
         /// </summary>
         /// <param name="workspaceId"></param>
-        /// <param name="userIds"></param>
+        /// <param name="emails"></param>
         /// <returns></returns>
         /// <response code="200">Add thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>

@@ -12,9 +12,13 @@ namespace PBL6.Common.Functions
 {
     public static class SecurityFunction
     {
-        public static string GenerateRandomString(int length = 20)
+        public static string GenerateRandomString(int length = 20, bool includeOnlyNumerics = false)
         {
-            const string validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*";
+            string validChars = includeOnlyNumerics switch
+            {
+                true => "1234567890",
+                false => "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*",
+            };
             char[] chars = new char[length];
 
             for (int i = 0; i < length; i++)

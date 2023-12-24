@@ -25,5 +25,12 @@ namespace PBL6.Common.Consts
             public const string Subject = "[FIRA] Invite to workspace";
             public const string Template = "InviteToWorkspace.cshtml";
         }
+
+        public static class AdminRandomPassword
+        {
+            public const string Subject = "[FIRA] Your admin password";
+            public const string Template = "AdminRandomPassword.cshtml";
+
+        }
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PBL6.Common;
+using PBL6.Common.Enum;
 using PBL6.Common.Functions;
 using PBL6.Domain.Data.Admins;
 using PBL6.Domain.Models.Admins;
@@ -16,7 +17,7 @@ namespace PBL6.Infrastructure.Repositories
         public async Task<AdminAccount> CheckAccountValidAsync(string userName, string password)
         {
             var existAccount =
-                await _dbSet.FirstOrDefaultAsync(x => x.Username == userName)
+                await _dbSet.Include(x => x.Information).FirstOrDefaultAsync(x => x.Username == userName)
                 ?? throw new InvalidUsernamePasswordException();
             var passwordSalt = existAccount.PasswordSalt;
             var passwordHashed = SecurityFunction.HashPassword(password, passwordSalt);
@@ -25,6 +26,14 @@ namespace PBL6.Infrastructure.Repositories
             {
                 throw new InvalidUsernamePasswordException();
             }
+
+            var isBlocked = existAccount.Information.Status == (short)ADMIN_STATUS.BLOCKED;
+
+            if (isBlocked)
+            {
+                throw new BlockedUserException();
+            }
+
 
             return existAccount;
         }
