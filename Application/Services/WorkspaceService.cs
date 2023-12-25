@@ -1012,14 +1012,32 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
 
-                var workspace = await _unitOfWork.Workspaces.Queryable()
+                var workspace = await _unitOfWork.Workspaces.Queryable().Include(x => x.Owner)
                     .FirstOrDefaultAsync(x => x.Id == workspaceId);
-                workspace.Status = status switch
+
+                switch (status)
                 {
-                    (short)WORKSPACE_STATUS.SUSPENDED => (short)WORKSPACE_STATUS.SUSPENDED,
-                    (short)WORKSPACE_STATUS.ACTIVE => (short)WORKSPACE_STATUS.ACTIVE,
-                    _ => throw new BadRequestException("Status is not valid"),
-                };
+                    case (short)WORKSPACE_STATUS.SUSPENDED:
+                        workspace.Status = (short)WORKSPACE_STATUS.SUSPENDED;
+                        _backgroundJobClient.Enqueue(() => _mailService.Send(
+                        workspace.Owner.Email,
+                        MailConst.WorkspaceSuspended.Subject,
+                        MailConst.WorkspaceSuspended.Template,
+                        workspace.Name
+                    ));
+                        break;
+                    case (short)WORKSPACE_STATUS.ACTIVE:
+                        workspace.Status = (short)WORKSPACE_STATUS.ACTIVE;
+                        _backgroundJobClient.Enqueue(() => _mailService.Send(
+                        workspace.Owner.Email,
+                        MailConst.WorkspaceReactivated.Subject,
+                        MailConst.WorkspaceReactivated.Template,
+                        workspace.Name
+                    ));
+                        break;
+                    default:
+                        throw new BadRequestException("Status is not valid");
+                }
                 await _unitOfWork.Workspaces.UpdateAsync(workspace);
                 await _unitOfWork.SaveChangeAsync();
 

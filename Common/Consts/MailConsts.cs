@@ -32,5 +32,29 @@ namespace PBL6.Common.Consts
             public const string Template = "AdminRandomPassword.cshtml";
 
         }
+
+        public static class AccountBlocked
+        {
+            public const string Subject = "[FIRA] Your account has been blocked";
+            public const string Template = "AccountBlocked.cshtml";
+        }
+
+        public static class AccountReactivated
+        {
+            public const string Subject = "[FIRA] Your account has been reactivated";
+            public const string Template = "AccountReactivated.cshtml";
+        }
+
+        public static class WorkspaceSuspended
+        {
+            public const string Subject = "[FIRA] Your workspace has been suspended";
+            public const string Template = "WorkspaceSuspended.cshtml";
+        }
+
+        public static class WorkspaceReactivated
+        {
+            public const string Subject = "[FIRA] Your workspace has been reactivated";
+            public const string Template = "WorkspaceReactivated.cshtml";
+        }
     }
 }

@@ -48,7 +48,7 @@ public class AdminService : BaseService, IAdminService
             throw new UsernameExistedException(createAdminDto.Username);
 
         var passwordSalt = SecurityFunction.GenerateRandomString();
-        var password = SecurityFunction.GenerateRandomString(10, includeOnlyNumerics: true);
+        var password = SecurityFunction.GenerateRandomString(10);
         var hashPassword = SecurityFunction.HashPassword(password, passwordSalt);
         AdminAccount newAccount =
             new()
@@ -68,10 +68,10 @@ public class AdminService : BaseService, IAdminService
                     Status = (short)ADMIN_STATUS.ACTIVE
                 }
             };
-        
+
         await _unitOfWork.Admins.AddAsync(newAccount);
         await _unitOfWork.SaveChangeAsync();
-        _backgroundJobClient.Enqueue(() =>  _mailService.Send(
+        _backgroundJobClient.Enqueue(() => _mailService.Send(
                     createAdminDto.Email,
                     MailConst.AdminRandomPassword.Subject,
                     MailConst.AdminRandomPassword.Template,
@@ -136,22 +136,40 @@ public class AdminService : BaseService, IAdminService
         var admin = await _unitOfWork.Admins.Queryable()
                                       .Include(a => a.Information)
                                       .FirstOrDefaultAsync(a => a.Id == adminId);
-                                      
+
         if (admin.Username == "root")
             throw new BadRequestException("Cannot change root status");
-            
+
         var userId = Guid.Parse(
                     _currentUser.UserId ?? throw new UnauthorizedAccessException()
                 );
         if (userId == adminId)
             throw new BadRequestException("Cannot change your own status");
-            
-        admin.Information.Status = status switch
+
+        switch (status)
         {
-            (short)ADMIN_STATUS.ACTIVE => admin.Information.Status = (short)ADMIN_STATUS.ACTIVE,
-            (short)ADMIN_STATUS.BLOCKED => admin.Information.Status = (short)ADMIN_STATUS.BLOCKED,
-            _ => throw new BadRequestException("Status is not valid"),
-        };
+            case (short)ADMIN_STATUS.BLOCKED:
+                admin.Information.Status = (short)ADMIN_STATUS.BLOCKED;
+                _backgroundJobClient.Enqueue(() => _mailService.Send(
+                admin.Email,
+                MailConst.AccountBlocked.Subject,
+                MailConst.AccountBlocked.Template,
+                ""
+            ));
+                break;
+            case (short)ADMIN_STATUS.ACTIVE:
+                admin.Information.Status = (short)ADMIN_STATUS.ACTIVE;
+                _backgroundJobClient.Enqueue(() => _mailService.Send(
+                admin.Email,
+                MailConst.AccountReactivated.Subject,
+                MailConst.AccountReactivated.Template,
+                ""
+            ));
+                break;
+            default:
+                throw new BadRequestException("Status is not valid");
+        }
+
         await _unitOfWork.Admins.UpdateAsync(admin);
         await _unitOfWork.SaveChangeAsync();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
