@@ -1,9 +1,9 @@
 @model MailData
 @{
-    @* Layout = "_LayoutMail"; *@
-    string password = Model.JsonData;
+  @* Layout = "_LayoutMail"; *@
+  string workspaceName = Model.JsonData;
 }
-@using  PBL6.Application.Contract.ExternalServices.Mails;
+@using PBL6.Application.Contract.ExternalServices.Mails;
 
 <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
   <div style="margin:50px auto;width:70%;padding:20px 0">
@@ -11,8 +11,9 @@
       <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">FIRA</a>
     </div>
     <p style="font-size:1.1em">Hi,</p>
-    <p>Thank you for choosing FIRA. This is your password</p>
-    <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">@password</h2>
+    <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">
+      Your workspace @workspaceName has been suspended</h2>
+    <p style="font-size:0.9em;">Please contact administrator if you think this is a mistake</p>
     <p style="font-size:0.9em;">Regards,<br />FIRA Team</p>
     <hr style="border:none;border-top:1px solid #eee" />
     <div style="float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300">

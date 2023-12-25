@@ -1,11 +1,13 @@
 using System.Runtime.CompilerServices;
 using Application.Contract.Users.Dtos;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OneSignalApi.Model;
 using PBL6.Application.Contract.Users;
 using PBL6.Application.Contract.Users.Dtos;
 using PBL6.Application.Services;
+using PBL6.Common.Consts;
 using PBL6.Common.Enum;
 using PBL6.Common.Exceptions;
 
@@ -288,9 +290,21 @@ public class UserService : BaseService, IUserService
             {
                 case (short)USER.BLOCKED:
                     user.Information.Status = (short)USER.BLOCKED;
+                    _backgroundJobClient.Enqueue(() =>  _mailService.Send(
+                    user.Email,
+                    MailConst.AccountBlocked.Subject,
+                    MailConst.AccountBlocked.Template,
+                    ""
+                ));
                     break;
                 case (short)USER.VERIFIED:
                     user.Information.Status = (short)USER.VERIFIED;
+                    _backgroundJobClient.Enqueue(() =>  _mailService.Send(
+                    user.Email,
+                    MailConst.AccountReactivated.Subject,
+                    MailConst.AccountReactivated.Template,
+                    ""
+                ));
                     break;
                 default:
                     throw new BadRequestException("Status is not valid");
