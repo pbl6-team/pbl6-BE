@@ -86,6 +86,11 @@ public class AdminService : BaseService, IAdminService
         var method = GetActualAsyncMethodName();
 
         _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        if (pageNumber < 1)
+        {
+            throw new BadRequestException("Page number is not valid");
+        }
+        
         var admins = await _unitOfWork.Admins.Queryable()
                                        .Include(a => a.Information)
                                         .Skip((pageNumber - 1) * pageSize)

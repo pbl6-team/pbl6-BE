@@ -254,6 +254,11 @@ public class UserService : BaseService, IUserService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            if (pageNumber < 1)
+            {
+                throw new BadRequestException("Page number is not valid");
+            }
+            
             var users = await _unitOfWork.Users.Queryable()
                                            .Include(x => x.Information)
                                            .Where(x => !x.IsDeleted)
