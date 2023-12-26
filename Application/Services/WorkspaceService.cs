@@ -993,7 +993,11 @@ namespace PBL6.Application.Services
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-
+            if (pageNumber < 1)
+            {
+                throw new BadRequestException("Page number is not valid");
+            }
+            
             var workspaces = await _unitOfWork.Workspaces
                 .Queryable()
                 .Include(x => x.Owner)
