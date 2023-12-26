@@ -81,13 +81,15 @@ public class AdminService : BaseService, IAdminService
         return newAccount.Id;
     }
 
-    public async Task<IEnumerable<AdminDto>> GetAllAsync()
+    public async Task<IEnumerable<AdminDto>> GetAllAsync(int pageSize, int pageNumber)
     {
         var method = GetActualAsyncMethodName();
 
         _logger.LogInformation("[{_className}][{method}] Start", _className, method);
         var admins = await _unitOfWork.Admins.Queryable()
                                        .Include(a => a.Information)
+                                        .Skip((pageNumber - 1) * pageSize)
+                                        .Take(pageSize)
                                        .ToListAsync();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
         return _mapper.Map<IEnumerable<AdminDto>>(admins);

@@ -24,13 +24,13 @@ public class AdminController : ControllerBase
     /// <returns></returns>
     /// <response code="200">Get thành công</response>
     /// <response code="400">Có lỗi xảy ra</response>
-    [HttpGet]
+    [HttpGet("page/{pageNumber}/size/{pageSize}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<AdminDto>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [AdminFilter]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromRoute] int pageNumber, [FromRoute] int pageSize)
     {
-        return Ok(await _adminService.GetAllAsync());
+        return Ok(await _adminService.GetAllAsync(pageSize, pageNumber));
     }
 
     /// <summary>

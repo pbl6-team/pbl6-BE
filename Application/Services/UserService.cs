@@ -248,7 +248,7 @@ public class UserService : BaseService, IUserService
         }
     }
 
-    public async Task<IEnumerable<AdminUserDto>> GetAllAsync()
+    public async Task<IEnumerable<AdminUserDto>> GetAllAsync(int pageSize, int pageNumber)
     {
         var method = GetActualAsyncMethodName();
         try
@@ -257,6 +257,8 @@ public class UserService : BaseService, IUserService
             var users = await _unitOfWork.Users.Queryable()
                                            .Include(x => x.Information)
                                            .Where(x => !x.IsDeleted)
+                                           .Skip((pageNumber - 1) * pageSize)
+                                           .Take(pageSize)
                                            .ToListAsync();
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
@@ -290,7 +292,7 @@ public class UserService : BaseService, IUserService
             {
                 case (short)USER.BLOCKED:
                     user.Information.Status = (short)USER.BLOCKED;
-                    _backgroundJobClient.Enqueue(() =>  _mailService.Send(
+                    _backgroundJobClient.Enqueue(() => _mailService.Send(
                     user.Email,
                     MailConst.AccountBlocked.Subject,
                     MailConst.AccountBlocked.Template,
@@ -299,7 +301,7 @@ public class UserService : BaseService, IUserService
                     break;
                 case (short)USER.VERIFIED:
                     user.Information.Status = (short)USER.VERIFIED;
-                    _backgroundJobClient.Enqueue(() =>  _mailService.Send(
+                    _backgroundJobClient.Enqueue(() => _mailService.Send(
                     user.Email,
                     MailConst.AccountReactivated.Subject,
                     MailConst.AccountReactivated.Template,
@@ -355,7 +357,7 @@ public class UserService : BaseService, IUserService
     public async Task<IEnumerable<AdminUserDto>> SearchUserForAdminAsync(short searchType, string searchValue, int numberOfResults)
     {
         var method = GetActualAsyncMethodName();
-        
+
         _logger.LogInformation("[{_className}][{method}] Start", _className, method);
         var users = await _unitOfWork.Users.Queryable()
                                        .Include(x => x.Information)

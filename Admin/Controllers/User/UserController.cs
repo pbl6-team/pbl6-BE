@@ -28,10 +28,10 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<AdminUserDto>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [AdminFilter]
-    [HttpGet]
-    public async Task<ActionResult> GetAllUser()
+    [HttpGet("page/{pageNumber}/size/{pageSize}")]
+    public async Task<ActionResult> GetAllUser([FromRoute] int pageNumber, [FromRoute] int pageSize)
     {
-        var users = await _userService.GetAllAsync();
+        var users = await _userService.GetAllAsync(pageSize, pageNumber);
         return Ok(users);
     }
 

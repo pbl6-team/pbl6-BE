@@ -28,7 +28,7 @@ namespace PBL6.Application.Contract.Workspaces
         Task<IEnumerable<UserDetailDto>> GetMembersByRoleIdAsync(Guid workspaceId, Guid roleId);
         Task<IEnumerable<UserDetailDto>> GetMembersWithoutRoleAsync(Guid workspaceId);
         Task<IEnumerable<WorkspaceUserDto>> GetMembersAsync(Guid workspaceId, short status = 1);
-        Task<IEnumerable<AdminWorkspaceDto>> GetAllForAdminAsync();
+        Task<IEnumerable<AdminWorkspaceDto>> GetAllForAdminAsync(int pageSize, int pageNumber);
         Task<IEnumerable<AdminWorkspaceDto>> SearchForAdminAsync(short searchType, string searchValue, int numberOfResults);
         Task<Guid> UpdateWorkspaceStatusAsync(Guid workspaceId, short status);
         Task AcceptInvitationAsync(Guid workspaceId);
