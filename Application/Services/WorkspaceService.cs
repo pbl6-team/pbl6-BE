@@ -989,7 +989,7 @@ namespace PBL6.Application.Services
             return _mapper.Map<IEnumerable<WorkspaceUserDto>>(members);
         }
 
-        public async Task<IEnumerable<AdminWorkspaceDto>> GetAllForAdminAsync()
+        public async Task<IEnumerable<AdminWorkspaceDto>> GetAllForAdminAsync(int pageSize, int pageNumber)
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
@@ -998,6 +998,8 @@ namespace PBL6.Application.Services
                 .Queryable()
                 .Include(x => x.Owner)
                 .ThenInclude(o => o.Information)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);

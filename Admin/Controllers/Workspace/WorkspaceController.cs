@@ -28,10 +28,10 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<AdminWorkspaceDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AdminFilter]
-        [HttpGet]
-        public async Task<ActionResult> GetAllWorkspace()
+        [HttpGet("page/{pageNumber}/size/{pageSize}")]
+        public async Task<ActionResult> GetAllWorkspace([FromRoute] int pageNumber, [FromRoute] int pageSize)
         {
-            var workspaces = await _workspaceService.GetAllForAdminAsync();
+            var workspaces = await _workspaceService.GetAllForAdminAsync(pageSize, pageNumber);
             return Ok(workspaces);
         }
 
