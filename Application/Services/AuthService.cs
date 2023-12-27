@@ -427,6 +427,7 @@ namespace PBL6.Application.Services
                 var existedUser = await _unitOfWork.Users
                     .Queryable()
                     .Include(x => x.UserTokens)
+                    .Include(x => x.Information)
                     .FirstOrDefaultAsync(x => x.Email == googleOauthUser.Email);
 
                 if (existedUser is null)
@@ -450,6 +451,13 @@ namespace PBL6.Application.Services
                 {
                     existedUser.IsActive = true;
                     await _unitOfWork.Users.UpdateAsync(existedUser);
+                }
+
+                var isBlocked = existedUser.Information.Status == (short)USER.BLOCKED;
+
+                if (isBlocked)
+                {
+                    throw new BlockedUserException();
                 }
 
                 ClaimData claimData =
