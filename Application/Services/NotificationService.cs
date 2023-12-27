@@ -6,7 +6,7 @@ namespace PBL6.Application.Services
 {
     public interface INotificationService
     {
-        Task<List<NotificationDto>> GetAllAsync(SearchDto dto);
+        Task<List<NotificationDto>> SearchAsync(SearchDto dto);
         Task ReadAsync(Guid id);
         Task DeleteAsync(List<Guid> ids);
         Task<int> CountUnreadNotification(short? type);
@@ -24,13 +24,13 @@ namespace PBL6.Application.Services
 
         static string GetActualAsyncMethodName([CallerMemberName] string name = null) => name;
 
-        public async Task<List<NotificationDto>> GetAllAsync(SearchDto dto)
+        public async Task<List<NotificationDto>> SearchAsync(SearchDto dto)
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
             var currentUserId = Guid.Parse(_currentUser.UserId);
             var notifications = await _unitOfWork.Notifications.GetUserNotifications(
-                currentUserId, dto.Offset, dto.Limit
+                currentUserId, dto.Offset, dto.Limit, dto.type
             );
             var notificationDtos = _mapper.Map<List<NotificationDto>>(notifications);
 

@@ -31,7 +31,7 @@ namespace PBL6.API.Controllers.Notifications
         [AuthorizeFilter]
         public async Task<IActionResult> GetNotifications([FromQuery] SearchDto input)
         {
-            var notifications = await _notificationService.GetAllAsync(input);
+            var notifications = await _notificationService.SearchAsync(input);
             return Ok(notifications);
         }
 
