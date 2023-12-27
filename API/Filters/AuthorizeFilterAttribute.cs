@@ -3,6 +3,9 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.IdentityModel.Tokens;
+using PBL6.Application.Contract.Users;
+using PBL6.Common;
+using PBL6.Common.Enum;
 using PBL6.Common.Exceptions;
 using PBL6.Common.Functions;
 
@@ -73,6 +76,16 @@ namespace PBL6.API.Filters
                         throw new UnauthorizedException("Account is not verified");
                     }
                 }
+
+                var userService =
+                    context.HttpContext.RequestServices.GetService<IUserService>();
+                var user = await userService.GetByIdForAdminAsync(Guid.Parse(userId));
+                
+                if (user.Status == (short)USER.BLOCKED)
+                {
+                    throw new BlockedUserException();
+                }
+
                 var identity = new ClaimsIdentity(context.HttpContext.User.Identity);
                 identity.AddClaim(new Claim(CustomClaimTypes.UserId, userId));
                 identity.AddClaim(new Claim(CustomClaimTypes.Email, email));
@@ -85,8 +98,8 @@ namespace PBL6.API.Filters
             catch (Exception e)
             {
                 if (e is UnauthorizedException)
-                    throw;
-                throw new UnauthorizedException("Invalid token");
+                    throw new UnauthorizedException("Invalid token");
+                throw;
             }
         }
 

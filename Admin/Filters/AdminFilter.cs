@@ -1,8 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Application.Contract.Admins;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.IdentityModel.Tokens;
+using PBL6.Common;
+using PBL6.Common.Enum;
 using PBL6.Common.Exceptions;
 using PBL6.Common.Functions;
 
@@ -11,6 +14,13 @@ namespace PBL6.Admin.Filters
     [AttributeUsage(AttributeTargets.All)]
     public class AdminFilter : Attribute, IAsyncAuthorizationFilter
     {
+        private readonly bool _rootRequired = false;
+
+        public AdminFilter(bool rootRequired = false)
+        {
+            _rootRequired = rootRequired;
+        }
+        
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
             var configuration = context.HttpContext.RequestServices.GetService<IConfiguration>();
@@ -57,6 +67,18 @@ namespace PBL6.Admin.Filters
             if (isAdmin != "True")
             {
                 throw new UnauthorizedException("You are not admin");
+            }
+            var adminService = context.HttpContext.RequestServices.GetService<IAdminService>();
+
+            var admin = await adminService.GetByIdAsync(Guid.Parse(userId));
+            if (admin.Status == (short)ADMIN_STATUS.BLOCKED)
+            {
+                throw new BlockedUserException();
+            }
+            
+            if (_rootRequired && !isRoot)
+            {
+                throw new UnauthorizedException("You are not root");
             }
 
             var identity = new ClaimsIdentity(context.HttpContext.User.Identity);
