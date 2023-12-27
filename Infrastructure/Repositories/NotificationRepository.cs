@@ -42,11 +42,12 @@ namespace PBL6.Domain.Models.Users
                 );
         }
 
-        public Task<List<Notification>> GetUserNotifications(Guid userId, int offset, int limit)
+        public Task<List<Notification>> GetUserNotifications(Guid userId, int offset, int limit, short? type = null)
         {
             return _dbSet
                 .Include(x => x.UserNotifications.Where(y => y.UserId == userId))
-                .Where(x => x.UserNotifications.Any(y => y.UserId == userId && !y.IsDeleted))
+                .Where(x => x.UserNotifications.Any(y => y.UserId == userId && !y.IsDeleted)
+                    && (type == null || x.Type == type) && !x.IsDeleted)
                 .OrderByDescending(x => x.CreatedAt)
                 .Skip(offset)
                 .Take(limit)
