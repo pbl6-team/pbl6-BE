@@ -27,7 +27,7 @@ public class AdminController : ControllerBase
     [HttpGet("page/{pageNumber}/size/{pageSize}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<AdminDto>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [AdminFilter]
+    [AdminFilter(rootRequired: true)]
     public async Task<IActionResult> GetAll([FromRoute] int pageNumber, [FromRoute] int pageSize)
     {
         return Ok(await _adminService.GetAllAsync(pageSize, pageNumber));
@@ -46,7 +46,7 @@ public class AdminController : ControllerBase
     [HttpGet("search/{searchType}/{searchValue}/{numberOfResults}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<AdminDto>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [AdminFilter]
+    [AdminFilter(rootRequired: true)]
     public async Task<IActionResult> SearchAdmin([FromRoute] short searchType, [FromRoute] string searchValue, [FromRoute] int numberOfResults)
     {
         return Ok(await _adminService.SearchAsync(searchType, searchValue, numberOfResults));
@@ -62,7 +62,7 @@ public class AdminController : ControllerBase
     /// <response code="400">Có lỗi xảy ra</response>
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [AdminFilter]
+    [AdminFilter(rootRequired: true)]
     [HttpPut("{adminId}")]
     public async Task<ActionResult> UpdateAdmin([FromRoute] Guid adminId, [FromForm] UpdateAdminDto input)
     {
@@ -80,7 +80,7 @@ public class AdminController : ControllerBase
     [HttpGet("{adminId}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AdminDetailDto))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [AdminFilter]
+    [AdminFilter(rootRequired: true)]
     public async Task<IActionResult> GetById([FromRoute] Guid adminId)
     {
         return Ok(await _adminService.GetByIdAsync(adminId));
@@ -97,7 +97,7 @@ public class AdminController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesDefaultResponseType]
-    [AdminFilter]
+    [AdminFilter(rootRequired: true)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> Create(CreateAdminDto input)
     {
@@ -113,7 +113,7 @@ public class AdminController : ControllerBase
     /// <response code="400">Có lỗi xảy ra</response>
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [AdminFilter]
+    [AdminFilter(rootRequired: true)]
     [HttpPut("{adminId}/status/{status}")]
     public async Task<ActionResult> UpdateWorkspaceStatus([FromRoute] Guid adminId, [FromRoute] short status)
     {
