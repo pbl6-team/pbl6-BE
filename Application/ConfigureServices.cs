@@ -16,6 +16,7 @@ using IExternalNotificationService = PBL6.Application.Contract.ExternalServices.
 using PBL6.Application.ExternalServices;
 using Application.Contract.Admins;
 using Application.Services.Admins;
+using Application.Contract.Dashboard;
 
 namespace PBL6.Application
 {
@@ -35,6 +36,7 @@ namespace PBL6.Application
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IAdminService, AdminService>();
+            services.AddScoped<IDashboardService, DashboardService>();
 
             services.AddScoped<IExternalNotificationService, ExternalNotificationService>();
             services.AddTransient<IMailService, MailService>();
