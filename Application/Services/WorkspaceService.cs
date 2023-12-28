@@ -989,7 +989,7 @@ namespace PBL6.Application.Services
             return _mapper.Map<IEnumerable<WorkspaceUserDto>>(members);
         }
 
-        public async Task<IEnumerable<AdminWorkspaceDto>> GetAllForAdminAsync(int pageSize, int pageNumber)
+        public async Task<PagedResult<AdminWorkspaceDto>> GetAllForAdminAsync(int pageSize, int pageNumber)
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
@@ -1008,7 +1008,13 @@ namespace PBL6.Application.Services
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
-            return _mapper.Map<IEnumerable<AdminWorkspaceDto>>(workspaces);
+            return new PagedResult<AdminWorkspaceDto>
+            {
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling((double)await _unitOfWork.Workspaces.Queryable().CountAsync() / pageSize),
+                Items = _mapper.Map<IEnumerable<AdminWorkspaceDto>>(workspaces)
+            };
         }
 
         public async Task<Guid> UpdateWorkspaceStatusAsync(Guid workspaceId, short status)

@@ -25,7 +25,7 @@ public class AdminController : ControllerBase
     /// <response code="200">Get thành công</response>
     /// <response code="400">Có lỗi xảy ra</response>
     [HttpGet("page/{pageNumber}/size/{pageSize}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<AdminDto>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResult<AdminDto>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [AdminFilter(rootRequired: true)]
     public async Task<IActionResult> GetAll([FromRoute] int pageNumber, [FromRoute] int pageSize)

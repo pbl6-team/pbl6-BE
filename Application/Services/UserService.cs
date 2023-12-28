@@ -248,7 +248,7 @@ public class UserService : BaseService, IUserService
         }
     }
 
-    public async Task<IEnumerable<AdminUserDto>> GetAllAsync(int pageSize, int pageNumber)
+    public async Task<PagedResult<AdminUserDto>> GetAllAsync(int pageSize, int pageNumber)
     {
         var method = GetActualAsyncMethodName();
         try
@@ -267,7 +267,13 @@ public class UserService : BaseService, IUserService
                                            .ToListAsync();
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
-            return _mapper.Map<IEnumerable<AdminUserDto>>(users);
+            return new PagedResult<AdminUserDto>
+            {
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling((double)_unitOfWork.Users.Queryable().Count() / pageSize),
+                Items = _mapper.Map<IEnumerable<AdminUserDto>>(users),
+            };
         }
         catch (Exception e)
         {
