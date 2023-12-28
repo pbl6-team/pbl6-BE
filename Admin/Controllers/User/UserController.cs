@@ -25,7 +25,7 @@ public class UserController : ControllerBase
     /// <returns></returns>
     /// <response code="200">Get thành công</response>
     /// <response code="400">Có lỗi xảy ra</response>
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<AdminUserDto>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResult<AdminUserDto>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [AdminFilter]
     [HttpGet("page/{pageNumber}/size/{pageSize}")]

@@ -2,8 +2,10 @@ using System.Runtime.CompilerServices;
 using Application.Contract.Admins;
 using Application.Contract.Admins.Dtos;
 using Hangfire;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Minio.DataModel;
 using PBL6.Application.Services;
 using PBL6.Common;
 using PBL6.Common.Consts;
@@ -81,7 +83,7 @@ public class AdminService : BaseService, IAdminService
         return newAccount.Id;
     }
 
-    public async Task<IEnumerable<AdminDto>> GetAllAsync(int pageSize, int pageNumber)
+    public async Task<PagedResult<AdminDto>> GetAllAsync(int pageSize, int pageNumber)
     {
         var method = GetActualAsyncMethodName();
 
@@ -97,7 +99,14 @@ public class AdminService : BaseService, IAdminService
                                         .Take(pageSize)
                                        .ToListAsync();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
-        return _mapper.Map<IEnumerable<AdminDto>>(admins);
+        
+        return new PagedResult<AdminDto>
+        {
+            PageSize = pageSize,
+            CurrentPage = pageNumber,
+            TotalPages = (int)Math.Ceiling((double)_unitOfWork.Admins.Queryable().Count() / pageSize),
+            Items = _mapper.Map<IEnumerable<AdminDto>>(admins),
+        };
     }
 
     public async Task<AdminDetailDto> GetByIdAsync(Guid adminId)

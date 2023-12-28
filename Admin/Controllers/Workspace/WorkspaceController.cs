@@ -25,7 +25,7 @@ namespace PBL6.API.Controllers.Workspaces
         /// <returns></returns>
         /// <response code="200">Get thành công</response>
         /// <response code="400">Có lỗi xảy ra</response>
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<AdminWorkspaceDto>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResult<AdminWorkspaceDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AdminFilter]
         [HttpGet("page/{pageNumber}/size/{pageSize}")]
