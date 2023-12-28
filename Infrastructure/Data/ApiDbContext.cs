@@ -43,6 +43,8 @@ namespace PBL6.Infrastructure.Data
         public DbSet<Message> Messages { get; set; }
         public DbSet<MessageTracking> MessageTrackings { get; set; }
         public DbSet<FileOfMessage> Files { get; set; }
+        public DbSet<Meeting> Meetings { get; set; }
+        public DbSet<Call> Calls { get; set; }
 
         public ApiDbContext() { }
 
@@ -204,6 +206,12 @@ namespace PBL6.Infrastructure.Data
                 .HasMany(x => x.Files)
                 .WithOne(x => x.Message)
                 .HasForeignKey(x => x.MessageId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Meeting>()
+                .HasOne(x => x.Channel)
+                .WithMany(c => c.Meetings)
+                .HasForeignKey(x => x.ChannelId)
                 .OnDelete(DeleteBehavior.NoAction);
         }
 

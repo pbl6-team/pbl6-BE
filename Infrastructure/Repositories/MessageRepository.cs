@@ -69,12 +69,12 @@ namespace PBL6.Infrastructure.Repositories
         {
             return await _apiDbContext.Messages
                 .Include(x => x.Sender)
-                .ThenInclude(x => x.Information)
+                    .ThenInclude(x => x.Information)
                 .Include(x => x.Children)
-                .ThenInclude(x => x.Sender)
-                .ThenInclude(x => x.Information)
+                    .ThenInclude(x => x.Sender)
+                        .ThenInclude(x => x.Information)
                 .Include(x => x.ToChannel)
-                .ThenInclude(x => x.ChannelMembers)
+                    .ThenInclude(x => x.ChannelMembers)
                 .Include(x => x.MessageTrackings)
                 .Include(x => x.Files)
                 .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);

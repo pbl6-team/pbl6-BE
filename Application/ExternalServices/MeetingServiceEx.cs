@@ -5,20 +5,31 @@ using PBL6.Application.Contract.ExternalServices.Meetings.Dtos;
 
 namespace PBL6.Application.ExternalServices
 {
-    public interface IMeetingService
+    public interface IMeetingServiceEx
     {
         Task<string> CreateSession(Session session);
         Task<string> CreateToken(string sessionId);
+        Task CloseSession(string sessionId);
     }
 
-    public class    MeetingService : IMeetingService
+    public class MeetingServiceEx : IMeetingServiceEx
     {
         private readonly IHttpClientFactory _clientFactory;
 
-        public MeetingService(IHttpClientFactory clientFactory)
+        public MeetingServiceEx(IHttpClientFactory clientFactory)
         {
             _clientFactory =
                 clientFactory ?? throw new ArgumentNullException(nameof(clientFactory));
+        }
+
+        public async Task CloseSession(string sessionId)
+        {
+            var client = _clientFactory.CreateClient("Meeting");
+            var response = await client.DeleteAsync(
+                "openvidu/api/sessions/" + sessionId.Trim('"')
+            );
+            response.EnsureSuccessStatusCode();
+            return;
         }
 
         public async Task<string> CreateSession(Session session)

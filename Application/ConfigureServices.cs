@@ -17,6 +17,7 @@ using PBL6.Application.ExternalServices;
 using Application.Contract.Admins;
 using Application.Services.Admins;
 using Application.Contract.Dashboard;
+using PBL6.Application.Contract.Meetings.Dtos;
 
 namespace PBL6.Application
 {
@@ -37,11 +38,13 @@ namespace PBL6.Application
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IAdminService, AdminService>();
             services.AddScoped<IDashboardService, DashboardService>();
+            services.AddScoped<IMeetingService, MeetingService>();
 
             services.AddScoped<IExternalNotificationService, ExternalNotificationService>();
             services.AddTransient<IMailService, MailService>();
             services.AddTransient<IFileService, FileService>();
-            services.AddTransient<IMeetingService, MeetingService>();
+            services.AddTransient<IMeetingServiceEx, MeetingServiceEx>();
+            services.AddTransient<IHubService, HubService>();
 
             return services;
         }

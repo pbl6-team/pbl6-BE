@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
+using PBL6.Application.Contract.Chats.Dtos;
 using PBL6.Application.Hubs;
 
 namespace PBL6.Application.Services
@@ -10,6 +11,7 @@ namespace PBL6.Application.Services
         Task SendAsync(IEnumerable<string> connectionIds, string method, object arg1);
         Task RemoveUsersFromChannelHub(Guid channelId, List<Guid> userIds);
         Task AddUsersToChannelHub(Guid channelId, List<Guid> userIds);
+        Task SendMessage(MessageDto message);
     }
 
     public class HubService : IHubService
@@ -71,6 +73,33 @@ namespace PBL6.Application.Services
 
                     await SendAsync(connectionIds, ChatHub.ADD_USER_TO_CHANNEL, channelId);
                 }
+            }
+        }
+
+        public async Task SendMessage(MessageDto message)
+        {
+            try
+            {
+                if (message.IsChannel)
+                {
+                    await _chatHub.Clients
+                        .Group(message.ReceiverId.ToString())
+                        .SendAsync(ChatHub.RECEIVE_MESSAGE, message);
+                }
+                else
+                {
+                    var connectionIds = await ChatHub.GetConnectionsByUserId(message.ReceiverId);
+                    if (connectionIds is not null)
+                    {
+                        await _chatHub.Clients
+                            .Clients(connectionIds.ToList())
+                            .SendAsync(ChatHub.RECEIVE_MESSAGE, message);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
         }
     }
