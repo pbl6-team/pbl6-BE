@@ -86,7 +86,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ChannelDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
-        [ChannelFilter]
+        [WorkspaceFilter]
         public async Task<IActionResult> GetAllChannelsOfAWorkspace([FromRoute] Guid workspaceId)
         {
             return Ok(await _channelService.GetAllChannelsOfAWorkspaceAsync(workspaceId));

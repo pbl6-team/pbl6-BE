@@ -18,7 +18,7 @@ public class DashboardController : ControllerBase
 
     /// <summary>
     /// API Get total number of users - cần đăng nhập
-    /// status = 1 - Active, 2 - Block
+    /// status = 0 - Get all, 1 - Active, 2 - Block
     /// </summary>
     /// <returns></returns>
     /// <response code="200">Get thành công</response>
@@ -35,7 +35,7 @@ public class DashboardController : ControllerBase
 
     /// <summary>
     /// API Get total number of workspace - cần đăng nhập
-    /// status = 1 - Active, 2 - Suspended
+    /// status = 0 - Get all, 1 - Active, 2 - Suspended
     /// </summary>
     /// <returns></returns>
     /// <response code="200">Get thành công</response>

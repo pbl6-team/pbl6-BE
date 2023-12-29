@@ -30,15 +30,22 @@ public class DashboardService : BaseService, IDashboardService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            
-            var numberOfUsers = await _unitOfWork.Users.Queryable()
-                                .Include(x => x.Information)
-                                .Where(x => x.Information.Status == status)
+            int numberOfUsers;
+            if (status == 0)
+            {
+                numberOfUsers = await _unitOfWork.Users.Queryable()
                                 .CountAsync();
-
+            }
+            else
+            {
+                numberOfUsers = await _unitOfWork.Users.Queryable()
+                                    .Include(x => x.Information)
+                                    .Where(x => x.Information.Status == status)
+                                    .CountAsync();
+            }
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return numberOfUsers;
-        }   
+        }
         catch (Exception e)
         {
             _logger.LogInformation(
@@ -59,14 +66,21 @@ public class DashboardService : BaseService, IDashboardService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            
-            var numberOfWorkspaces = await _unitOfWork.Workspaces.Queryable()
-                                .Where(x => x.Status == status)
+            int numberOfWorkspaces;
+            if (status == 0)
+            {
+                numberOfWorkspaces = await _unitOfWork.Workspaces.Queryable()
                                 .CountAsync();
-
+            }
+            else
+            {
+                numberOfWorkspaces = await _unitOfWork.Workspaces.Queryable()
+                                    .Where(x => x.Status == status)
+                                    .CountAsync();
+            }
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return numberOfWorkspaces;
-        }   
+        }
         catch (Exception e)
         {
             _logger.LogInformation(
