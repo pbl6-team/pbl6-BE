@@ -83,7 +83,7 @@ public class AdminService : BaseService, IAdminService
         return newAccount.Id;
     }
 
-    public async Task<PagedResult<AdminDto>> GetAllAsync(int pageSize, int pageNumber)
+    public async Task<PagedResult<AdminDto>> GetAllAsync(int pageSize, int pageNumber, short status)
     {
         var method = GetActualAsyncMethodName();
 
@@ -92,12 +92,24 @@ public class AdminService : BaseService, IAdminService
         {
             throw new BadRequestException("Page number is not valid");
         }
-        
-        var admins = await _unitOfWork.Admins.Queryable()
+        List<AdminAccount> admins;
+        if (status == 0)
+        {
+            admins = await _unitOfWork.Admins.Queryable()
                                        .Include(a => a.Information)
                                         .Skip((pageNumber - 1) * pageSize)
                                         .Take(pageSize)
                                        .ToListAsync();
+        }
+        else 
+        {
+            admins = await _unitOfWork.Admins.Queryable()
+                                       .Include(a => a.Information)
+                                       .Where(a => a.Information.Status == status)
+                                        .Skip((pageNumber - 1) * pageSize)
+                                        .Take(pageSize)
+                                       .ToListAsync();
+        }
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
         
         return new PagedResult<AdminDto>
@@ -121,7 +133,7 @@ public class AdminService : BaseService, IAdminService
         return _mapper.Map<AdminDetailDto>(admin);
     }
 
-    public async Task<IEnumerable<AdminDto>> SearchAsync(short searchType, string searchValue, int numberOfResults)
+    public async Task<IEnumerable<AdminDto>> SearchAsync(string searchValue, int numberOfResults)
     {
         var method = GetActualAsyncMethodName();
 
@@ -130,15 +142,12 @@ public class AdminService : BaseService, IAdminService
                                        .Include(a => a.Information)
                                        .ToListAsync();
         searchValue = searchValue.ToUpper();
-        admins = searchType switch
-        {
-            (short)ADMIN_SEARCH_TYPE.USERNAME => admins.Where(a => a.Username.ToUpper().Contains(searchValue)).ToList(),
-            (short)ADMIN_SEARCH_TYPE.FULLNAME => admins.Where(a => (a.Information.FirstName + " " + a.Information.LastName).ToUpper().Contains(searchValue)).ToList(),
-            (short)ADMIN_SEARCH_TYPE.EMAIL => admins.Where(a => a.Email.ToUpper().Contains(searchValue)).ToList(),
-            (short)ADMIN_SEARCH_TYPE.PHONE => admins.Where(a => a.Information.Phone.Contains(searchValue)).ToList(),
-            (short)ADMIN_SEARCH_TYPE.STATUS => admins.Where(a => a.Information.Status == short.Parse(searchValue)).ToList(),
-            _ => throw new BadRequestException("Search type is not valid"),
-        };
+        admins = admins.Where(a => a.Username.ToUpper().Contains(searchValue)
+                                   || a.Username.ToUpper().Contains(searchValue)
+                                   || (a.Information.FirstName + " " + a.Information.LastName).ToUpper().Contains(searchValue)
+                                   || a.Email.ToUpper().Contains(searchValue)
+                                   || (a.Information.Phone is not null && a.Information.Phone.Contains(searchValue))
+                                   ).ToList();
         admins = admins.Take(numberOfResults).ToList();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
         return _mapper.Map<IEnumerable<AdminDto>>(admins);

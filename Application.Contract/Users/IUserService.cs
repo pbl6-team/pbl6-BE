@@ -11,10 +11,10 @@ namespace PBL6.Application.Contract.Users
         Task<UserDetailDto> GetByIdAsync(Guid userId);
         Task<Guid> UpdateAsync(Guid userId, UpdateUserDto updateUserDto);
         Task<Guid> UpdateAvatarAsync(Guid userId, UpdateUserPictureDto updateUserPictureDto);
-        Task<PagedResult<AdminUserDto>> GetAllAsync(int pageSize, int pageNumber);
+        Task<PagedResult<AdminUserDto>> GetAllAsync(int pageSize, int pageNumber, short status);
         Task<Guid> UpdateUserStatusAsync(Guid userId, short status);
         Task<AdminUserDto> GetByIdForAdminAsync(Guid userId);
-        Task<IEnumerable<AdminUserDto>> SearchUserForAdminAsync(short searchType, string searchValue, int numberOfResults);
+        Task<IEnumerable<AdminUserDto>> SearchUserForAdminAsync(string searchValue, int numberOfResults);
 
     }
 }
