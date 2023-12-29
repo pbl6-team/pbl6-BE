@@ -28,8 +28,8 @@ namespace PBL6.Application.Contract.Channels
         Task<IEnumerable<UserDetailDto>> GetMembersWithoutRoleAsync(Guid channelId);
         Task<IEnumerable<UserNotInChannelDto>> GetMembersThatNotInTheChannel(Guid workspaceId, Guid channelId);
         Task<IEnumerable<ChannelUserDto>> GetMembersAsync(Guid channelId, short status = 1);
-        Task AcceptInvitationAsync(Guid channelId);
-        Task DeclineInvitationAsync(Guid channelId);
+        // Task AcceptInvitationAsync(Guid channelId);
+        // Task DeclineInvitationAsync(Guid channelId);
         Task<Guid> LeaveChannelAsync(Guid channelId);
         Task<Guid> TransferOwnershipAsync(Guid channelId, Guid userId);
 

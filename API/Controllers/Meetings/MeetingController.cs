@@ -4,6 +4,7 @@ using PBL6.Application.Contract.ExternalServices.Meetings.Dtos;
 using PBL6.Application.Contract.Meetings.Dtos;
 using PBL6.Application.ExternalServices;
 using PBL6.Application.Services;
+using Microsoft.AspNetCore.Http;
 
 namespace PBL6.API.Controllers.Messages;
 
@@ -63,6 +64,8 @@ public class MeetingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
     [HttpPost("createMeeting")]
     [AuthorizeFilter]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesDefaultResponseType]
     public async Task<IActionResult> CreateMeetingAsync([FromBody] CreateMeetingDto meeting)
     {
         var meetingDto = await _meetingService.CreateMeetingAsync(meeting);

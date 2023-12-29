@@ -412,41 +412,41 @@ namespace PBL6.API.Controllers.Channels
             return Ok(await _channelService.GetMembersAsync(channelId, status));
         }
 
-        /// <summary>
-        /// Accept invitation - cần đăng nhập
-        /// </summary>
-        /// <param name="channelId"></param>
-        /// <returns></returns>
-        /// <response code="200">Accept thành công</response>
-        /// <response code="400">Có lỗi xảy ra</response>
-        [HttpPost("{channelId}/accept-invitation")]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [AuthorizeFilter]
-        [ChannelFilter]
-        public async Task<IActionResult> AcceptInvitation([FromRoute] Guid channelId)
-        {
-            await _channelService.AcceptInvitationAsync(channelId);
-            return NoContent();
-        }
+        // /// <summary>
+        // /// Accept invitation - cần đăng nhập
+        // /// </summary>
+        // /// <param name="channelId"></param>
+        // /// <returns></returns>
+        // /// <response code="200">Accept thành công</response>
+        // /// <response code="400">Có lỗi xảy ra</response>
+        // [HttpPost("{channelId}/accept-invitation")]
+        // [ProducesResponseType(StatusCodes.Status404NotFound)]
+        // [ProducesResponseType(StatusCodes.Status204NoContent)]
+        // [AuthorizeFilter]
+        // [ChannelFilter]
+        // public async Task<IActionResult> AcceptInvitation([FromRoute] Guid channelId)
+        // {
+        //     await _channelService.AcceptInvitationAsync(channelId);
+        //     return NoContent();
+        // }
 
-        /// <summary>
-        /// Decline invitation - cần đăng nhập
-        /// </summary>
-        /// <param name="channelId"></param>
-        /// <returns></returns>
-        /// <response code="200">Decline thành công</response>
-        /// <response code="400">Có lỗi xảy ra</response>
-        [HttpPost("{channelId}/decline-invitation")]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [AuthorizeFilter]
-        [ChannelFilter]
-        public async Task<IActionResult> DeclineInvitation([FromRoute] Guid channelId)
-        {
-            await _channelService.DeclineInvitationAsync(channelId);
-            return NoContent();
-        }
+        // /// <summary>
+        // /// Decline invitation - cần đăng nhập
+        // /// </summary>
+        // /// <param name="channelId"></param>
+        // /// <returns></returns>
+        // /// <response code="200">Decline thành công</response>
+        // /// <response code="400">Có lỗi xảy ra</response>
+        // [HttpPost("{channelId}/decline-invitation")]
+        // [ProducesResponseType(StatusCodes.Status404NotFound)]
+        // [ProducesResponseType(StatusCodes.Status204NoContent)]
+        // [AuthorizeFilter]
+        // [ChannelFilter]
+        // public async Task<IActionResult> DeclineInvitation([FromRoute] Guid channelId)
+        // {
+        //     await _channelService.DeclineInvitationAsync(channelId);
+        //     return NoContent();
+        // }
 
         /// <summary>
         /// Leave channel - cần đăng nhập

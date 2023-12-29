@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PBL6.Common;
+using PBL6.Common.Enum;
 using PBL6.Common.Functions;
 using PBL6.Domain.Models.Admins;
 using PBL6.Domain.Models.Common;
@@ -213,6 +214,10 @@ namespace PBL6.Infrastructure.Data
                 .WithMany(c => c.Meetings)
                 .HasForeignKey(x => x.ChannelId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Message>()
+                .Property(x => x.Type)
+                .HasDefaultValue(MESSAGE_TYPE.DEFAULT);
         }
 
         public override int SaveChanges()

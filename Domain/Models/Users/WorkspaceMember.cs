@@ -26,5 +26,7 @@ namespace PBL6.Domain.Models.Users
         public Guid? RoleId { get; set; }
         
         public WorkspaceRole WorkspaceRole { get; set; }
+
+        public DateTimeOffset InvitationTimeOut { get; set; }
     }
 }
