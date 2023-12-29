@@ -46,6 +46,15 @@ namespace PBL6.Application.Services
                     .Repository<Call>()
                     .Queryable()
                     .Any(x => x.SessionId == input.SessionId);
+            if (string.IsNullOrEmpty(input.SessionId))
+            {
+                input.SessionId = CommonFunctions.GenerateRandomCode(10);
+            }
+            if (string.IsNullOrEmpty(input.Password))
+            {
+                input.Password = CommonFunctions.GenerateRandomPassword(10);
+            }
+
             if (isExistSession)
             {
                 throw new BadRequestException("SessionId is already exist");
@@ -87,10 +96,6 @@ namespace PBL6.Application.Services
                         x.ChannelMembers.Where(x => x.Status == (short)CHANNEL_MEMBER_STATUS.ACTIVE)
                 )
                 .FirstOrDefault(x => x.Id == input.ChannelId);
-            if (string.IsNullOrEmpty(input.SessionId))
-            {
-                input.SessionId = CommonFunctions.GenerateRandomCode(10);
-            }
 
             var meeting = new Meeting
             {

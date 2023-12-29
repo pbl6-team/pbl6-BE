@@ -100,6 +100,7 @@ public class ChannelService : BaseService, IChannelService
         try
         {
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var transaction = await _unitOfWork.BeginTransactionAsync();
             var channel = await _unitOfWork.Channels
                 .GetChannelsWithMembers()
                 .Where(x => x.Id == channelId)
@@ -168,8 +169,8 @@ public class ChannelService : BaseService, IChannelService
                     );
                 }
 
-                var user = await _unitOfWork.Users.FindAsync(userId);
-                if (user is null)
+                var user = await _unitOfWork.Users.CheckIsUserAsync(userId);
+                if (!user)
                 {
                     throw new NotFoundException<User>(userId.ToString());
                 }
@@ -215,6 +216,7 @@ public class ChannelService : BaseService, IChannelService
             }
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
+            await transaction.CommitAsync();
 
             return channelId;
         }
@@ -990,56 +992,56 @@ public class ChannelService : BaseService, IChannelService
         return _mapper.Map<IEnumerable<ChannelUserDto>>(members);
     }
 
-    public async Task AcceptInvitationAsync(Guid channelId)
-    {
-        var method = GetActualAsyncMethodName();
-        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-        var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
-        var isInvited = await _unitOfWork.Channels.CheckIsInvitedAsync(channelId, userId);
-        if (!isInvited)
-        {
-            throw new BadRequestException("Invitation is expired or you already accepted it");
-        }
-        var member = await _unitOfWork.Channels.GetMemberByUserId(channelId, userId);
-        member.Status = (short)CHANNEL_MEMBER_STATUS.ACTIVE;
-        await _unitOfWork.ChannelMembers.UpdateAsync(member);
-        await _unitOfWork.SaveChangeAsync();
+    // public async Task AcceptInvitationAsync(Guid channelId)
+    // {
+    //     var method = GetActualAsyncMethodName();
+    //     _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+    //     var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
+    //     var isInvited = await _unitOfWork.Channels.CheckIsInvitedAsync(channelId, userId);
+    //     if (!isInvited)
+    //     {
+    //         throw new BadRequestException("Invitation is expired or you already accepted it");
+    //     }
+    //     var member = await _unitOfWork.Channels.GetMemberByUserId(channelId, userId);
+    //     member.Status = (short)CHANNEL_MEMBER_STATUS.ACTIVE;
+    //     await _unitOfWork.ChannelMembers.UpdateAsync(member);
+    //     await _unitOfWork.SaveChangeAsync();
 
-        try
-        {
-            _backgroundJobClient.Enqueue(
-                () => _hubService.AddUsersToChannelHub(channelId, new List<Guid> { userId })
-            );
-        }
-        catch (Exception e)
-        {
-            _logger.LogInformation(
-                "[{_className}][{method}] Error: {message}",
-                _className,
-                method,
-                e.Message
-            );
-        }
+    //     try
+    //     {
+    //         _backgroundJobClient.Enqueue(
+    //             () => _hubService.AddUsersToChannelHub(channelId, new List<Guid> { userId })
+    //         );
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         _logger.LogInformation(
+    //             "[{_className}][{method}] Error: {message}",
+    //             _className,
+    //             method,
+    //             e.Message
+    //         );
+    //     }
 
-        _logger.LogInformation("[{_className}][{method}] End", _className, method);
-    }
+    //     _logger.LogInformation("[{_className}][{method}] End", _className, method);
+    // }
 
-    public async Task DeclineInvitationAsync(Guid channelId)
-    {
-        var method = GetActualAsyncMethodName();
-        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-        var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
-        var isInvited = await _unitOfWork.Channels.CheckIsInvitedAsync(channelId, userId);
-        if (!isInvited)
-        {
-            throw new BadRequestException("Invitation is expired or you already accepted it");
-        }
-        var member = await _unitOfWork.Channels.GetMemberByUserId(channelId, userId);
-        await _unitOfWork.ChannelMembers.DeleteAsync(member);
-        await _unitOfWork.SaveChangeAsync();
+    // public async Task DeclineInvitationAsync(Guid channelId)
+    // {
+    //     var method = GetActualAsyncMethodName();
+    //     _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+    //     var userId = Guid.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException());
+    //     var isInvited = await _unitOfWork.Channels.CheckIsInvitedAsync(channelId, userId);
+    //     if (!isInvited)
+    //     {
+    //         throw new BadRequestException("Invitation is expired or you already accepted it");
+    //     }
+    //     var member = await _unitOfWork.Channels.GetMemberByUserId(channelId, userId);
+    //     await _unitOfWork.ChannelMembers.DeleteAsync(member);
+    //     await _unitOfWork.SaveChangeAsync();
 
-        _logger.LogInformation("[{_className}][{method}] End", _className, method);
-    }
+    //     _logger.LogInformation("[{_className}][{method}] End", _className, method);
+    // }
 
     public async Task<Guid> LeaveChannelAsync(Guid channelId)
     {

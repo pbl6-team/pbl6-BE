@@ -44,9 +44,8 @@ namespace PBL6.Application.Services
 
                 if (workspaceDto.Avatar is not null)
                 {
-                    var filename = workspace.Id.ToString() + Path.GetExtension(
-                        workspaceDto.Avatar.FileName
-                    );
+                    var filename =
+                        workspace.Id.ToString() + Path.GetExtension(workspaceDto.Avatar.FileName);
                     workspace.AvatarUrl = await _fileService.UploadFileGetUrlAsync(
                         filename,
                         workspaceDto.Avatar.OpenReadStream(),
@@ -110,8 +109,9 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                var workspace = await _unitOfWork.Workspaces
-                    .GetAsync(workspaceId) ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
+                var workspace =
+                    await _unitOfWork.Workspaces.GetAsync(workspaceId)
+                    ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
 
                 var currentUserId = Guid.Parse(
                     _currentUser.UserId ?? throw new UnauthorizedAccessException()
@@ -148,8 +148,7 @@ namespace PBL6.Application.Services
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-                var workspaces = await _unitOfWork.Workspaces
-                    .GetWorkspaces().ToListAsync();
+                var workspaces = await _unitOfWork.Workspaces.GetWorkspaces().ToListAsync();
 
                 var userId = Guid.Parse(
                     _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
@@ -290,7 +289,9 @@ namespace PBL6.Application.Services
                 var userId = Guid.Parse(
                     _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
                 );
-                var workspace = await _unitOfWork.Workspaces.GetAsync(workspaceId) ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
+                var workspace =
+                    await _unitOfWork.Workspaces.GetAsync(workspaceId)
+                    ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
                 if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, userId))
                     throw new ForbidException();
 
@@ -328,16 +329,18 @@ namespace PBL6.Application.Services
                 var userId = Guid.Parse(
                     _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
                 );
-                var workspace = await _unitOfWork.Workspaces.GetAsync(workspaceId) ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
+                var workspace =
+                    await _unitOfWork.Workspaces.GetAsync(workspaceId)
+                    ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
 
                 if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, userId))
                     throw new ForbidException();
 
                 if (updateAvatarWorkspaceDto.Avatar is not null)
                 {
-                    var filename = workspace.Id.ToString() + Path.GetExtension(
-                        updateAvatarWorkspaceDto.Avatar.FileName
-                    );
+                    var filename =
+                        workspace.Id.ToString()
+                        + Path.GetExtension(updateAvatarWorkspaceDto.Avatar.FileName);
                     workspace.AvatarUrl = await _fileService.UploadFileGetUrlAsync(
                         filename,
                         updateAvatarWorkspaceDto.Avatar.OpenReadStream(),
@@ -376,7 +379,9 @@ namespace PBL6.Application.Services
                     _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
                 );
                 var currentUser = await _unitOfWork.Users.GetUserByIdAsync(currentUserId);
-                var workspace = await _unitOfWork.Workspaces.GetAsync(workspaceId) ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
+                var workspace =
+                    await _unitOfWork.Workspaces.GetAsync(workspaceId)
+                    ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
                 if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, currentUserId))
                 {
                     throw new ForbidException();
@@ -404,7 +409,9 @@ namespace PBL6.Application.Services
                                         InviterName =
                                             $"{currentUser.Information.FirstName} {currentUser.Information.LastName}",
                                         InviterAvatar = currentUser.Information.Picture,
-                                        GroupAvatar = workspace.AvatarUrl ?? CommonConsts.DEFAULT_WORKSPACE_AVATAR,
+                                        GroupAvatar =
+                                            workspace.AvatarUrl
+                                            ?? CommonConsts.DEFAULT_WORKSPACE_AVATAR,
                                     }
                                 )
                             },
@@ -416,7 +423,7 @@ namespace PBL6.Application.Services
                 workspace.Members ??= new List<WorkspaceMember>();
                 foreach (var email in emails)
                 {
-                    var user = await _unitOfWork.Users.GetUserByEmailAsync(email);
+                    var user = await _unitOfWork.Users.GetActiveUserByEmailAsync(email);
                     if (user is null)
                     {
                         await InviteNewUserToWorkspaceAsync(workspaceId, email);
@@ -428,7 +435,10 @@ namespace PBL6.Application.Services
                     );
                     if (member is not null)
                     {
-                        if (member.Status == (short)WORKSPACE_MEMBER_STATUS.INVITED || member.Status == (short)WORKSPACE_MEMBER_STATUS.ACTIVE)
+                        if (
+                            member.Status == (short)WORKSPACE_MEMBER_STATUS.INVITED
+                            || member.Status == (short)WORKSPACE_MEMBER_STATUS.ACTIVE
+                        )
                         {
                             continue;
                         }
@@ -437,7 +447,12 @@ namespace PBL6.Application.Services
                     }
 
                     workspace.Members.Add(
-                        new WorkspaceMember { UserId = user.Id, AddBy = currentUserId, Status = (short)WORKSPACE_MEMBER_STATUS.INVITED }
+                        new WorkspaceMember
+                        {
+                            UserId = user.Id,
+                            AddBy = currentUserId,
+                            Status = (short)WORKSPACE_MEMBER_STATUS.INVITED
+                        }
                     );
                     notification.UserNotifications.Add(
                         new UserNotification
@@ -500,7 +515,8 @@ namespace PBL6.Application.Services
                 var currentUser = await _unitOfWork.Users.GetUserByIdAsync(currentUserId);
 
                 var workspace =
-                    await _unitOfWork.Workspaces.GetAsync(workspaceId) ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
+                    await _unitOfWork.Workspaces.GetAsync(workspaceId)
+                    ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
                 if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, currentUserId))
                 {
                     throw new ForbidException();
@@ -529,7 +545,9 @@ namespace PBL6.Application.Services
                                         RemoverName =
                                             $"{currentUser.Information.FirstName} {currentUser.Information.LastName}",
                                         RemoverAvatar = currentUser.Information.Picture,
-                                        GroupAvatar = workspace.AvatarUrl ?? CommonConsts.DEFAULT_WORKSPACE_AVATAR,
+                                        GroupAvatar =
+                                            workspace.AvatarUrl
+                                            ?? CommonConsts.DEFAULT_WORKSPACE_AVATAR,
                                     }
                                 )
                             },
@@ -957,7 +975,10 @@ namespace PBL6.Application.Services
             return _mapper.Map<IEnumerable<UserDetailDto>>(members.Select(x => x.User));
         }
 
-        public async Task<IEnumerable<WorkspaceUserDto>> GetMembersAsync(Guid workspaceId, short status = (short)WORKSPACE_MEMBER_STATUS.ACTIVE)
+        public async Task<IEnumerable<WorkspaceUserDto>> GetMembersAsync(
+            Guid workspaceId,
+            short status = (short)WORKSPACE_MEMBER_STATUS.ACTIVE
+        )
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
@@ -992,7 +1013,11 @@ namespace PBL6.Application.Services
             return _mapper.Map<IEnumerable<WorkspaceUserDto>>(members);
         }
 
-        public async Task<PagedResult<AdminWorkspaceDto>> GetAllForAdminAsync(int pageSize, int pageNumber, short status)
+        public async Task<PagedResult<AdminWorkspaceDto>> GetAllForAdminAsync(
+            int pageSize,
+            int pageNumber,
+            short status
+        )
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
@@ -1028,7 +1053,10 @@ namespace PBL6.Application.Services
             {
                 PageSize = pageSize,
                 CurrentPage = pageNumber,
-                TotalPages = (int)Math.Ceiling((double)await _unitOfWork.Workspaces.Queryable().CountAsync() / pageSize),
+                TotalPages = (int)
+                    Math.Ceiling(
+                        (double)await _unitOfWork.Workspaces.Queryable().CountAsync() / pageSize
+                    ),
                 Items = _mapper.Map<IEnumerable<AdminWorkspaceDto>>(workspaces)
             };
         }
@@ -1040,28 +1068,36 @@ namespace PBL6.Application.Services
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
 
-                var workspace = await _unitOfWork.Workspaces.Queryable().Include(x => x.Owner)
+                var workspace = await _unitOfWork.Workspaces
+                    .Queryable()
+                    .Include(x => x.Owner)
                     .FirstOrDefaultAsync(x => x.Id == workspaceId);
 
                 switch (status)
                 {
                     case (short)WORKSPACE_STATUS.SUSPENDED:
                         workspace.Status = (short)WORKSPACE_STATUS.SUSPENDED;
-                        _backgroundJobClient.Enqueue(() => _mailService.Send(
-                        workspace.Owner.Email,
-                        MailConst.WorkspaceSuspended.Subject,
-                        MailConst.WorkspaceSuspended.Template,
-                        workspace.Name
-                    ));
+                        _backgroundJobClient.Enqueue(
+                            () =>
+                                _mailService.Send(
+                                    workspace.Owner.Email,
+                                    MailConst.WorkspaceSuspended.Subject,
+                                    MailConst.WorkspaceSuspended.Template,
+                                    workspace.Name
+                                )
+                        );
                         break;
                     case (short)WORKSPACE_STATUS.ACTIVE:
                         workspace.Status = (short)WORKSPACE_STATUS.ACTIVE;
-                        _backgroundJobClient.Enqueue(() => _mailService.Send(
-                        workspace.Owner.Email,
-                        MailConst.WorkspaceReactivated.Subject,
-                        MailConst.WorkspaceReactivated.Template,
-                        workspace.Name
-                    ));
+                        _backgroundJobClient.Enqueue(
+                            () =>
+                                _mailService.Send(
+                                    workspace.Owner.Email,
+                                    MailConst.WorkspaceReactivated.Subject,
+                                    MailConst.WorkspaceReactivated.Template,
+                                    workspace.Name
+                                )
+                        );
                         break;
                     default:
                         throw new BadRequestException("Status is not valid");
@@ -1082,7 +1118,6 @@ namespace PBL6.Application.Services
                 );
                 throw;
             }
-
         }
 
         public async Task AcceptInvitationAsync(Guid workspaceId)
@@ -1099,7 +1134,11 @@ namespace PBL6.Application.Services
 
             var channel = await _unitOfWork.Channels
                 .GetChannelsWithMembers()
-                .Where(x => x.WorkspaceId == workspaceId && x.Category == (short)CHANNEL_CATEGORY.DEFAULT)
+                .Where(
+                    x =>
+                        x.WorkspaceId == workspaceId
+                        && x.Category == (short)CHANNEL_CATEGORY.DEFAULT
+                )
                 .FirstOrDefaultAsync();
             if (channel is null)
             {
@@ -1145,24 +1184,51 @@ namespace PBL6.Application.Services
                 var currentUserId = Guid.Parse(
                     _currentUser.UserId ?? throw new UnauthorizedAccessException()
                 );
+                User newUser =
+                    await _unitOfWork.Users.GetAllUserByEmailAsync(email)
+                    ?? new()
+                    {
+                        Email = email,
+                        Username = email,
+                        Information = new() { FirstName = "Unregistered", LastName = "User" },
+                        IsActive = false,
+                    };
+                if (!workspace.Members.Any(x => x.UserId == newUser.Id))
+                {
+                    workspace.Members.Add(
+                        new WorkspaceMember
+                        {
+                            User = newUser,
+                            AddBy = currentUserId,
+                            Status = (short)WORKSPACE_MEMBER_STATUS.INVITED,
+                            InvitationTimeOut = DateTime.UtcNow.AddDays(7)
+                        }
+                    );
+                }
+
+                await _unitOfWork.Workspaces.UpdateAsync(workspace);
+                await _unitOfWork.SaveChangeAsync();
 
                 var mailData = new MailData
                 {
                     JsonData = JsonConvert.SerializeObject(
-                                    new InvitedToNewGroup
-                                    {
-                                        GroupId = workspace.Id,
-                                        GroupName = workspace.Name,
-                                        InviterId = currentUserId,
-                                        InviterName = currentUserId.ToString(),
-                                        InviterAvatar = string.Empty,
-                                        GroupAvatar = workspace.AvatarUrl ?? CommonConsts.DEFAULT_WORKSPACE_AVATAR,
-                                    }
-                                )
+                        new InvitedToNewGroup
+                        {
+                            GroupId = workspace.Id,
+                            GroupName = workspace.Name,
+                            InviterId = currentUserId,
+                            InviterName = currentUserId.ToString(),
+                            InviterAvatar = string.Empty,
+                            GroupAvatar =
+                                workspace.AvatarUrl ?? CommonConsts.DEFAULT_WORKSPACE_AVATAR,
+                            Email = email
+                        }
+                    )
                 };
 
                 _backgroundJobClient.Enqueue(
-                    () => _mailService.Send(
+                    () =>
+                        _mailService.Send(
                             email,
                             "You have been invited to join a workspace",
                             MailConst.InviteToWorkspace.Template,
@@ -1174,7 +1240,10 @@ namespace PBL6.Application.Services
                                     InviterId = currentUserId,
                                     InviterName = currentUserId.ToString(),
                                     InviterAvatar = string.Empty,
-                                    GroupAvatar = workspace.AvatarUrl ?? CommonConsts.DEFAULT_WORKSPACE_AVATAR,
+                                    GroupAvatar =
+                                        workspace.AvatarUrl
+                                        ?? CommonConsts.DEFAULT_WORKSPACE_AVATAR,
+                                    Email = email
                                 }
                             )
                         )
@@ -1218,7 +1287,9 @@ namespace PBL6.Application.Services
                     .ToListAsync();
                 foreach (var channel in channels)
                 {
-                    var channelMember = channel.ChannelMembers.FirstOrDefault(x => x.UserId == userId);
+                    var channelMember = channel.ChannelMembers.FirstOrDefault(
+                        x => x.UserId == userId
+                    );
                     if (channelMember is not null)
                     {
                         channelMember.Status = (short)CHANNEL_MEMBER_STATUS.REMOVED;
@@ -1299,7 +1370,10 @@ namespace PBL6.Application.Services
                 if (workspace.OwnerId == userId)
                     throw new BadRequestException("User is already owner");
 
-                var currentOwner = await _unitOfWork.Workspaces.GetMemberByUserId(workspaceId, currentUserId);
+                var currentOwner = await _unitOfWork.Workspaces.GetMemberByUserId(
+                    workspaceId,
+                    currentUserId
+                );
                 if (currentOwner is null)
                     throw new NotFoundException<WorkspaceMember>(currentUserId.ToString());
 
@@ -1324,24 +1398,45 @@ namespace PBL6.Application.Services
             }
         }
 
-        public async Task<IEnumerable<AdminWorkspaceDto>> SearchForAdminAsync(string searchValue, int numberOfResults, short status)
+        public async Task<IEnumerable<AdminWorkspaceDto>> SearchForAdminAsync(
+            string searchValue,
+            int numberOfResults,
+            short status
+        )
         {
-
             var method = GetActualAsyncMethodName();
 
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var workspaces = await _unitOfWork.Workspaces.Queryable().Include(x => x.Owner).ThenInclude(x => x.Information).ToListAsync();
+            var workspaces = await _unitOfWork.Workspaces
+                .Queryable()
+                .Include(x => x.Owner)
+                .ThenInclude(x => x.Information)
+                .ToListAsync();
             searchValue = searchValue.ToUpper();
             if (status == 0)
             {
-                workspaces = workspaces.Where(x => x.Name.ToUpper().Contains(searchValue)
-                                             || (x.Owner.Information.FirstName + " " + x.Owner.Information.LastName).ToUpper().Contains(searchValue)).ToList();
+                workspaces = workspaces
+                    .Where(
+                        x =>
+                            x.Name.ToUpper().Contains(searchValue)
+                            || (x.Owner.Information.FirstName + " " + x.Owner.Information.LastName)
+                                .ToUpper()
+                                .Contains(searchValue)
+                    )
+                    .ToList();
             }
             else
             {
-                workspaces = workspaces.Where(x => x.Name.ToUpper().Contains(searchValue)
-                                             || (x.Owner.Information.FirstName + " " + x.Owner.Information.LastName).ToUpper().Contains(searchValue)
-                                             && x.Status == status).ToList();
+                workspaces = workspaces
+                    .Where(
+                        x =>
+                            x.Name.ToUpper().Contains(searchValue)
+                            || (x.Owner.Information.FirstName + " " + x.Owner.Information.LastName)
+                                .ToUpper()
+                                .Contains(searchValue)
+                                && x.Status == status
+                    )
+                    .ToList();
             }
             workspaces = workspaces.Take(numberOfResults).ToList();
             _logger.LogInformation("[{_className}][{method}] End", _className, method);

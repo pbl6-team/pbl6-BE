@@ -6,6 +6,7 @@ namespace PBL6.Domain.Data.Users
     {
         Task<bool> CheckIsUserAsync(Guid userId);
         Task<User> GetUserByIdAsync(Guid userId);
-        Task<User> GetUserByEmailAsync(string email);
+        Task<User> GetActiveUserByEmailAsync(string email);
+        Task<User> GetAllUserByEmailAsync(string email);
     }
 }

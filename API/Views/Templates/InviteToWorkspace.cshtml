@@ -1,8 +1,9 @@
-@* @model MailData
+@model MailData
 @{
     InvitedToNewGroup data = Newtonsoft.Json.JsonConvert.DeserializeObject<InvitedToNewGroup>(Model.JsonData);
 }
 @using PBL6.Application.Contract.ExternalServices.Notifications.Dtos;
+@using PBL6.Application.Contract.ExternalServices.Mails;
 
 <div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
   <div style="margin:50px auto;width:70%;padding:20px 0">
@@ -16,8 +17,9 @@
     <p style="font-size:1.1em">Invited by @data.InviterName</p>
     <p>If you don't have an account, please register at <a href="https://web.firar.live/signup">here</a> and join the group.</p>
     <p>
-        If you have an account, please login at <a href="https://web.firar.live/login">here</a> and join the group. 
+        If you have an account, please click  here to accept. 
     </p>
+    <a href="@($"https:////web.firar.live/acceptInvite?workspaceId={data.GroupId}&email={data.Email}")" style="background: #00466a; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none;">Accept</a>
     <p style="font-size:0.9em;">Regards,<br />FIRA Team</p>
     <hr style="border:none;border-top:1px solid #eee" />
     <div style="float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300">
@@ -26,4 +28,4 @@
       <p>Da Nang, Viet Nam</p>
     </div>
   </div>
-</div> *@
+</div>

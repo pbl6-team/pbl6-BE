@@ -13,5 +13,7 @@ namespace PBL6.Application.Contract.ExternalServices.Notifications.Dtos
         public string InviterName { get; set; }
 
         public string InviterAvatar { get; set; }
+
+        public string Email { get; set; }
     }
 }
