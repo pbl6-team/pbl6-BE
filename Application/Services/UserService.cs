@@ -217,7 +217,9 @@ public class UserService : BaseService, IUserService
 
             searchValue = searchValue.ToUpper();
 
-            users = users.Where(x => (x.Information.FirstName + " " + x.Information.LastName).ToUpper().Contains(searchValue) || x.Email.ToUpper().Contains(searchValue)).ToList();
+            users = users.Where(x => (x.Information.FirstName + " " + x.Information.LastName).ToUpper().Contains(searchValue)
+                                    || x.Email.ToUpper().Contains(searchValue)
+                                    || x.Information.Phone.ToUpper().Contains(searchValue)).ToList();
             users = users.Take(numberOfResults).ToList();
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
