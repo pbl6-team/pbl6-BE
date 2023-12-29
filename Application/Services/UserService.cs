@@ -204,7 +204,7 @@ public class UserService : BaseService, IUserService
         }
     }
 
-    public async Task<IEnumerable<UserDetailDto>> SearchUserAsync(string searchType, string searchValue, int numberOfResults)
+    public async Task<IEnumerable<UserDetailDto>> SearchUserAsync(string searchValue, int numberOfResults)
     {
         var method = GetActualAsyncMethodName();
         try
@@ -215,21 +215,9 @@ public class UserService : BaseService, IUserService
                                            .Where(x => !x.IsDeleted)
                                            .ToListAsync();
 
-            searchType = searchType.ToUpper();
             searchValue = searchValue.ToUpper();
 
-            switch (searchType)
-            {
-                case "EMAIL":
-                    users = users.Where(x => x.Email.ToUpper().Contains(searchValue)).ToList();
-                    break;
-                case "NAME":
-                    users = users.Where(x => (x.Information.LastName + " " + x.Information.FirstName).ToUpper().Contains(searchValue)).ToList();
-                    break;
-                default:
-                    throw new BadRequestException("Search type is not valid");
-            }
-
+            users = users.Where(x => (x.Information.FirstName + " " + x.Information.LastName).ToUpper().Contains(searchValue) || x.Email.ToUpper().Contains(searchValue)).ToList();
             users = users.Take(numberOfResults).ToList();
 
             _logger.LogInformation("[{_className}][{method}] End", _className, method);

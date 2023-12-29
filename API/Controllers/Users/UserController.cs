@@ -105,19 +105,18 @@ public class UserController : ControllerBase
     /// <summary>
     /// API Search user - cần đăng nhập
     /// </summary>
-    /// <param name="searchType"></param>
     /// <param name="searchValue"></param>
     /// <param name="numberOfResults"></param>
     /// <returns></returns>
     /// <response code="200">Get thành công</response>
     /// <response code="400">Có lỗi xảy ra</response>
-    [HttpGet("search/{searchType}/{searchValue}/{numberOfResults}")]
+    [HttpGet("search/{searchValue}/{numberOfResults}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDetailDto>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [AuthorizeFilter]
-    public async Task<IActionResult> SearchUser([FromRoute] string searchType, [FromRoute] string searchValue, [FromRoute] int numberOfResults)
+    public async Task<IActionResult> SearchUser([FromRoute] string searchValue, [FromRoute] int numberOfResults)
     {
-        return Ok(await _userService.SearchUserAsync(searchType, searchValue, numberOfResults));
+        return Ok(await _userService.SearchUserAsync(searchValue, numberOfResults));
     }
 
 }
