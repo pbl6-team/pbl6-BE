@@ -366,7 +366,7 @@ public class UserService : BaseService, IUserService
         }
     }
 
-    public async Task<IEnumerable<AdminUserDto>> SearchUserForAdminAsync(string searchValue, int numberOfResults)
+    public async Task<IEnumerable<AdminUserDto>> SearchUserForAdminAsync(string searchValue, int numberOfResults, short status)
     {
         var method = GetActualAsyncMethodName();
 
@@ -377,12 +377,24 @@ public class UserService : BaseService, IUserService
                                        .ToListAsync();
 
         searchValue = searchValue.ToUpper();
-        users = users.Where(x => x.Username.ToUpper().Contains(searchValue)
-                                   || x.Username.ToUpper().Contains(searchValue)
-                                   || (x.Information.FirstName + " " + x.Information.LastName).ToUpper().Contains(searchValue)
-                                   || x.Email.ToUpper().Contains(searchValue)
-                                   || (x.Information.Phone is not null && x.Information.Phone.Contains(searchValue))
-                                   ).ToList();
+        if (status == 0)
+        {
+            users = users.Where(x => x.Username.ToUpper().Contains(searchValue)
+                                       || x.Username.ToUpper().Contains(searchValue)
+                                       || (x.Information.FirstName + " " + x.Information.LastName).ToUpper().Contains(searchValue)
+                                       || x.Email.ToUpper().Contains(searchValue)
+                                       || (x.Information.Phone is not null && x.Information.Phone.Contains(searchValue))
+                                       ).ToList();
+        }
+        else
+        {
+            users = users.Where(x => x.Username.ToUpper().Contains(searchValue)
+                                       || x.Username.ToUpper().Contains(searchValue)
+                                       || (x.Information.FirstName + " " + x.Information.LastName).ToUpper().Contains(searchValue)
+                                       || x.Email.ToUpper().Contains(searchValue)
+                                       || (x.Information.Phone is not null && x.Information.Phone.Contains(searchValue))
+                                       && x.Information.Status == status).ToList();
+        }
         users = users.Take(numberOfResults).ToList();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
         return _mapper.Map<IEnumerable<AdminUserDto>>(users);

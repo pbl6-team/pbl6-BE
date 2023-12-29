@@ -1324,7 +1324,7 @@ namespace PBL6.Application.Services
             }
         }
 
-        public async Task<IEnumerable<AdminWorkspaceDto>> SearchForAdminAsync(string searchValue, int numberOfResults)
+        public async Task<IEnumerable<AdminWorkspaceDto>> SearchForAdminAsync(string searchValue, int numberOfResults, short status)
         {
 
             var method = GetActualAsyncMethodName();
@@ -1332,8 +1332,17 @@ namespace PBL6.Application.Services
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
             var workspaces = await _unitOfWork.Workspaces.Queryable().Include(x => x.Owner).ThenInclude(x => x.Information).ToListAsync();
             searchValue = searchValue.ToUpper();
-            workspaces = workspaces.Where(x => x.Name.ToUpper().Contains(searchValue)
-                                         || (x.Owner.Information.FirstName + " " + x.Owner.Information.LastName).ToUpper().Contains(searchValue)).ToList();
+            if (status == 0)
+            {
+                workspaces = workspaces.Where(x => x.Name.ToUpper().Contains(searchValue)
+                                             || (x.Owner.Information.FirstName + " " + x.Owner.Information.LastName).ToUpper().Contains(searchValue)).ToList();
+            }
+            else
+            {
+                workspaces = workspaces.Where(x => x.Name.ToUpper().Contains(searchValue)
+                                             || (x.Owner.Information.FirstName + " " + x.Owner.Information.LastName).ToUpper().Contains(searchValue)
+                                             && x.Status == status).ToList();
+            }
             workspaces = workspaces.Take(numberOfResults).ToList();
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return _mapper.Map<IEnumerable<AdminWorkspaceDto>>(workspaces);

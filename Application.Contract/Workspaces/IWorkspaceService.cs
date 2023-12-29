@@ -29,7 +29,7 @@ namespace PBL6.Application.Contract.Workspaces
         Task<IEnumerable<UserDetailDto>> GetMembersWithoutRoleAsync(Guid workspaceId);
         Task<IEnumerable<WorkspaceUserDto>> GetMembersAsync(Guid workspaceId, short status = 1);
         Task<PagedResult<AdminWorkspaceDto>> GetAllForAdminAsync(int pageSize, int pageNumber, short status);
-        Task<IEnumerable<AdminWorkspaceDto>> SearchForAdminAsync(string searchValue, int numberOfResults);
+        Task<IEnumerable<AdminWorkspaceDto>> SearchForAdminAsync(string searchValue, int numberOfResults, short status);
         Task<Guid> UpdateWorkspaceStatusAsync(Guid workspaceId, short status);
         Task AcceptInvitationAsync(Guid workspaceId);
         Task DeclineInvitationAsync(Guid workspaceId);
