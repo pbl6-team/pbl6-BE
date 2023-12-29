@@ -463,6 +463,10 @@ namespace PBL6.Application.Services
             var _currentUserId = Guid.Parse(
                 _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
             );
+            var current = await _unitOfWork.Users
+                .Queryable()
+                .Include(x => x.Information)
+                .FirstOrDefaultAsync(x => x.Id == _currentUserId && x.IsActive);
             var meeting =
                 await _unitOfWork
                     .Repository<Meeting>()
@@ -475,7 +479,8 @@ namespace PBL6.Application.Services
                 ?? throw new BadRequestException("Meeting not found");
             var message = new Message
             {
-                Content = $"{_currentUserId} has updated meeting {meeting.Name}",
+                Content =
+                    $"{current.Information.FirstName} {current.Information.LastName} has updated meeting {meeting.Name}",
                 Type = (short)MESSAGE_TYPE.MEETING,
                 ToChannelId = meeting.ChannelId,
             };
@@ -657,6 +662,11 @@ namespace PBL6.Application.Services
 
             if (!isInChannel)
             {
+                if (meeting.Channel.Category != (short)CHANNEL_CATEGORY.MEETING)
+                {
+                    throw new BadRequestException("User is not in channel");
+                }
+
                 if (string.IsNullOrEmpty(input.Password))
                 {
                     throw new BadRequestException("Password is required");
@@ -695,6 +705,71 @@ namespace PBL6.Application.Services
             return token;
         }
 
+        public async Task EndMeetingAsync(JoinMeetingDto input)
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+            );
+            var currentUser =
+                await _unitOfWork.Users
+                    .Queryable()
+                    .Include(x => x.Information)
+                    .FirstOrDefaultAsync(x => x.Id == currentUserId && x.IsActive)
+                ?? throw new BadRequestException("User not found");
+
+            var meeting =
+                _unitOfWork
+                    .Repository<Meeting>()
+                    .Queryable()
+                    .FirstOrDefault(
+                        x => x.SessionId == input.SessionId && x.Password == input.Password
+                    ) ?? throw new BadRequestException("Meeting not found");
+
+            if (meeting.Status == (short)MEETING_STATUS.ENDED)
+            {
+                throw new BadRequestException("Meeting has ended");
+            }
+
+            if (meeting.CreatedBy != currentUserId)
+            {
+                throw new BadRequestException("You are not owner of this meeting");
+            }
+
+            meeting.Status = (short)MEETING_STATUS.ENDED;
+            await _unitOfWork.Repository<Meeting>().UpdateAsync(meeting);
+            await _unitOfWork.SaveChangeAsync();
+
+            Message message =
+                new()
+                {
+                    Content =
+                        $"{currentUser.Information.FirstName} {currentUser.Information.LastName} has ended meeting {meeting.Name}",
+                    Type = (short)MESSAGE_TYPE.SYSTEM,
+                    ToChannelId = meeting.ChannelId,
+                    Data = JsonSerializer.Serialize(
+                        new MeetingDto
+                        {
+                            Id = meeting.Id,
+                            Name = meeting.Name,
+                            TimeStart = meeting.TimeStart,
+                            TimeEnd = meeting.TimeEnd,
+                            Description = meeting.Description,
+                            SessionId = meeting.SessionId,
+                            Password = meeting.Password,
+                            ChannelId = meeting.ChannelId,
+                        }
+                    )
+                };
+            message = await _unitOfWork.Messages.AddAsync(message);
+            await _unitOfWork.SaveChangeAsync();
+            message = await _unitOfWork.Messages.Get(message.Id);
+            var messageDto = _mapper.Map<MessageDto>(message);
+            await _meetingServiceEx.CloseSession(input.SessionId);
+            _backgroundJobClient.Enqueue(() => _hubService.SendMessage(messageDto));
+        }
+
         public async Task EndCallAsync(JoinMeetingDto joinMeetingDto)
         {
             var method = GetActualAsyncMethodName();
@@ -717,7 +792,7 @@ namespace PBL6.Application.Services
             await _meetingServiceEx.CloseSession(joinMeetingDto.SessionId);
         }
 
-        public Task<string> JoinCallAsync(JoinMeetingDto joinMeetingDto)
+        public async Task<CallInfoDto> JoinCallAsync(JoinMeetingDto joinMeetingDto)
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
@@ -738,10 +813,15 @@ namespace PBL6.Application.Services
             {
                 throw new BadRequestException("Call has ended");
             }
-            return _meetingServiceEx.CreateToken(joinMeetingDto.SessionId);
+            return new CallInfoDto
+            {
+                SessionId = call.SessionId,
+                Password = call.Password,
+                Token = await _meetingServiceEx.CreateToken(call.SessionId),
+            };
         }
 
-        public async Task<string> MakeCallAsync(MakeCallDto input)
+        public async Task<CallInfoDto> MakeCallAsync(MakeCallDto input)
         {
             var method = GetActualAsyncMethodName();
             var transaction = await _unitOfWork.BeginTransactionAsync();
@@ -809,7 +889,100 @@ namespace PBL6.Application.Services
             _backgroundJobClient.Enqueue(() => _hubService.SendMessage(messageDto));
             await _unitOfWork.CommitAsync(transaction);
 
-            return await _meetingServiceEx.CreateToken(sessionId);
+            return new CallInfoDto
+            {
+                SessionId = call.SessionId,
+                Password = call.Password,
+                Token = await _meetingServiceEx.CreateToken(call.SessionId),
+            };
+        }
+
+        public async Task<List<MeetingInfo>> GetMeetingsAsync()
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+            );
+            var meetings = await _unitOfWork
+                .Repository<Meeting>()
+                .Queryable()
+                .Include(x => x.Channel)
+                .ThenInclude(x => x.ChannelMembers)
+                .ThenInclude(x => x.User)
+                .ThenInclude(x => x.Information)
+                .Include(x => x.Channel)
+                .ThenInclude(x => x.Workspace)
+                .Where(x => x.Channel.ChannelMembers.Any(x => x.UserId == currentUserId))
+                .ToListAsync();
+
+            var meetingDtos = _mapper.Map<List<MeetingInfo>>(meetings);
+
+            return meetingDtos;
+        }
+
+        public async Task<MeetingInfo> GetMeetingAsync(Guid id)
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+            );
+            var meeting =
+                await _unitOfWork
+                    .Repository<Meeting>()
+                    .Queryable()
+                    .Include(x => x.Channel)
+                    .ThenInclude(x => x.ChannelMembers)
+                    .ThenInclude(x => x.User)
+                    .ThenInclude(x => x.Information)
+                    .Include(x => x.Channel)
+                    .ThenInclude(x => x.Workspace)
+                    .FirstOrDefaultAsync(
+                        x =>
+                            x.Id == id
+                            && x.Channel.ChannelMembers.Any(x => x.UserId == currentUserId)
+                    ) ?? throw new BadRequestException("Meeting not found");
+
+            var meetingDto = _mapper.Map<MeetingInfo>(meeting);
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+
+            return meetingDto;
+        }
+
+        public async Task<List<MeetingInfo>> GetMeetingsByChannelIdAsync(Guid channelId)
+        {
+            var method = GetActualAsyncMethodName();
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            var currentUserId = Guid.Parse(
+                _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
+            );
+            var meetings = await _unitOfWork
+                .Repository<Meeting>()
+                .Queryable()
+                .Include(x => x.Channel)
+                .ThenInclude(
+                    x =>
+                        x.ChannelMembers.Where(x => x.Status == (short)CHANNEL_MEMBER_STATUS.ACTIVE)
+                )
+                .ThenInclude(x => x.User)
+                .ThenInclude(x => x.Information)
+                .Include(x => x.Channel)
+                .ThenInclude(x => x.Workspace)
+                .Where(
+                    x =>
+                        x.ChannelId == channelId
+                        && x.Channel.ChannelMembers.Any(
+                            x =>
+                                x.UserId == currentUserId
+                                && x.Status == (short)CHANNEL_MEMBER_STATUS.ACTIVE
+                        )
+                )
+                .ToListAsync();
+
+            var meetingDtos = _mapper.Map<List<MeetingInfo>>(meetings);
+
+            return meetingDtos;
         }
     }
 }

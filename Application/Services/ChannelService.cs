@@ -785,11 +785,6 @@ public class ChannelService : BaseService, IChannelService
                 updateChannelDto.Description = string.Empty;
             }
 
-            if (updateChannelDto.CategoryId is null)
-            {
-                updateChannelDto.CategoryId = Guid.Empty;
-            }
-
             _mapper.Map(updateChannelDto, channel);
             await _unitOfWork.Channels.UpdateAsync(channel);
             await _unitOfWork.SaveChangeAsync();
