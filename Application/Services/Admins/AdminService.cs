@@ -101,7 +101,7 @@ public class AdminService : BaseService, IAdminService
                                         .Take(pageSize)
                                        .ToListAsync();
         }
-        else 
+        else
         {
             admins = await _unitOfWork.Admins.Queryable()
                                        .Include(a => a.Information)
@@ -111,7 +111,7 @@ public class AdminService : BaseService, IAdminService
                                        .ToListAsync();
         }
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
-        
+
         return new PagedResult<AdminDto>
         {
             PageSize = pageSize,
@@ -133,7 +133,7 @@ public class AdminService : BaseService, IAdminService
         return _mapper.Map<AdminDetailDto>(admin);
     }
 
-    public async Task<IEnumerable<AdminDto>> SearchAsync(string searchValue, int numberOfResults)
+    public async Task<IEnumerable<AdminDto>> SearchAsync(string searchValue, int numberOfResults, short status)
     {
         var method = GetActualAsyncMethodName();
 
@@ -142,12 +142,25 @@ public class AdminService : BaseService, IAdminService
                                        .Include(a => a.Information)
                                        .ToListAsync();
         searchValue = searchValue.ToUpper();
-        admins = admins.Where(a => a.Username.ToUpper().Contains(searchValue)
-                                   || a.Username.ToUpper().Contains(searchValue)
-                                   || (a.Information.FirstName + " " + a.Information.LastName).ToUpper().Contains(searchValue)
-                                   || a.Email.ToUpper().Contains(searchValue)
-                                   || (a.Information.Phone is not null && a.Information.Phone.Contains(searchValue))
-                                   ).ToList();
+        if (status == 0)
+        {
+            admins = admins.Where(a => a.Username.ToUpper().Contains(searchValue)
+                                       || a.Username.ToUpper().Contains(searchValue)
+                                       || (a.Information.FirstName + " " + a.Information.LastName).ToUpper().Contains(searchValue)
+                                       || a.Email.ToUpper().Contains(searchValue)
+                                       || (a.Information.Phone is not null && a.Information.Phone.Contains(searchValue))
+                                       ).ToList();
+        }
+        else
+        {
+            admins = admins.Where(a => a.Information.Status == status
+                                       && (a.Username.ToUpper().Contains(searchValue)
+                                       || a.Username.ToUpper().Contains(searchValue)
+                                       || (a.Information.FirstName + " " + a.Information.LastName).ToUpper().Contains(searchValue)
+                                       || a.Email.ToUpper().Contains(searchValue)
+                                       || (a.Information.Phone is not null && a.Information.Phone.Contains(searchValue))
+                                       )).ToList();
+        }
         admins = admins.Take(numberOfResults).ToList();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
         return _mapper.Map<IEnumerable<AdminDto>>(admins);
