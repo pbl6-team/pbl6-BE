@@ -33,6 +33,7 @@ namespace PBL6.Common.Enum
         CHANNEL_REMOVED = 5,
         WORKSPACE_INVITATION = 6,
         WORKSPACE_REMOVED = 7,
+        MEETING = 8,
     }
 
     public enum WORKSPACE_STATUS
@@ -63,6 +64,8 @@ namespace PBL6.Common.Enum
     {
         DEFAULT = 1,
         PRIVATE = 2,
+        PUBLIC = 3,
+        MEETING = 4,
     }
 
     public enum ADMIN_SEARCH_TYPE
@@ -95,5 +98,33 @@ namespace PBL6.Common.Enum
         FULLNAME = 4,
         STATUS = 5,
         GENDER = 6,
+    }
+
+    public enum MESSAGE_TYPE
+    {
+        DEFAULT = 0,
+        MEETING = 1,
+        SYSTEM = 2,
+        CALL = 3,
+    }
+
+    public enum MEETING_TYPE
+    {
+        PRIVATE = 0,
+        PUBLIC = 1,
+    }
+
+    public enum CALL_STATUS
+    {
+        ACTIVE = 1,
+        ENDED = 2,
+    }
+
+    public enum MEETING_STATUS
+    {
+        SCHEDULED = 0,
+        ACTIVE = 1,
+        ENDED = 2,
+        CANCELED = 3,
     }
 }

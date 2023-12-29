@@ -122,7 +122,7 @@ namespace PBL6.Application.ExternalServices
                 if (!result.IsNullOrEmpty())
                 {
                     notification.Status = (short)NOTIFICATION_STATUS.SENT;
-                    notification.UserNotifications.ToList().ForEach(x => x.PushId = Guid.Parse(result));
+                    notification.UserNotifications.ToList().ForEach(x => {x.PushId = Guid.Parse(result); x.SendAt = DateTime.Now;});
                     notification.Data = JsonConvert.SerializeObject(data);
                     await _unitOfWork.Notifications.UpdateAsync(notification);
                     await _unitOfWork.SaveChangeAsync();

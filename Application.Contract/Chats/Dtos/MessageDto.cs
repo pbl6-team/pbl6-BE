@@ -1,3 +1,5 @@
+using PBL6.Application.Contract.Meetings.Dtos;
+
 namespace PBL6.Application.Contract.Chats.Dtos
 {
     public class MessageDto
@@ -33,5 +35,7 @@ namespace PBL6.Application.Contract.Chats.Dtos
         public List<FileInfoDto> Files { get; set; }
 
         public bool IsPined { get; set; }
+
+        public MeetingDto Meeting { get; set; }
     }
 }

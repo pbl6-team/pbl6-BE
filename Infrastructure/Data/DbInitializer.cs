@@ -26,11 +26,16 @@ namespace PBL6.Infrastructure.Data
             {
                 await SeedAdminAccount(context);
             }
+            if (!context.Users.Any(x => x.Email.Contains("@firar.live")))
+            {
+                await SeedBots(context);
+            }
         }
 
         public static async Task SeedUsers(ApiDbContext context)
         {
-            await context.Users.AddAsync(new User
+            await context.Users.AddAsync(
+                new User
                 {
                     Email = "User@gmail.com",
                     Username = "User",
@@ -51,32 +56,116 @@ namespace PBL6.Infrastructure.Data
             await context.SaveChangesAsync();
         }
 
+        public static async Task SeedBots(ApiDbContext context)
+        {
+            await context.Users.AddAsync(
+                new User
+                {
+                    Email = "meetingbot@firar.live",
+                    Username = "meetingbot",
+                    Password = SecurityFunction.HashPassword("Meetingbot@12321123", "123"),
+                    PasswordSalt = "123",
+                    IsActive = true,
+                    Information = new()
+                    {
+                        FirstName = "Meetingbot",
+                        BirthDay = DateTimeOffset.UtcNow,
+                        Gender = true,
+                        Status = (short)USER.VERIFIED
+                    }
+                }
+            );
+        }
 
         public static async Task SeedPermissions(ApiDbContext context)
         {
-            await context.WorkspacePermissions.AddRangeAsync
-            (
+            await context.WorkspacePermissions.AddRangeAsync(
                 new List<WorkspacePermission>
                 {
-                    new () { Code = "CHANGE_WORKSPACE_NAME", Name = "Change workspace name", Description = "Change workspace name", IsActive = true },
-                    new () { Code = "CREATE_UPDATE_CHANNEL", Name = "Create/update channel", Description = "Create/update channel", IsActive = true },
-                    new () { Code = "DELETE_CHANNEL", Name = "Delete channel", Description = "Delete channel", IsActive = true },
-                    new () { Code = "INVITE_MEMBER", Name = "Invite member", Description = "Invite member", IsActive = true },
-                    new () { Code = "DELETE_MEMBER", Name = "Delete member", Description = "Delete member", IsActive = true },
-                    new () { Code = "CREATE_UPDATE_ROLE", Name = "Create/update member role", Description = "Create/update member role", IsActive = true }
+                    new()
+                    {
+                        Code = "CHANGE_WORKSPACE_NAME",
+                        Name = "Change workspace name",
+                        Description = "Change workspace name",
+                        IsActive = true
+                    },
+                    new()
+                    {
+                        Code = "CREATE_UPDATE_CHANNEL",
+                        Name = "Create/update channel",
+                        Description = "Create/update channel",
+                        IsActive = true
+                    },
+                    new()
+                    {
+                        Code = "DELETE_CHANNEL",
+                        Name = "Delete channel",
+                        Description = "Delete channel",
+                        IsActive = true
+                    },
+                    new()
+                    {
+                        Code = "INVITE_MEMBER",
+                        Name = "Invite member",
+                        Description = "Invite member",
+                        IsActive = true
+                    },
+                    new()
+                    {
+                        Code = "DELETE_MEMBER",
+                        Name = "Delete member",
+                        Description = "Delete member",
+                        IsActive = true
+                    },
+                    new()
+                    {
+                        Code = "CREATE_UPDATE_ROLE",
+                        Name = "Create/update member role",
+                        Description = "Create/update member role",
+                        IsActive = true
+                    }
                 }
             );
             await context.SaveChangesAsync();
 
-            await context.ChannelPermissions.AddRangeAsync
-            (
+            await context.ChannelPermissions.AddRangeAsync(
                 new List<ChannelPermission>
                 {
-                    new () { Code = "CHANGE_CHANNEL_NAME", Name = "Change channel name", Description = "Change channel name", IsActive = true },
-                    new () { Code = "INVITE_MEMBER", Name = "Invite member", Description = "Invite member", IsActive = true },
-                    new () { Code = "DELETE_MEMBER", Name = "Delete member", Description = "Delete member", IsActive = true },
-                    new () { Code = "CREATE_UPDATE_ROLE", Name = "Create/update member role", Description = "Create/update member role", IsActive = true },
-                    new () { Code = "DELETE_OTHER_PEOPLE'S_MESSAGE", Name = "Delete other people's messages", Description = "Delete other people's messages", IsActive = true }
+                    new()
+                    {
+                        Code = "CHANGE_CHANNEL_NAME",
+                        Name = "Change channel name",
+                        Description = "Change channel name",
+                        IsActive = true
+                    },
+                    new()
+                    {
+                        Code = "INVITE_MEMBER",
+                        Name = "Invite member",
+                        Description = "Invite member",
+                        IsActive = true
+                    },
+                    new()
+                    {
+                        Code = "DELETE_MEMBER",
+                        Name = "Delete member",
+                        Description = "Delete member",
+                        IsActive = true
+                    },
+                    new()
+                    {
+                        Code = "CREATE_UPDATE_ROLE",
+                        Name = "Create/update member role",
+                        Description = "Create/update member role",
+                        IsActive = true
+                    },
+                    new()
+                    {
+                        Code = "DELETE_OTHER_PEOPLE'S_MESSAGE",
+                        Name = "Delete other people's messages",
+                        Description = "Delete other people's messages",
+                        IsActive = true
+                    }
                 }
             );
             await context.SaveChangesAsync();
@@ -84,14 +173,15 @@ namespace PBL6.Infrastructure.Data
 
         public static async Task SeedAdminAccount(ApiDbContext context)
         {
-            await context.AdminAccounts.AddAsync(new AdminAccount
+            await context.AdminAccounts.AddAsync(
+                new AdminAccount
                 {
                     Username = "root",
                     Password = SecurityFunction.HashPassword("Root@123", "123"),
                     PasswordSalt = "123",
                     Email = "Root@fira.com",
                     IsActive = true,
-                    Information = new ()
+                    Information = new()
                     {
                         FirstName = "Root",
                         LastName = "Root",

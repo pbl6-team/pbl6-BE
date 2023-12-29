@@ -10,9 +10,9 @@ using Application.Contract.Workspaces.Dtos;
 using PBL6.Application.Contract.Notifications.Dtos;
 using PBL6.Common.Enum;
 using Application.Contract.Users.Dtos;
-using System.Security.Cryptography.X509Certificates;
 using PBL6.Domain.Models.Admins;
 using Application.Contract.Admins.Dtos;
+using PBL6.Application.Contract.Meetings.Dtos;
 
 namespace PBL6.Application
 {
@@ -152,6 +152,9 @@ namespace PBL6.Application
                 .ForPath(x => x.Information.Gender, opt => opt.MapFrom(src => src.Gender))
                 .ForPath(x => x.Information.Phone, opt => opt.MapFrom(src => src.Phone))
                 .ForPath(x => x.Information.BirthDay, opt => opt.MapFrom(src => src.BirthDay));
+            
+            CreateMap<Meeting, MeetingDto>()
+                .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id));
 
             CreateMap<Message, MessageDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))

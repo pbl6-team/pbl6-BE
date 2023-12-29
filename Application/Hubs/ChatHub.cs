@@ -25,7 +25,7 @@ namespace PBL6.Application.Hubs
         private readonly ICurrentUserService _currentUserService;
         private readonly IChannelService _channelService;
         private readonly IChatService _chatService;
-        private readonly IMeetingService _meetingService;
+        private readonly IMeetingServiceEx _meetingService;
 
         // private readonly ILogger _logger;
 
@@ -44,7 +44,7 @@ namespace PBL6.Application.Hubs
             IHubContext<ChatHub> hubContext,
             ICurrentUserService currentUserService,
             IChannelService channelService,
-            IMeetingService meetingService,
+            IMeetingServiceEx meetingService,
             IChatService chatService
         // ILogger logger
         )

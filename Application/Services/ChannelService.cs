@@ -1,4 +1,3 @@
-using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Hangfire;
@@ -677,8 +676,7 @@ public class ChannelService : BaseService, IChannelService
                     new UserNotification
                     {
                         UserId = userId,
-                        Status = (short)NOTIFICATION_STATUS.PENDING,
-                        SendAt = DateTime.UtcNow
+                        Status = (short)NOTIFICATION_STATUS.PENDING
                     }
                 );
 

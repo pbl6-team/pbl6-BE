@@ -368,6 +368,7 @@ namespace PBL6.Application.Services
         public async Task<Guid> InviteMemberToWorkspaceAsync(Guid workspaceId, List<string> emails)
         {
             var method = GetActualAsyncMethodName();
+            var transaction = await _unitOfWork.BeginTransactionAsync();
             try
             {
                 _logger.LogInformation("[{_className}][{method}] Start", _className, method);
@@ -419,6 +420,7 @@ namespace PBL6.Application.Services
                     if (user is null)
                     {
                         await InviteNewUserToWorkspaceAsync(workspaceId, email);
+                        continue;
                     }
 
                     var member = workspace.Members.FirstOrDefault(
@@ -470,6 +472,7 @@ namespace PBL6.Application.Services
                 }
 
                 _logger.LogInformation("[{_className}][{method}] End", _className, method);
+                await transaction.CommitAsync();
 
                 return workspace.Id;
             }
