@@ -238,7 +238,7 @@ public class UserService : BaseService, IUserService
         }
     }
 
-    public async Task<PagedResult<AdminUserDto>> GetAllAsync(int pageSize, int pageNumber)
+    public async Task<PagedResult<AdminUserDto>> GetAllAsync(int pageSize, int pageNumber, short status)
     {
         var method = GetActualAsyncMethodName();
         try
@@ -248,14 +248,25 @@ public class UserService : BaseService, IUserService
             {
                 throw new BadRequestException("Page number is not valid");
             }
-            
-            var users = await _unitOfWork.Users.Queryable()
+
+            List<PBL6.Domain.Models.Users.User> users;
+            if (status == 0)
+            {
+                users = await _unitOfWork.Users.Queryable()
                                            .Include(x => x.Information)
-                                           .Where(x => !x.IsDeleted)
                                            .Skip((pageNumber - 1) * pageSize)
                                            .Take(pageSize)
                                            .ToListAsync();
-
+            }
+            else
+            {
+                users = await _unitOfWork.Users.Queryable()
+                                           .Include(x => x.Information)
+                                           .Where(x => x.Information.Status == status)
+                                           .Skip((pageNumber - 1) * pageSize)
+                                           .Take(pageSize)
+                                           .ToListAsync();
+            }
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return new PagedResult<AdminUserDto>
             {
@@ -355,7 +366,7 @@ public class UserService : BaseService, IUserService
         }
     }
 
-    public async Task<IEnumerable<AdminUserDto>> SearchUserForAdminAsync(short searchType, string searchValue, int numberOfResults)
+    public async Task<IEnumerable<AdminUserDto>> SearchUserForAdminAsync(string searchValue, int numberOfResults)
     {
         var method = GetActualAsyncMethodName();
 
@@ -366,16 +377,12 @@ public class UserService : BaseService, IUserService
                                        .ToListAsync();
 
         searchValue = searchValue.ToUpper();
-        users = searchType switch
-        {
-            (short)USER_ADMIN_SEARCH_TYPE.USERNAME => users.Where(x => x.Username.ToUpper().Contains(searchValue)).ToList(),
-            (short)USER_ADMIN_SEARCH_TYPE.FULLNAME => users.Where(x => (x.Information.FirstName + " " + x.Information.LastName).ToUpper().Contains(searchValue)).ToList(),
-            (short)USER_ADMIN_SEARCH_TYPE.EMAIL => users.Where(x => x.Email.ToUpper().Contains(searchValue)).ToList(),
-            (short)USER_ADMIN_SEARCH_TYPE.PHONE => users.Where(x => x.Information.Phone.Contains(searchValue)).ToList(),
-            (short)USER_ADMIN_SEARCH_TYPE.STATUS => users.Where(x => x.Information.Status == short.Parse(searchValue)).ToList(),
-            (short)USER_ADMIN_SEARCH_TYPE.GENDER => users.Where(x => x.Information.Gender == bool.Parse(searchValue)).ToList(),
-            _ => throw new BadRequestException("Search type is not valid"),
-        };
+        users = users.Where(x => x.Username.ToUpper().Contains(searchValue)
+                                   || x.Username.ToUpper().Contains(searchValue)
+                                   || (x.Information.FirstName + " " + x.Information.LastName).ToUpper().Contains(searchValue)
+                                   || x.Email.ToUpper().Contains(searchValue)
+                                   || (x.Information.Phone is not null && x.Information.Phone.Contains(searchValue))
+                                   ).ToList();
         users = users.Take(numberOfResults).ToList();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
         return _mapper.Map<IEnumerable<AdminUserDto>>(users);
