@@ -10,7 +10,7 @@ namespace PBL6.API.Filters
     [AttributeUsage(AttributeTargets.All)]
     public class ChannelFilter : Attribute, IAsyncAuthorizationFilter
     {
-        private readonly string _policyName;
+        private readonly string _policyName = string.Empty;
 
         public ChannelFilter(string policyName)
         {
