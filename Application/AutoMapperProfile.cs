@@ -144,7 +144,7 @@ namespace PBL6.Application
                 .ForMember(x => x.BirthDay, opt => opt.MapFrom(src => src.Information.BirthDay))
                 .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.Information.Picture))
                 .ForMember(x => x.Status, opt => opt.MapFrom(src => src.Information.Status));
-                
+
             CreateMap<UpdateUserDto, User>()
                 .ForPath(x => x.Information.FirstName, opt => opt.MapFrom(src => src.FirstName))
                 .ForPath(x => x.Information.LastName, opt => opt.MapFrom(src => src.LastName))
@@ -152,7 +152,7 @@ namespace PBL6.Application
                 .ForPath(x => x.Information.Gender, opt => opt.MapFrom(src => src.Gender))
                 .ForPath(x => x.Information.Phone, opt => opt.MapFrom(src => src.Phone))
                 .ForPath(x => x.Information.BirthDay, opt => opt.MapFrom(src => src.BirthDay));
-            
+
             CreateMap<Meeting, MeetingDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id));
 
@@ -160,7 +160,10 @@ namespace PBL6.Application
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(x => x.SendAt, opt => opt.MapFrom(src => src.CreatedAt))
                 .ForMember(x => x.IsChannel, opt => opt.MapFrom(src => src.ToChannelId != null))
-                .ForMember(x => x.ChildCount, opt => opt.MapFrom(src => src.Children.Where(x => !x.IsDeleted).Count()))
+                .ForMember(
+                    x => x.ChildCount,
+                    opt => opt.MapFrom(src => src.Children.Where(x => !x.IsDeleted).Count())
+                )
                 .ForMember(
                     x => x.ReceiverId,
                     opt => opt.MapFrom(src => src.ToChannelId ?? src.ToUserId)
@@ -208,7 +211,10 @@ namespace PBL6.Application
                                     )
                         )
                 )
-                .ForMember(x => x.Files, opt => opt.MapFrom(src => src.Files.Where(x => !x.IsDeleted)));
+                .ForMember(
+                    x => x.Files,
+                    opt => opt.MapFrom(src => src.Files.Where(x => !x.IsDeleted))
+                );
 
             CreateMap<WorkspaceMember, WorkspaceUserDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.UserId))
@@ -272,8 +278,8 @@ namespace PBL6.Application
                 .ForMember(x => x.Name, opt => opt.MapFrom(src => src.Name))
                 .ForMember(x => x.Type, opt => opt.MapFrom(src => src.Type))
                 .ForMember(x => x.Url, opt => opt.MapFrom(src => src.Url));
-            
-            CreateMap<AdminAccount, AdminDto>() 
+
+            CreateMap<AdminAccount, AdminDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
                 .ForMember(x => x.FirstName, opt => opt.MapFrom(src => src.Information.FirstName))
                 .ForMember(x => x.LastName, opt => opt.MapFrom(src => src.Information.LastName))
@@ -298,6 +304,23 @@ namespace PBL6.Application
                 .ForPath(x => x.Information.Phone, opt => opt.MapFrom(src => src.Phone))
                 .ForPath(x => x.Information.Gender, opt => opt.MapFrom(src => src.Gender))
                 .ForPath(x => x.Information.BirthDate, opt => opt.MapFrom(src => src.BirthDay));
+
+            CreateMap<Meeting, MeetingInfo>()
+                .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(
+                    x => x.ChannelName,
+                    opt => opt.MapFrom(src => src.Channel != null ? src.Channel.Name : "")
+                )
+                .ForMember(
+                    x => x.WorkspaceName,
+                    opt =>
+                        opt.MapFrom(
+                            src =>
+                                (src.Channel != null && src.Channel.Workspace != null)
+                                    ? src.Channel.Workspace.Name
+                                    : ""
+                        )
+                );
         }
     }
 }
