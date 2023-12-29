@@ -97,9 +97,8 @@ namespace PBL6.API.Filters
             }
             catch (Exception e)
             {
-                if (e is UnauthorizedException)
-                    throw new UnauthorizedException("Invalid token");
-                throw;
+                Console.WriteLine(e.Message);
+                throw new UnauthorizedException("Invalid token");
             }
         }
 
