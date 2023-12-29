@@ -86,6 +86,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ChannelDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> GetAllChannelsOfAWorkspace([FromRoute] Guid workspaceId)
         {
             return Ok(await _channelService.GetAllChannelsOfAWorkspaceAsync(workspaceId));
@@ -102,6 +103,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> GetById([FromRoute] Guid channelId)
         {
             return Ok(await _channelService.GetByIdAsync(channelId));
@@ -118,6 +120,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ChannelDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> GetByName([FromRoute] string channelName)
         {
             return Ok(await _channelService.GetByNameAsync(channelName));
@@ -180,6 +183,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ChannelRoleDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> GetRoles([FromRoute] Guid channelId)
         {
             return Ok(await _channelService.GetRolesAsync(channelId));
@@ -197,6 +201,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDetailDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> GetMembersByRoleId([FromRoute] Guid channelId, [FromRoute] Guid roleId)
         {
             return Ok(await _channelService.GetMembersByRoleIdAsync(channelId, roleId));
@@ -213,6 +218,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDetailDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> GetMembersWithoutRole([FromRoute] Guid channelId)
         {
             return Ok(await _channelService.GetMembersWithoutRoleAsync(channelId));
@@ -230,6 +236,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<PermissionDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> GetPermissions(
             [FromRoute] Guid channelId,
             [FromRoute] Guid roleId
@@ -248,6 +255,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<PermissionDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> GetPermissions()
         {
             return Ok(await _channelService.GetPermissions());
@@ -265,6 +273,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelRoleDto))]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> GetRole(
             [FromRoute] Guid channelId,
             [FromRoute] Guid roleId
@@ -286,6 +295,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> UpdateRole(
             [FromRoute] Guid channelId,
             [FromRoute] Guid roleId,
@@ -308,6 +318,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> AddRole(
             [FromRoute] Guid channelId,
             [FromBody] CreateUpdateChannelRoleDto input
@@ -328,6 +339,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> DeleteRole(
             [FromRoute] Guid channelId,
             [FromRoute] Guid roleId
@@ -350,6 +362,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> SetRoleToUser(
             [FromRoute] Guid channelId,
             [FromRoute] Guid userId,
@@ -372,6 +385,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> GetMembersThatNotInTheChannel(
             [FromRoute] Guid workspaceId,
             [FromRoute] Guid channelId
@@ -392,6 +406,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> GetMembers([FromRoute] Guid channelId, [FromRoute] short status = 1)
         {
             return Ok(await _channelService.GetMembersAsync(channelId, status));
@@ -408,6 +423,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> AcceptInvitation([FromRoute] Guid channelId)
         {
             await _channelService.AcceptInvitationAsync(channelId);
@@ -425,6 +441,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> DeclineInvitation([FromRoute] Guid channelId)
         {
             await _channelService.DeclineInvitationAsync(channelId);
@@ -442,6 +459,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> LeaveChannel([FromRoute] Guid channelId)
         {
             await _channelService.LeaveChannelAsync(channelId);
@@ -460,6 +478,7 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
+        [ChannelFilter]
         public async Task<IActionResult> TransferOwnership(
             [FromRoute] Guid channelId,
             [FromRoute] Guid userId
