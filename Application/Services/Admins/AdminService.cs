@@ -97,8 +97,6 @@ public class AdminService : BaseService, IAdminService
         {
             admins = await _unitOfWork.Admins.Queryable()
                                        .Include(a => a.Information)
-                                        .Skip((pageNumber - 1) * pageSize)
-                                        .Take(pageSize)
                                        .ToListAsync();
         }
         else
@@ -106,18 +104,19 @@ public class AdminService : BaseService, IAdminService
             admins = await _unitOfWork.Admins.Queryable()
                                        .Include(a => a.Information)
                                        .Where(a => a.Information.Status == status)
-                                        .Skip((pageNumber - 1) * pageSize)
-                                        .Take(pageSize)
                                        .ToListAsync();
         }
+        var pagedAdmins = admins.Skip((pageNumber - 1) * pageSize)
+                       .Take(pageSize)
+                       .ToList();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
         return new PagedResult<AdminDto>
         {
             PageSize = pageSize,
             CurrentPage = pageNumber,
-            TotalPages = (int)Math.Ceiling((double)_unitOfWork.Admins.Queryable().Count() / pageSize),
-            Items = _mapper.Map<IEnumerable<AdminDto>>(admins),
+            TotalPages = (int)Math.Ceiling((double)admins.Count() / pageSize),
+            Items = _mapper.Map<IEnumerable<AdminDto>>(pagedAdmins),
         };
     }
 
@@ -133,37 +132,52 @@ public class AdminService : BaseService, IAdminService
         return _mapper.Map<AdminDetailDto>(admin);
     }
 
-    public async Task<IEnumerable<AdminDto>> SearchAsync(string searchValue, int numberOfResults, short status)
+    public async Task<PagedResult<AdminDto>> SearchAsync(string searchValue, int pageSize, int pageNumber, short status)
     {
         var method = GetActualAsyncMethodName();
 
         _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-        var admins = await _unitOfWork.Admins.Queryable()
-                                       .Include(a => a.Information)
-                                       .ToListAsync();
+        var admins = new List<AdminAccount>();
+        if (pageNumber < 1)
+        {
+            throw new BadRequestException("Page number is not valid");
+        }
+
         searchValue = searchValue.ToUpper();
         if (status == 0)
         {
-            admins = admins.Where(a => a.Username.ToUpper().Contains(searchValue)
+            admins = await _unitOfWork.Admins.Queryable()
+                                       .Include(a => a.Information)
+                                       .Where(a => a.Username.ToUpper().Contains(searchValue)
                                        || a.Username.ToUpper().Contains(searchValue)
                                        || (a.Information.FirstName + " " + a.Information.LastName).ToUpper().Contains(searchValue)
                                        || a.Email.ToUpper().Contains(searchValue)
-                                       || (a.Information.Phone is not null && a.Information.Phone.Contains(searchValue))
-                                       ).ToList();
+                                       || (a.Information.Phone != null && a.Information.Phone.Contains(searchValue))
+                                       ).ToListAsync();
         }
         else
         {
-            admins = admins.Where(a => a.Information.Status == status
+            admins = await _unitOfWork.Admins.Queryable()
+                                       .Include(a => a.Information)
+                                       .Where(a => a.Information.Status == status
                                        && (a.Username.ToUpper().Contains(searchValue)
                                        || a.Username.ToUpper().Contains(searchValue)
                                        || (a.Information.FirstName + " " + a.Information.LastName).ToUpper().Contains(searchValue)
                                        || a.Email.ToUpper().Contains(searchValue)
-                                       || (a.Information.Phone is not null && a.Information.Phone.Contains(searchValue))
-                                       )).ToList();
+                                       || (a.Information.Phone != null && a.Information.Phone.Contains(searchValue))
+                                       )).ToListAsync();
         }
-        admins = admins.Take(numberOfResults).ToList();
+        var pagedAdmins = admins.Skip((pageNumber - 1) * pageSize)
+                       .Take(pageSize)
+                       .ToList();
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
-        return _mapper.Map<IEnumerable<AdminDto>>(admins);
+        return new PagedResult<AdminDto>
+        {
+            PageSize = pageSize,
+            CurrentPage = pageNumber,
+            TotalPages = (int)Math.Ceiling((double)admins.Count() / pageSize),
+            Items = _mapper.Map<IEnumerable<AdminDto>>(pagedAdmins),
+        };
     }
 
     public async Task<Guid> UpdateAdminStatusAsync(Guid adminId, short status)
