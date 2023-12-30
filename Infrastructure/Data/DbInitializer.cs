@@ -79,95 +79,100 @@ namespace PBL6.Infrastructure.Data
 
         public static async Task SeedPermissions(ApiDbContext context)
         {
-            await context.WorkspacePermissions.AddRangeAsync(
-                new List<WorkspacePermission>
+            var permissions = new List<WorkspacePermission>
+            {
+                new()
                 {
-                    new()
-                    {
-                        Code = "CHANGE_WORKSPACE_NAME",
-                        Name = "Change workspace name",
-                        Description = "Change workspace name",
-                        IsActive = true
-                    },
-                    new()
-                    {
-                        Code = "CREATE_UPDATE_CHANNEL",
-                        Name = "Create/update channel",
-                        Description = "Create/update channel",
-                        IsActive = true
-                    },
-                    new()
-                    {
-                        Code = "DELETE_CHANNEL",
-                        Name = "Delete channel",
-                        Description = "Delete channel",
-                        IsActive = true
-                    },
-                    new()
-                    {
-                        Code = "INVITE_MEMBER",
-                        Name = "Invite member",
-                        Description = "Invite member",
-                        IsActive = true
-                    },
-                    new()
-                    {
-                        Code = "DELETE_MEMBER",
-                        Name = "Delete member",
-                        Description = "Delete member",
-                        IsActive = true
-                    },
-                    new()
-                    {
-                        Code = "CREATE_UPDATE_ROLE",
-                        Name = "Create/update member role",
-                        Description = "Create/update member role",
-                        IsActive = true
-                    }
+                    Code = "UPDATE_WORKSPACE",
+                    Name = "Update workspace",
+                    Description = "Update workspace",
+                    IsActive = true
+                },
+                new()
+                {
+                    Code = "CREATE_UPDATE_CHANNEL",
+                    Name = "Create/update channel",
+                    Description = "Create/update channel",
+                    IsActive = true
+                },
+                new()
+                {
+                    Code = "DELETE_CHANNEL",
+                    Name = "Delete channel",
+                    Description = "Delete channel",
+                    IsActive = true
+                },
+                new()
+                {
+                    Code = "INVITE_MEMBER",
+                    Name = "Invite member",
+                    Description = "Invite member",
+                    IsActive = true
+                },
+                new()
+                {
+                    Code = "DELETE_MEMBER",
+                    Name = "Delete member",
+                    Description = "Delete member",
+                    IsActive = true
+                },
+                new()
+                {
+                    Code = "CREATE_UPDATE_ROLE",
+                    Name = "Create/update member role",
+                    Description = "Create/update member role",
+                    IsActive = true
+                },
+                new()
+                {
+                    Code = "DELETE_WORKSPACE",
+                    Name = "Delete workspace",
+                    Description = "Delete workspace",
+                    IsActive = true
                 }
-            );
-            await context.SaveChangesAsync();
+            };
+            permissions = permissions
+                .Where(x => !context.WorkspacePermissions.Any(y => y.Code == x.Code))
+                .ToList();
 
-            await context.ChannelPermissions.AddRangeAsync(
-                new List<ChannelPermission>
+            await context.WorkspacePermissions.AddRangeAsync(permissions);
+            await context.SaveChangesAsync();
+            
+            var channelPermissions = new List<ChannelPermission>
+            {
+                new()
                 {
-                    new()
-                    {
-                        Code = "CHANGE_CHANNEL_NAME",
-                        Name = "Change channel name",
-                        Description = "Change channel name",
-                        IsActive = true
-                    },
-                    new()
-                    {
-                        Code = "INVITE_MEMBER",
-                        Name = "Invite member",
-                        Description = "Invite member",
-                        IsActive = true
-                    },
-                    new()
-                    {
-                        Code = "DELETE_MEMBER",
-                        Name = "Delete member",
-                        Description = "Delete member",
-                        IsActive = true
-                    },
-                    new()
-                    {
-                        Code = "CREATE_UPDATE_ROLE",
-                        Name = "Create/update member role",
-                        Description = "Create/update member role",
-                        IsActive = true
-                    },
-                    new()
-                    {
-                        Code = "DELETE_OTHER_PEOPLE'S_MESSAGE",
-                        Name = "Delete other people's messages",
-                        Description = "Delete other people's messages",
-                        IsActive = true
-                    }
+                    Code = "CHANGE_CHANNEL_NAME",
+                    Name = "Change channel name",
+                    Description = "Change channel name",
+                    IsActive = true
+                },
+                new()
+                {
+                    Code = "INVITE_MEMBER",
+                    Name = "Invite member",
+                    Description = "Invite member",
+                    IsActive = true
+                },
+                new()
+                {
+                    Code = "DELETE_MEMBER",
+                    Name = "Delete member",
+                    Description = "Delete member",
+                    IsActive = true
+                },
+                new()
+                {
+                    Code = "CREATE_UPDATE_ROLE",
+                    Name = "Create/update member role",
+                    Description = "Create/update member role",
+                    IsActive = true
                 }
-            );
+            };
+            channelPermissions = channelPermissions
+                .Where(x => !context.ChannelPermissions.Any(y => y.Code == x.Code))
+                .ToList();
+            await context.ChannelPermissions.AddRangeAsync(channelPermissions);
             await context.SaveChangesAsync();
         }
 

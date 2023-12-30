@@ -1365,17 +1365,7 @@ namespace PBL6.Application.Services
                     throw new NotFoundException<WorkspaceMember>(userId.ToString());
 
                 if (workspace.OwnerId != currentUserId)
-                    throw new ForbidException();
-
-                if (workspace.OwnerId == userId)
-                    throw new BadRequestException("User is already owner");
-
-                var currentOwner = await _unitOfWork.Workspaces.GetMemberByUserId(
-                    workspaceId,
-                    currentUserId
-                );
-                if (currentOwner is null)
-                    throw new NotFoundException<WorkspaceMember>(currentUserId.ToString());
+                    throw new ForbidException("You are not owner of this workspace");
 
                 workspace.OwnerId = userId;
                 await _unitOfWork.Workspaces.UpdateAsync(workspace);
