@@ -5,12 +5,12 @@ namespace PBL6.Common.Consts
         /// <summary>
         /// Change workspace name
         /// </summary>
-        public const string CHANGE_WORKSPACE_NAME = "CHANGE_WORKSPACE_NAME";
+        public const string UPDATE_WORKSPACE = "UPDATE_WORKSPACE";
 
         /// <summary>
-        /// Create/update channel
+        /// Create channel
         /// </summary>
-        public const string CREATE_UPDATE_CHANNEL = "CREATE_UPDATE_CHANNEL";
+        public const string CREATE_CHANNEL = "CREATE_CHANNEL";
 
         /// <summary>
         /// Delete channel
@@ -31,5 +31,10 @@ namespace PBL6.Common.Consts
         /// Create/update member role
         /// </summary>
         public const string CREATE_UPDATE_ROLE = "CREATE_UPDATE_ROLE";
+
+        /// <summary>
+        /// Delete workspace
+        /// </summary>
+        public const string DELETE_WORKSPACE = "DELETE_WORKSPACE";
     }
 }

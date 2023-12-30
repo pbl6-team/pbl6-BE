@@ -49,7 +49,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [AuthorizeFilter]
-        [WorkspaceFilter]
+        [WorkspaceFilter(WorkSpacePolicy.UPDATE_WORKSPACE)]
         public async Task<IActionResult> Update(
             [FromRoute] Guid workspaceId,
             [FromBody] UpdateWorkspaceDto input
@@ -70,7 +70,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [AuthorizeFilter]
-        [WorkspaceFilter]
+        [WorkspaceFilter(WorkSpacePolicy.UPDATE_WORKSPACE)]
         public async Task<IActionResult> UpdateAvatar(
             [FromRoute] Guid workspaceId,
             [FromForm] UpdateAvatarWorkspaceDto input
@@ -90,7 +90,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [AuthorizeFilter]
-        [WorkspaceFilter]
+        [WorkspaceFilter(WorkSpacePolicy.DELETE_WORKSPACE)]
         public async Task<IActionResult> Delete([FromRoute] Guid workspaceId)
         {
             return Ok(new { Id = await _workspaceService.DeleteAsync(workspaceId) });
@@ -320,7 +320,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
-        [WorkspaceFilter]
+        [WorkspaceFilter(WorkSpacePolicy.CREATE_UPDATE_ROLE)]
         public async Task<IActionResult> UpdateRole(
             [FromRoute] Guid workspaceId,
             [FromRoute] Guid roleId,
@@ -343,7 +343,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [AuthorizeFilter]
-        [WorkspaceFilter]
+        [WorkspaceFilter(WorkSpacePolicy.CREATE_UPDATE_ROLE)]
         public async Task<IActionResult> AddRole(
             [FromRoute] Guid workspaceId,
             [FromBody] CreateUpdateWorkspaceRoleDto input
@@ -367,7 +367,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
-        [WorkspaceFilter]
+        [WorkspaceFilter(WorkSpacePolicy.CREATE_UPDATE_ROLE)]
         public async Task<IActionResult> DeleteRole(
             [FromRoute] Guid workspaceId,
             [FromRoute] Guid roleId
@@ -390,7 +390,7 @@ namespace PBL6.API.Controllers.Workspaces
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [AuthorizeFilter]
-        [WorkspaceFilter]
+        [WorkspaceFilter(WorkSpacePolicy.CREATE_UPDATE_ROLE)]
         public async Task<IActionResult> SetRole(
             [FromRoute] Guid workspaceId,
             [FromRoute] Guid userId,

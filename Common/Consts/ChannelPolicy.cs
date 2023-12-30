@@ -3,9 +3,9 @@ namespace PBL6.Common.Consts
     public static class ChannelPolicy
     {
         /// <summary>
-        /// Change channel name
+        /// Update channel
         /// </summary>
-        public const string CHANGE_CHANNEL_NAME = "CHANGE_CHANNEL_NAME";
+        public const string UPDATE_CHANNEL = "UPDATE_CHANNEL";
 
         /// <summary>
         /// Invite member
@@ -21,10 +21,5 @@ namespace PBL6.Common.Consts
         /// Create/update member role
         /// </summary>
         public const string CREATE_UPDATE_ROLE = "CREATE_UPDATE_ROLE";
-
-        /// <summary>
-        /// Delete other people's messages
-        /// </summary>
-        public const string DELETE_OTHER_PEOPLE_S_MESSAGE = "DELETE_OTHER_PEOPLE_S_MESSAGE";
     }
 }

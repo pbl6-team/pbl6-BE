@@ -108,8 +108,7 @@ namespace PBL6.Application.Services
                         message.ToChannelId.Value
                     );
                     if (
-                        !permissions.Any(x => x.Code == ChannelPolicy.DELETE_OTHER_PEOPLE_S_MESSAGE)
-                        && message.ToChannel.CreatedBy != currentUserId
+                        message.ToChannel.CreatedBy != currentUserId
                         && message.CreatedBy != currentUserId
                     )
                     {

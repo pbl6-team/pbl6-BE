@@ -1089,26 +1089,10 @@ public class ChannelService : BaseService, IChannelService
             var channel = await _unitOfWork.Channels
                 .GetChannelsWithMembers()
                 .Where(x => x.Id == channelId)
-                .FirstOrDefaultAsync();
-            if (channel is null)
-                throw new NotFoundException<Channel>(channelId.ToString());
-
-            var member = await _unitOfWork.Channels.GetMemberByUserId(channelId, userId);
-            if (member is null)
-                throw new NotFoundException<ChannelMember>(userId.ToString());
-
+                .FirstOrDefaultAsync() ?? throw new NotFoundException<Channel>(channelId.ToString());
+            var member = await _unitOfWork.Channels.GetMemberByUserId(channelId, userId) ?? throw new NotFoundException<ChannelMember>(userId.ToString());
             if (channel.OwnerId != currentUserId)
-                throw new ForbidException();
-
-            if (channel.OwnerId == userId)
-                throw new BadRequestException("User is already owner");
-
-            var currentOwner = await _unitOfWork.Channels.GetMemberByUserId(
-                channelId,
-                currentUserId
-            );
-            if (currentOwner is null)
-                throw new NotFoundException<ChannelMember>(currentUserId.ToString());
+                throw new ForbidException("You are not owner of this channel");
 
             channel.OwnerId = userId;
             await _unitOfWork.Channels.UpdateAsync(channel);
