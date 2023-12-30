@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using Application.Contract.Users.Dtos;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
@@ -254,8 +255,6 @@ public class UserService : BaseService, IUserService
             {
                 users = await _unitOfWork.Users.Queryable()
                                            .Include(x => x.Information)
-                                           .Skip((pageNumber - 1) * pageSize)
-                                           .Take(pageSize)
                                            .ToListAsync();
             }
             else
@@ -263,17 +262,20 @@ public class UserService : BaseService, IUserService
                 users = await _unitOfWork.Users.Queryable()
                                            .Include(x => x.Information)
                                            .Where(x => x.Information.Status == status)
-                                           .Skip((pageNumber - 1) * pageSize)
-                                           .Take(pageSize)
                                            .ToListAsync();
             }
+
+            var pagedUsers = users.Skip((pageNumber - 1) * pageSize)
+                         .Take(pageSize)
+                         .ToList();
+
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
             return new PagedResult<AdminUserDto>
             {
                 PageSize = pageSize,
                 CurrentPage = pageNumber,
-                TotalPages = (int)Math.Ceiling((double)_unitOfWork.Users.Queryable().Count() / pageSize),
-                Items = _mapper.Map<IEnumerable<AdminUserDto>>(users),
+                TotalPages = (int)Math.Ceiling((double)users.Count() / pageSize),
+                Items = _mapper.Map<IEnumerable<AdminUserDto>>(pagedUsers)
             };
         }
         catch (Exception e)
@@ -366,37 +368,50 @@ public class UserService : BaseService, IUserService
         }
     }
 
-    public async Task<IEnumerable<AdminUserDto>> SearchUserForAdminAsync(string searchValue, int numberOfResults, short status)
+    public async Task<PagedResult<AdminUserDto>> SearchUserForAdminAsync(string searchValue, int pageSize, int pageNumber, short status)
     {
         var method = GetActualAsyncMethodName();
 
         _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-        var users = await _unitOfWork.Users.Queryable()
-                                       .Include(x => x.Information)
-                                       .Where(x => !x.IsDeleted)
-                                       .ToListAsync();
+        var users = new List<PBL6.Domain.Models.Users.User>();
+        if (pageNumber < 1)
+        {
+            throw new BadRequestException("Page number is not valid");
+        }
 
         searchValue = searchValue.ToUpper();
         if (status == 0)
         {
-            users = users.Where(x => x.Username.ToUpper().Contains(searchValue)
+            users = await _unitOfWork.Users.Queryable().Include(x => x.Information)
+                                       .Where(x => x.Username.ToUpper().Contains(searchValue)
                                        || x.Username.ToUpper().Contains(searchValue)
                                        || (x.Information.FirstName + " " + x.Information.LastName).ToUpper().Contains(searchValue)
                                        || x.Email.ToUpper().Contains(searchValue)
-                                       || (x.Information.Phone is not null && x.Information.Phone.Contains(searchValue))
-                                       ).ToList();
+                                       || (x.Information.Phone != null && x.Information.Phone.Contains(searchValue))
+                                       ).ToListAsync();
         }
         else
         {
-            users = users.Where(x => x.Username.ToUpper().Contains(searchValue)
+            users = await _unitOfWork.Users.Queryable().Include(x => x.Information)
+                                       .Where(x => (x.Username.ToUpper().Contains(searchValue)
                                        || x.Username.ToUpper().Contains(searchValue)
                                        || (x.Information.FirstName + " " + x.Information.LastName).ToUpper().Contains(searchValue)
                                        || x.Email.ToUpper().Contains(searchValue)
-                                       || (x.Information.Phone is not null && x.Information.Phone.Contains(searchValue))
-                                       && x.Information.Status == status).ToList();
+                                       || (x.Information.Phone != null && x.Information.Phone.Contains(searchValue)))
+                                       && x.Information.Status == status
+                                       ).ToListAsync();
         }
-        users = users.Take(numberOfResults).ToList();
+        var pagedUsers = users.Skip((pageNumber - 1) * pageSize)
+                     .Take(pageSize)
+                     .ToList();
+
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
-        return _mapper.Map<IEnumerable<AdminUserDto>>(users);
+        return new PagedResult<AdminUserDto>
+        {
+            PageSize = pageSize,
+            CurrentPage = pageNumber,
+            TotalPages = (int)Math.Ceiling((double)users.Count() / pageSize),
+            Items = _mapper.Map<IEnumerable<AdminUserDto>>(pagedUsers)
+        };
     }
 }

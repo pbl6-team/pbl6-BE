@@ -38,19 +38,16 @@ public class AdminController : ControllerBase
     /// API Search admin - cần đăng nhập
     /// status = 0 - Get all, 1 - Active, 2 - Blocked
     /// </summary>
-    /// <param name="searchValue"></param>
-    /// <param name="numberOfResults"></param>
-    /// <param name="status"></param>
     /// <returns></returns>
     /// <response code="200">Get thành công</response>
     /// <response code="400">Có lỗi xảy ra</response>
-    [HttpGet("search/{searchValue}/{numberOfResults}/status/{status}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<AdminDto>))]
+    [HttpGet("search/{searchValue}/page/{pageNumber}/size/{pageSize}/status/{status}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PagedResult<AdminDto>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [AdminFilter(rootRequired: true)]
-    public async Task<IActionResult> SearchAdmin([FromRoute] string searchValue, [FromRoute] int numberOfResults, [FromRoute] short status)
+    public async Task<IActionResult> SearchAdmin([FromRoute] string searchValue, [FromRoute] int pageNumber, [FromRoute] int pageSize, [FromRoute] short status)
     {
-        return Ok(await _adminService.SearchAsync(searchValue, numberOfResults, status));
+        return Ok(await _adminService.SearchAsync(searchValue, pageSize, pageNumber, status));
     }
 
     /// <summary>

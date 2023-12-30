@@ -14,7 +14,7 @@ namespace PBL6.Application.Contract.Users
         Task<PagedResult<AdminUserDto>> GetAllAsync(int pageSize, int pageNumber, short status);
         Task<Guid> UpdateUserStatusAsync(Guid userId, short status);
         Task<AdminUserDto> GetByIdForAdminAsync(Guid userId);
-        Task<IEnumerable<AdminUserDto>> SearchUserForAdminAsync(string searchValue, int numberOfResults, short status);
+        Task<PagedResult<AdminUserDto>> SearchUserForAdminAsync(string searchValue, int pageSize, int pageNumber, short status);
 
     }
 }

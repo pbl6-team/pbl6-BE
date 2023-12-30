@@ -1032,8 +1032,6 @@ namespace PBL6.Application.Services
                     .Queryable()
                     .Include(x => x.Owner)
                     .ThenInclude(o => o.Information)
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
                     .ToListAsync();
             }
             else
@@ -1043,21 +1041,22 @@ namespace PBL6.Application.Services
                     .Include(x => x.Owner)
                     .ThenInclude(o => o.Information)
                     .Where(x => x.Status == status)
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
                     .ToListAsync();
             }
+
+            var pagedWorkspaces = workspaces
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
 
             return new PagedResult<AdminWorkspaceDto>
             {
                 PageSize = pageSize,
                 CurrentPage = pageNumber,
-                TotalPages = (int)
-                    Math.Ceiling(
-                        (double)await _unitOfWork.Workspaces.Queryable().CountAsync() / pageSize
-                    ),
-                Items = _mapper.Map<IEnumerable<AdminWorkspaceDto>>(workspaces)
+                TotalPages = (int)Math.Ceiling((double)workspaces.Count() / pageSize),
+                Items = _mapper.Map<IEnumerable<AdminWorkspaceDto>>(pagedWorkspaces)
             };
         }
 
@@ -1398,24 +1397,24 @@ namespace PBL6.Application.Services
             }
         }
 
-        public async Task<IEnumerable<AdminWorkspaceDto>> SearchForAdminAsync(
-            string searchValue,
-            int numberOfResults,
-            short status
+        public async Task<PagedResult<AdminWorkspaceDto>> SearchForAdminAsync(
+            string searchValue, int pageSize, int pageNumber, short status
         )
         {
             var method = GetActualAsyncMethodName();
 
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            var workspaces = await _unitOfWork.Workspaces
-                .Queryable()
-                .Include(x => x.Owner)
-                .ThenInclude(x => x.Information)
-                .ToListAsync();
+            List<Workspace> workspaces;
+
+            if (pageNumber < 1)
+            {
+                throw new BadRequestException("Page number is not valid");
+            }
+
             searchValue = searchValue.ToUpper();
             if (status == 0)
             {
-                workspaces = workspaces
+                workspaces = await _unitOfWork.Workspaces.Queryable().Include(x => x.Owner).ThenInclude(x => x.Information)
                     .Where(
                         x =>
                             x.Name.ToUpper().Contains(searchValue)
@@ -1423,24 +1422,33 @@ namespace PBL6.Application.Services
                                 .ToUpper()
                                 .Contains(searchValue)
                     )
-                    .ToList();
+                    .ToListAsync();
             }
             else
             {
-                workspaces = workspaces
+                workspaces = await _unitOfWork.Workspaces.Queryable().Include(x => x.Owner).ThenInclude(x => x.Information)
                     .Where(
                         x =>
-                            x.Name.ToUpper().Contains(searchValue)
+                            (x.Name.ToUpper().Contains(searchValue)
                             || (x.Owner.Information.FirstName + " " + x.Owner.Information.LastName)
                                 .ToUpper()
-                                .Contains(searchValue)
+                                .Contains(searchValue))
                                 && x.Status == status
                     )
-                    .ToList();
+                    .ToListAsync();
             }
-            workspaces = workspaces.Take(numberOfResults).ToList();
+            var pagedWorkspaces = workspaces
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
             _logger.LogInformation("[{_className}][{method}] End", _className, method);
-            return _mapper.Map<IEnumerable<AdminWorkspaceDto>>(workspaces);
+            return new PagedResult<AdminWorkspaceDto>
+            {
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling((double)workspaces.Count() / pageSize),
+                Items = _mapper.Map<IEnumerable<AdminWorkspaceDto>>(pagedWorkspaces)
+            };
         }
     }
 }
