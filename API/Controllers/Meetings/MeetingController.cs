@@ -3,8 +3,6 @@ using PBL6.API.Filters;
 using PBL6.Application.Contract.ExternalServices.Meetings.Dtos;
 using PBL6.Application.Contract.Meetings.Dtos;
 using PBL6.Application.ExternalServices;
-using PBL6.Application.Services;
-using Microsoft.AspNetCore.Http;
 
 namespace PBL6.API.Controllers.Messages;
 
@@ -115,7 +113,7 @@ public class MeetingController : ControllerBase
     /// <response code="200">Returns call</response>
     /// <response code="400">If the request is invalid</response>
     /// <response code="500">If there was an internal server error</response>
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CallInfoDto))]
     [HttpPost("call")]
     [AuthorizeFilter]
     public async Task<IActionResult> MakeCall([FromBody] MakeCallDto call)
@@ -149,12 +147,92 @@ public class MeetingController : ControllerBase
     /// <response code="200">Returns meeting</response>
     /// <response code="400">If the request is invalid</response>
     /// <response code="500">If there was an internal server error</response>
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CallInfoDto))]
     [HttpPost("joinCall")]
     [AuthorizeFilter]
     public async Task<IActionResult> JoinCall([FromBody] JoinMeetingDto meeting)
     {
         var meetingDto = await _meetingService.JoinCallAsync(meeting);
         return Ok(meetingDto);
+    }
+
+    /// <summary>
+    /// Get meetings
+    /// </summary>
+    /// <returns></returns>
+    /// <response code="200">Returns meetings</response>
+    /// <response code="400">If the request is invalid</response>
+    /// <response code="500">If there was an internal server error</response>
+    [HttpGet("getMeetings")]
+    [AuthorizeFilter]
+    public async Task<IActionResult> GetMeetings()
+    {
+        var meetings = await _meetingService.GetMeetingsAsync();
+        return Ok(meetings);
+    }
+
+    /// <summary>
+    /// Get meeting
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <response code="200">Returns meeting</response>
+    /// <response code="400">If the request is invalid</response>
+    /// <response code="500">If there was an internal server error</response>
+    [HttpGet("getMeeting/{id}")]
+    [AuthorizeFilter]
+    public async Task<IActionResult> GetMeeting(Guid id)
+    {
+        var meeting = await _meetingService.GetMeetingAsync(id);
+
+        return Ok(meeting);
+    }
+
+    /// <summary>
+    /// Get meetings by channel id
+    /// </summary>
+    /// <param name="channelId"></param>
+    /// <returns></returns>
+    /// <response code="200">Returns meetings</response>
+    /// <response code="400">If the request is invalid</response>
+    /// <response code="500">If there was an internal server error</response>
+    [HttpGet("getMeetingsByChannelId/{channelId}")]
+    [AuthorizeFilter]
+    public async Task<IActionResult> GetMeetingsByChannelId(Guid channelId)
+    {
+        var meetings = await _meetingService.GetMeetingsByChannelIdAsync(channelId);
+        return Ok(meetings);
+    }
+
+    /// <summary>
+    /// Delete meeting
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <response code="200">Returns meeting</response>
+    /// <response code="400">If the request is invalid</response>
+    /// <response code="500">If there was an internal server error</response>
+    [HttpDelete("delete/{id}")]
+    [AuthorizeFilter]
+    public async Task<IActionResult> DeleteMeeting(Guid id)
+    {
+        await _meetingService.DeleteMeetingAsync(id);
+        return Ok();
+    }
+
+    /// <summary>
+    /// End meeting
+    /// </summary>
+    /// <param name="meeting"></param>
+    /// <returns></returns>
+    /// <response code="200">Returns meeting</response>
+    /// <response code="400">If the request is invalid</response>
+    /// <response code="500">If there was an internal server error</response>
+    [HttpPut("endMeeting")]
+    [AuthorizeFilter]
+    public async Task<IActionResult> EndMeeting([FromBody] JoinMeetingDto meeting)
+    {
+        await _meetingService.EndMeetingAsync(meeting);
+        return Ok();
     }
 }
