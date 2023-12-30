@@ -1002,6 +1002,7 @@ namespace PBL6.Application.Services
 
             var members = await _unitOfWork.WorkspaceMembers
                 .Queryable()
+                .Include(x => x.Workspace)
                 .Include(x => x.User)
                 .ThenInclude(x => x.Information)
                 .Include(x => x.WorkspaceRole)
