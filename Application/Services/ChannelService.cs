@@ -985,6 +985,7 @@ public class ChannelService : BaseService, IChannelService
 
         var members = await _unitOfWork.ChannelMembers
             .GetMembers()
+            .Include(x => x.Channel)
             .Include(x => x.ChannelRole)
             .Where(x => x.ChannelId == channelId && x.Status == status)
             .ToListAsync();

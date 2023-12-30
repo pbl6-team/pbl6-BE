@@ -11,6 +11,7 @@ public class ChannelUserDto
     public string Email { get; set; }
     public string Picture { get; set; }
     public short Status { get; set; }
+    public bool IsOwner { get; set; }
     public DateTimeOffset BirthDay { get; set; }
     public ChannelRoleDto Role { get; set; }
 }
