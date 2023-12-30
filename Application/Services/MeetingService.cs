@@ -921,7 +921,7 @@ namespace PBL6.Application.Services
                 .Where(x => x.Channel.ChannelMembers.Any(x => x.UserId == currentUserId))
                 .ToListAsync();
 
-            var meetingDtos = _mapper.Map<List<MeetingInfo>>(meetings);
+            List<MeetingInfo> meetingDtos = _mapper.Map<List<MeetingInfo>>(meetings);
 
             return meetingDtos;
         }

@@ -320,6 +320,10 @@ namespace PBL6.Application
                                     ? src.Channel.Workspace.Name
                                     : ""
                         )
+                )
+                .ForMember(
+                    opt => opt.WorkspaceId,
+                    opt => opt.MapFrom(src => src.Channel.WorkspaceId)
                 );
         }
     }

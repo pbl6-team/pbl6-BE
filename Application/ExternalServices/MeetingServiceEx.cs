@@ -28,7 +28,6 @@ namespace PBL6.Application.ExternalServices
             var response = await client.DeleteAsync(
                 "openvidu/api/sessions/" + sessionId.Trim('"')
             );
-            response.EnsureSuccessStatusCode();
             return;
         }
 
