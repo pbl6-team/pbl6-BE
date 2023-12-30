@@ -92,6 +92,30 @@ public class DashboardService : BaseService, IDashboardService
 
             throw;
         }
-
     }
+    
+    public async Task<IEnumerable<DateTimeOffset>> GetAllUserCreatedDatesAsync()
+    {
+        var method = GetActualAsyncMethodName();
+
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var userCreatedDate = await _unitOfWork.Users.Queryable()
+                                     .Select(x => x.CreatedAt)
+                                     .ToListAsync();
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
+        return userCreatedDate;
+    }
+
+    
+        public async Task<IEnumerable<DateTimeOffset>> GetAllWorkspaceCreatedDatesAsync()
+        {
+            var method = GetActualAsyncMethodName();
+
+            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+            
+            var workspaces = await _unitOfWork.Workspaces.Queryable().ToListAsync();
+            var createdDates = workspaces.Select(x => x.CreatedAt).ToList();
+            _logger.LogInformation("[{_className}][{method}] End", _className, method);
+            return createdDates;
+        }
 }
