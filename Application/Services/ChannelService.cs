@@ -681,8 +681,9 @@ public class ChannelService : BaseService, IChannelService
                         Status = (short)NOTIFICATION_STATUS.PENDING
                     }
                 );
-
-                await _unitOfWork.ChannelMembers.DeleteAsync(member);
+                member.Status = (short)CHANNEL_MEMBER_STATUS.REMOVED;
+                await _unitOfWork.ChannelMembers.UpdateAsync(member);
+                await _unitOfWork.ChannelMembers.DeleteAsync(member); // keep this here for now to prevent unexpected bug
             }
             await _unitOfWork.SaveChangeAsync();
 
@@ -937,13 +938,13 @@ public class ChannelService : BaseService, IChannelService
 
         var channelMemberUserIds = await _unitOfWork.ChannelMembers
             .GetMembers()
-            .Where(x => x.ChannelId == channelId)
+            .Where(x => x.ChannelId == channelId && x.Status == (short)CHANNEL_MEMBER_STATUS.ACTIVE)
             .Select(x => x.UserId).Distinct().ToListAsync();
 
         var memberUserIdThatIsNotInChannel = workspaceMemberUserIds
             .Except(channelMemberUserIds)
             .ToList();
-        
+
         var users1 = _mapper.Map<List<UserNotInChannelDto>>(await _unitOfWork.Users
             .Queryable()
             .Include(x => x.Information)
@@ -957,9 +958,9 @@ public class ChannelService : BaseService, IChannelService
             .Where(x => invitedChannelMemberUserIds.Contains(x.Id))
             .ToListAsync());
         users2.ForEach(x => x.IsInvited = true);
-        
+
         var result = users1.Concat(users2).ToList();
-        
+
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
         return _mapper.Map<IEnumerable<UserNotInChannelDto>>(result);
     }
