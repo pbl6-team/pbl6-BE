@@ -119,4 +119,22 @@ public class UserController : ControllerBase
         return Ok(await _userService.SearchUserAsync(searchValue, numberOfResults));
     }
 
+    /// <summary>
+    /// Get users not in a workspace - cần đăng nhập
+    /// </summary>
+    /// <param name="workspaceId"></param>
+    /// <param name="searchValue"></param>
+    /// <param name="numberOfResults"></param>
+    /// <returns></returns>
+    /// <response code="200">Get thành công</response>
+    /// <response code="400">Có lỗi xảy ra</response>
+    [HttpGet("workspace/{workspaceId}/search-user-not-in-workspace/{searchValue}/{numberOfResults}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDetailDto>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [AuthorizeFilter]
+    public async Task<IActionResult> SearchUserThatNotInWorkspace([FromRoute] Guid workspaceId, [FromRoute] string searchValue, [FromRoute] int numberOfResults)
+    {
+        return Ok(await _userService.SearchUserThatNotInWorkspaceAsync(workspaceId, searchValue, numberOfResults));
+    }
+
 }

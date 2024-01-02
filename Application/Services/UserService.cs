@@ -213,7 +213,6 @@ public class UserService : BaseService, IUserService
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
             var users = await _unitOfWork.Users.Queryable()
                                            .Include(x => x.Information)
-                                           .Where(x => !x.IsDeleted)
                                            .ToListAsync();
 
             searchValue = searchValue.ToUpper();
@@ -413,5 +412,33 @@ public class UserService : BaseService, IUserService
             TotalPages = (int)Math.Ceiling((double)users.Count() / pageSize),
             Items = _mapper.Map<IEnumerable<AdminUserDto>>(pagedUsers)
         };
+    }
+
+    public async Task<IEnumerable<UserDetailDto>> SearchUserThatNotInWorkspaceAsync(Guid workspaceId, string searchValue, int numberOfResults)
+    {
+        var method = GetActualAsyncMethodName();
+
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+        var users = await _unitOfWork.Users.Queryable()
+                                       .Include(x => x.Information)
+                                       .ToListAsync();
+        var idOfUsersInWorkspace = await _unitOfWork.WorkspaceMembers.Queryable()
+                                       .Where(x => x.WorkspaceId == workspaceId && x.Status != (short)WORKSPACE_MEMBER_STATUS.REMOVED)
+                                       .Select(x => x.UserId)
+                                       .ToListAsync();
+
+        users = users.Where(x => !idOfUsersInWorkspace.Contains(x.Id)).ToList();
+
+        searchValue = searchValue.ToUpper();
+
+        users = users.Where(x => x.Username.ToUpper().Contains(searchValue)
+                                       || (x.Information.FirstName + " " + x.Information.LastName).ToUpper().Contains(searchValue)
+                                       || x.Email.ToUpper().Contains(searchValue)
+                                       || (x.Information.Phone != null && x.Information.Phone.Contains(searchValue))
+                                       ).ToList();
+        users = users.Take(numberOfResults).ToList();
+
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
+        return _mapper.Map<IEnumerable<UserDetailDto>>(users);
     }
 }
