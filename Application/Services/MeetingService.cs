@@ -9,7 +9,7 @@ using PBL6.Application.Contract.Meetings.Dtos;
 using PBL6.Application.ExternalServices;
 using PBL6.Common.Enum;
 using PBL6.Common.Exceptions;
-using PBL6.Common.Functions;    
+using PBL6.Common.Functions;
 using PBL6.Domain.Models.Users;
 
 namespace PBL6.Application.Services
@@ -330,6 +330,7 @@ namespace PBL6.Application.Services
                                 }
                         )
                         .ToList(),
+                    OwnerId = currentUserId
                 };
 
             channel = await _unitOfWork.Channels.AddAsync(channel);
@@ -918,7 +919,14 @@ namespace PBL6.Application.Services
                 .ThenInclude(x => x.Information)
                 .Include(x => x.Channel)
                 .ThenInclude(x => x.Workspace)
-                .Where(x => x.Channel.ChannelMembers.Any(x => x.UserId == currentUserId) && (workspaceId == null || x.Channel.WorkspaceId == workspaceId))
+                .Where(
+                    x =>
+                        x.Channel.ChannelMembers.Any(x => x.UserId == currentUserId && !x.IsDeleted)
+                        && (workspaceId == null || x.Channel.WorkspaceId == workspaceId)
+                        && !x.Channel.IsDeleted
+                        && !x.IsDeleted
+                        && !x.Channel.Workspace.IsDeleted
+                )
                 .ToListAsync();
 
             List<MeetingInfo> meetingDtos = _mapper.Map<List<MeetingInfo>>(meetings);
@@ -946,7 +954,10 @@ namespace PBL6.Application.Services
                     .FirstOrDefaultAsync(
                         x =>
                             x.Id == id
-                            && x.Channel.ChannelMembers.Any(x => x.UserId == currentUserId)
+                            && x.Channel.ChannelMembers.Any(x => x.UserId == currentUserId && !x.IsDeleted)
+                            && !x.IsDeleted
+                            && !x.Channel.IsDeleted
+                            && !x.Channel.Workspace.IsDeleted
                     ) ?? throw new BadRequestException("Meeting not found");
 
             var meetingDto = _mapper.Map<MeetingInfo>(meeting);

@@ -12,6 +12,7 @@ namespace PBL6.API.Controllers.Channels
     [Produces("application/json")]
     [Route("api/[controller]")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [AuthorizeFilter]
     public class ChannelController : Controller
     {
         private readonly IChannelService _channelService;
@@ -30,7 +31,6 @@ namespace PBL6.API.Controllers.Channels
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
-        [AuthorizeFilter]
         [WorkspaceFilter(WorkSpacePolicy.CREATE_CHANNEL)]
         public async Task<IActionResult> Create([FromBody] CreateChannelDto input)
         {
@@ -48,8 +48,8 @@ namespace PBL6.API.Controllers.Channels
         [HttpPut("{channelId}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [AuthorizeFilter]
-        [WorkspaceFilter(ChannelPolicy.UPDATE_CHANNEL)]
+        [WorkspaceFilter]
+        [ChannelFilter(ChannelPolicy.UPDATE_CHANNEL)]
         public async Task<IActionResult> Update(
             [FromRoute] Guid channelId,
             [FromBody] UpdateChannelDto input
@@ -68,8 +68,8 @@ namespace PBL6.API.Controllers.Channels
         [HttpDelete("{channelId}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [AuthorizeFilter]
-        [WorkspaceFilter(WorkSpacePolicy.DELETE_CHANNEL)]
+        [WorkspaceFilter]
+        [ChannelFilter(WorkSpacePolicy.DELETE_CHANNEL)]
         public async Task<IActionResult> Delete([FromRoute] Guid channelId)
         {
             return Ok(new { Id = await _channelService.DeleteAsync(channelId) });
@@ -85,7 +85,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpGet("workspace/{workspaceId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ChannelDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [AuthorizeFilter]
         [WorkspaceFilter]
         public async Task<IActionResult> GetAllChannelsOfAWorkspace([FromRoute] Guid workspaceId)
         {
@@ -102,7 +101,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpGet("{channelId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [AuthorizeFilter]
         [ChannelFilter]
         public async Task<IActionResult> GetById([FromRoute] Guid channelId)
         {
@@ -119,7 +117,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpGet("byname/{channelName}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ChannelDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [AuthorizeFilter]
         [ChannelFilter]
         public async Task<IActionResult> GetByName([FromRoute] string channelName)
         {
@@ -137,7 +134,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpPost("{channelId}/members")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [AuthorizeFilter]
         [ChannelFilter(ChannelPolicy.INVITE_MEMBER)]
         public async Task<IActionResult> AddMemberToChannel(
             [FromRoute] Guid channelId,
@@ -160,7 +156,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpDelete("{channelId}/members")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [AuthorizeFilter]
         [ChannelFilter(ChannelPolicy.DELETE_MEMBER)]
         public async Task<IActionResult> RemoveMemberFromChannel(
             [FromRoute] Guid channelId,
@@ -182,7 +177,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpGet("{channelId}/roles")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ChannelRoleDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [AuthorizeFilter]
         [ChannelFilter]
         public async Task<IActionResult> GetRoles([FromRoute] Guid channelId)
         {
@@ -200,7 +194,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpGet("{channelId}/roles/{roleId}/members")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDetailDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [AuthorizeFilter]
         [ChannelFilter]
         public async Task<IActionResult> GetMembersByRoleId([FromRoute] Guid channelId, [FromRoute] Guid roleId)
         {
@@ -217,7 +210,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpGet("{channelId}/members/withoutrole")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserDetailDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [AuthorizeFilter]
         [ChannelFilter]
         public async Task<IActionResult> GetMembersWithoutRole([FromRoute] Guid channelId)
         {
@@ -235,7 +227,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpGet("{channelId}/roles/{roleId}/permissions")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<PermissionDto>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [AuthorizeFilter]
         [ChannelFilter]
         public async Task<IActionResult> GetPermissions(
             [FromRoute] Guid channelId,
@@ -270,7 +261,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpGet("{channelId}/roles/{roleId}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ChannelRoleDto))]
-        [AuthorizeFilter]
         [ChannelFilter]
         public async Task<IActionResult> GetRole(
             [FromRoute] Guid channelId,
@@ -292,7 +282,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpPut("{channelId}/roles/{roleId}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [AuthorizeFilter]
         [ChannelFilter(ChannelPolicy.CREATE_UPDATE_ROLE)]
         public async Task<IActionResult> UpdateRole(
             [FromRoute] Guid channelId,
@@ -315,7 +304,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpPost("{channelId}/roles")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [AuthorizeFilter]
         [ChannelFilter(ChannelPolicy.CREATE_UPDATE_ROLE)]
         public async Task<IActionResult> AddRole(
             [FromRoute] Guid channelId,
@@ -336,7 +324,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpDelete("{channelId}/roles/{roleId}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [AuthorizeFilter]
         [ChannelFilter(ChannelPolicy.CREATE_UPDATE_ROLE)]
         public async Task<IActionResult> DeleteRole(
             [FromRoute] Guid channelId,
@@ -359,7 +346,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpPut("{channelId}/users/{userId}/roles")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [AuthorizeFilter]
         [ChannelFilter(ChannelPolicy.CREATE_UPDATE_ROLE)]
         public async Task<IActionResult> SetRoleToUser(
             [FromRoute] Guid channelId,
@@ -382,7 +368,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpGet("workspace/{workspaceId}/channel/{channelId}/user-not-in-channel")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [AuthorizeFilter]
         [ChannelFilter]
         public async Task<IActionResult> GetMembersThatNotInTheChannel(
             [FromRoute] Guid workspaceId,
@@ -403,7 +388,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpGet("{channelId}/users/{status?}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [AuthorizeFilter]
         [ChannelFilter]
         public async Task<IActionResult> GetMembers([FromRoute] Guid channelId, [FromRoute] short status = 1)
         {
@@ -420,7 +404,6 @@ namespace PBL6.API.Controllers.Channels
         // [HttpPost("{channelId}/accept-invitation")]
         // [ProducesResponseType(StatusCodes.Status404NotFound)]
         // [ProducesResponseType(StatusCodes.Status204NoContent)]
-        // [AuthorizeFilter]
         // [ChannelFilter]
         // public async Task<IActionResult> AcceptInvitation([FromRoute] Guid channelId)
         // {
@@ -438,7 +421,6 @@ namespace PBL6.API.Controllers.Channels
         // [HttpPost("{channelId}/decline-invitation")]
         // [ProducesResponseType(StatusCodes.Status404NotFound)]
         // [ProducesResponseType(StatusCodes.Status204NoContent)]
-        // [AuthorizeFilter]
         // [ChannelFilter]
         // public async Task<IActionResult> DeclineInvitation([FromRoute] Guid channelId)
         // {
@@ -456,7 +438,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpPost("{channelId}/leave")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [AuthorizeFilter]
         public async Task<IActionResult> LeaveChannel([FromRoute] Guid channelId)
         {
             await _channelService.LeaveChannelAsync(channelId);
@@ -474,7 +455,6 @@ namespace PBL6.API.Controllers.Channels
         [HttpPut("{channelId}/ownership/{userId}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [AuthorizeFilter]
         [ChannelFilter]
         public async Task<IActionResult> TransferOwnership(
             [FromRoute] Guid channelId,

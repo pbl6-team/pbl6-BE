@@ -6,7 +6,7 @@ namespace PBL6.Application.Contract.Workspaces.Dtos
 
         public string Description { get; set; }
 
-        public string OwnerId { get; set; }
+        public Guid OwnerId { get; set; }
 
         public Guid WorkspaceId { get; set; }
         

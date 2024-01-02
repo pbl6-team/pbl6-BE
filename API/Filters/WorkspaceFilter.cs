@@ -40,6 +40,10 @@ namespace PBL6.Application.Filters
                 var userId = context.HttpContext.User.Claims
                     .FirstOrDefault(x => x.Type == CustomClaimTypes.UserId)
                     ?.Value;
+                if (workspace.OwnerId == Guid.Parse(userId))
+                {
+                    return;
+                }
                 var permissions = await workspaceService.GetPermissionOfUser(
                     Guid.Parse(workspaceId),
                     Guid.Parse(userId)
