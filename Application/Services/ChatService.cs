@@ -172,20 +172,13 @@ namespace PBL6.Application.Services
                         {
                             Id = (Guid)x.Key,
                             Name =
-                                currentUserId
-                                == x.OrderByDescending(x => x.CreatedAt).First().CreatedBy
+                                currentUserId == x.First().CreatedBy
                                     ? x.First().Receiver.Information.FirstName
                                         + " "
-                                        + x.OrderByDescending(x => x.CreatedAt)
-                                            .First()
-                                            .Receiver.Information.LastName
-                                    : x.OrderByDescending(x => x.CreatedAt)
-                                        .First()
-                                        .Sender.Information.FirstName
+                                        + x.First().Receiver.Information.LastName
+                                    : x.First().Sender.Information.FirstName
                                         + " "
-                                        + x.OrderByDescending(x => x.CreatedAt)
-                                            .First()
-                                            .Sender.Information.LastName,
+                                        + x.First().Sender.Information.LastName,
                             LastMessage = x.OrderByDescending(x => x.CreatedAt).First().Content,
                             LastMessageTime = x.OrderByDescending(x => x.CreatedAt)
                                 .First()
@@ -195,10 +188,6 @@ namespace PBL6.Application.Services
                                 == x.OrderByDescending(x => x.CreatedAt).First().CreatedBy
                                     ? "You"
                                     : x.OrderByDescending(x => x.CreatedAt)
-                                        .First()
-                                        .Receiver.Information.FirstName
-                                        + " "
-                                        + x.OrderByDescending(x => x.CreatedAt)
                                             .First()
                                             .Receiver.Information.LastName,
                             LastMessageSenderAvatar = x.OrderByDescending(x => x.CreatedAt)
@@ -269,11 +258,23 @@ namespace PBL6.Application.Services
                     )
                 )
                     .SelectMany(x => x.Files)
+                    .Where(
+                        x =>
+                            !x.IsDeleted
+                            && (
+                                (
+                                    input.Type == ((short)FILE_TYPE.MEDIA)
+                                    && (x.Type.Contains("image") || x.Type.Contains("video"))
+                                )
+                                || input.Type != ((short)FILE_TYPE.MEDIA)
+                            )
+                    )
                     .Select(
                         x =>
                             new FileInfoDto
                             {
                                 Id = x.Id,
+                                MessageId = x.MessageId.Value,
                                 Name = x.Name,
                                 Type = x.Type,
                                 Url = x.Url,
@@ -302,12 +303,24 @@ namespace PBL6.Application.Services
                         int.MaxValue
                     )
                 )
-                    .SelectMany(x => x.Files)
+                    .SelectMany(m => m.Files)
+                    .Where(
+                        x =>
+                            !x.IsDeleted
+                            && (
+                                (
+                                    input.Type == ((short)FILE_TYPE.MEDIA)
+                                    && (x.Type.Contains("image") || x.Type.Contains("video"))
+                                )
+                                || input.Type != ((short)FILE_TYPE.MEDIA)
+                            )
+                    )
                     .Select(
                         x =>
                             new FileInfoDto
                             {
                                 Id = x.Id,
+                                MessageId = x.MessageId.Value,
                                 Name = x.Name,
                                 Type = x.Type,
                                 Url = x.Url,
@@ -651,11 +664,11 @@ namespace PBL6.Application.Services
             {
                 foreach (var fileId in input.Files)
                 {
-                    var fileInfo = await _unitOfWork.Repository<FileOfMessage>().Queryable().Where(
-                        x => x.Id == fileId 
-                        && !x.IsDeleted
-                        && x.MessageId == null
-                    ).FirstOrDefaultAsync();
+                    var fileInfo = await _unitOfWork
+                        .Repository<FileOfMessage>()
+                        .Queryable()
+                        .Where(x => x.Id == fileId && !x.IsDeleted && x.MessageId == null)
+                        .FirstOrDefaultAsync();
 
                     if (fileInfo is not null)
                     {

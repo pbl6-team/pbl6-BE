@@ -101,4 +101,10 @@ namespace PBL6.Common.Enum
         ENDED = 2,
         CANCELED = 3,
     }
+
+    public enum FILE_TYPE
+    {
+        MEDIA = 1,
+        DOCUMENT = 2,
+    }
 }

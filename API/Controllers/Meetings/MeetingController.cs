@@ -165,9 +165,9 @@ public class MeetingController : ControllerBase
     /// <response code="500">If there was an internal server error</response>
     [HttpGet("getMeetings")]
     [AuthorizeFilter]
-    public async Task<IActionResult> GetMeetings()
+    public async Task<IActionResult> GetMeetings(Guid? workspaceId)
     {
-        var meetings = await _meetingService.GetMeetingsAsync();
+        var meetings = await _meetingService.GetMeetingsAsync(workspaceId);
         return Ok(meetings);
     }
 

@@ -1,9 +1,13 @@
+using PBL6.Application.Contract.Channels.Dtos;
+
 namespace PBL6.Application.Contract.Meetings.Dtos
 {
     public class MeetingInfo
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
+        public string Description {get; set;}
+        public List<ChannelUserDto> Participants { get; set; }
         public string SessionId { get; set; }
         public string Password { get; set; }
         public short Status { get; set; }

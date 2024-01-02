@@ -324,6 +324,8 @@ namespace PBL6.Application
                         )
                 )
                 .ForMember(
+                    x => x.Participants, opt => opt.MapFrom(src => src.Channel.ChannelMembers))
+                .ForMember(
                     opt => opt.WorkspaceId,
                     opt => opt.MapFrom(src => src.Channel.WorkspaceId)
                 );

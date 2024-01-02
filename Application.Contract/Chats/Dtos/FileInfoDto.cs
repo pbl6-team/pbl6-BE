@@ -3,6 +3,8 @@ namespace PBL6.Application.Contract.Chats.Dtos
     public class FileInfoDto
     {
         public Guid Id { get; set; }
+
+        public Guid MessageId { get; set; }
         
         public string Url { get; set; }
 
