@@ -330,6 +330,7 @@ namespace PBL6.Application.Services
                                 }
                         )
                         .ToList(),
+                    OwnerId = currentUserId
                 };
 
             channel = await _unitOfWork.Channels.AddAsync(channel);
