@@ -4,7 +4,7 @@ namespace PBL6.Application.Contract.Meetings.Dtos
     {
         Task<MeetingDto> CreateMeetingAsync(CreateMeetingDto input);
         Task<MeetingDto> UpdateMeetingAsync(Guid id, UpdateMeetingDto input);
-        Task<List<MeetingInfo>> GetMeetingsAsync();
+        Task<List<MeetingInfo>> GetMeetingsAsync(Guid? workspaceId);
         Task<MeetingInfo> GetMeetingAsync(Guid id);
         Task<List<MeetingInfo>> GetMeetingsByChannelIdAsync(Guid channelId);
         Task DeleteMeetingAsync(Guid id);

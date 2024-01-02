@@ -1,9 +1,14 @@
+using PBL6.Application.Contract.Users.Dtos;
+using PBL6.Domain.Models.Users;
+
 namespace PBL6.Application.Contract.Meetings.Dtos
 {
     public class MeetingInfo
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
+        public string Description {get; set;}
+        public List<UserDetailDto> Participants { get; set; }
         public string SessionId { get; set; }
         public string Password { get; set; }
         public short Status { get; set; }

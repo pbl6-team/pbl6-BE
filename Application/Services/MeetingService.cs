@@ -9,7 +9,7 @@ using PBL6.Application.Contract.Meetings.Dtos;
 using PBL6.Application.ExternalServices;
 using PBL6.Common.Enum;
 using PBL6.Common.Exceptions;
-using PBL6.Common.Functions;
+using PBL6.Common.Functions;    
 using PBL6.Domain.Models.Users;
 
 namespace PBL6.Application.Services
@@ -902,7 +902,7 @@ namespace PBL6.Application.Services
             };
         }
 
-        public async Task<List<MeetingInfo>> GetMeetingsAsync()
+        public async Task<List<MeetingInfo>> GetMeetingsAsync(Guid? workspaceId)
         {
             var method = GetActualAsyncMethodName();
             _logger.LogInformation("[{_className}][{method}] Start", _className, method);
@@ -918,7 +918,7 @@ namespace PBL6.Application.Services
                 .ThenInclude(x => x.Information)
                 .Include(x => x.Channel)
                 .ThenInclude(x => x.Workspace)
-                .Where(x => x.Channel.ChannelMembers.Any(x => x.UserId == currentUserId))
+                .Where(x => x.Channel.ChannelMembers.Any(x => x.UserId == currentUserId) && (workspaceId == null || x.Channel.WorkspaceId == workspaceId))
                 .ToListAsync();
 
             List<MeetingInfo> meetingDtos = _mapper.Map<List<MeetingInfo>>(meetings);
