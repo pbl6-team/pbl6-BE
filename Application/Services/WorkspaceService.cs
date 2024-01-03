@@ -515,7 +515,11 @@ namespace PBL6.Application.Services
                 var currentUser = await _unitOfWork.Users.GetUserByIdAsync(currentUserId);
 
                 var workspace =
-                    await _unitOfWork.Workspaces.GetAsync(workspaceId)
+                    await _unitOfWork.Workspaces.Queryable().Include(x => x.Members.Where(x => !x.IsDeleted))
+                    .ThenInclude(m => m.User)
+                    .ThenInclude(u => u.Information)
+                    .Include(x => x.Channels.Where(x => !x.IsDeleted))
+                    .FirstOrDefaultAsync(x => x.Id == workspaceId)
                     ?? throw new NotFoundException<Workspace>(workspaceId.ToString());
                 if (!await _unitOfWork.Workspaces.CheckIsMemberAsync(workspaceId, currentUserId))
                 {
