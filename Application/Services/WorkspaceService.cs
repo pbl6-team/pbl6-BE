@@ -515,7 +515,7 @@ namespace PBL6.Application.Services
                 var currentUser = await _unitOfWork.Users.GetUserByIdAsync(currentUserId);
 
                 var workspace =
-                    await _unitOfWork.Workspaces.Queryable().Include(x => x.Members.Where(x => !x.IsDeleted))
+                    await _unitOfWork.Workspaces.Queryable().Include(x => x.Members.Where(x => !x.IsDeleted && x.Status != (short)WORKSPACE_MEMBER_STATUS.REMOVED))
                     .ThenInclude(m => m.User)
                     .ThenInclude(u => u.Information)
                     .Include(x => x.Channels.Where(x => !x.IsDeleted))
