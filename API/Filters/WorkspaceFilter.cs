@@ -25,7 +25,7 @@ namespace PBL6.Application.Filters
             var workspaceId = GetValue(context, "workspace-id");
             if (string.IsNullOrEmpty(workspaceId))
             {
-                throw new Exception("workspace-id is required");
+                throw new ForbidException("workspace-id is required");
             }
 
             var workspaceService =

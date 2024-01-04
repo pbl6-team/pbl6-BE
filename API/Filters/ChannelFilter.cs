@@ -27,7 +27,7 @@ namespace PBL6.API.Filters
             var channelId = GetValue(context, "channel-id");
             if (string.IsNullOrEmpty(channelId))
             {
-                throw new Exception("channel-id is required");
+                throw new ForbidException("channel-id is required");
             }
 
             var channelService =
