@@ -469,6 +469,7 @@ namespace PBL6.Application.Services
             var _currentUserId = Guid.Parse(
                 _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
             );
+            var transaction = await _unitOfWork.BeginTransactionAsync();
             var current = await _unitOfWork.Users
                 .Queryable()
                 .Include(x => x.Information)
@@ -537,6 +538,18 @@ namespace PBL6.Application.Services
                 }
             }
 
+            await _unitOfWork.Repository<Meeting>().UpdateAsync(meeting);
+            await _unitOfWork.SaveChangeAsync();
+
+            meeting = await _unitOfWork
+                .Repository<Meeting>()
+                .Queryable()
+                .Include(x => x.Channel)
+                .ThenInclude(x => x.ChannelMembers)
+                .ThenInclude(x => x.User)
+                .ThenInclude(x => x.Information)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
             message.Data = JsonSerializer.Serialize(
                 JsonSerializer.Serialize(
                     new MeetingDto
@@ -573,6 +586,7 @@ namespace PBL6.Application.Services
             message = await _unitOfWork.Messages.Get(message.Id);
             var messageDto = _mapper.Map<MessageDto>(message);
             _backgroundJobClient.Enqueue(() => _hubService.SendMessage(messageDto));
+            await _unitOfWork.CommitAsync(transaction);
 
             return new MeetingDto
             {

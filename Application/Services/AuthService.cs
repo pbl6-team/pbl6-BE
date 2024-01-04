@@ -440,7 +440,9 @@ namespace PBL6.Application.Services
                             Information = new()
                             {
                                 FirstName = googleOauthUser.Name,
-                                Status = (short)USER.DEFAULT
+                                LastName = "",
+                                Status = (short)USER.DEFAULT,
+                                Picture = googleOauthUser.Picture
                             },
                             IsActive = true
                         };
