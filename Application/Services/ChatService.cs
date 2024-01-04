@@ -6,7 +6,6 @@ using Newtonsoft.Json;
 using PBL6.Application.Contract.Chats;
 using PBL6.Application.Contract.Chats.Dtos;
 using PBL6.Application.Hubs;
-using PBL6.Common.Consts;
 using PBL6.Common.Enum;
 using PBL6.Common.Exceptions;
 using PBL6.Common.Functions;

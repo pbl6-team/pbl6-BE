@@ -23,7 +23,7 @@ namespace PBL6.Application.Contract.Chats.Dtos
         public DateTimeOffset? SendAt { get; set; }
 
         public string Reaction { get; set; }
-
+    
         public int ChildCount { get; set; }
 
         public IEnumerable<Reader> Readers { get; set; }
@@ -37,5 +37,7 @@ namespace PBL6.Application.Contract.Chats.Dtos
         public bool IsPined { get; set; }
 
         public MeetingDto Meeting { get; set; }
+
+        public short Type { get; set; }
     }
 }
