@@ -3,6 +3,8 @@ using PBL6.API.Filters;
 using PBL6.Application.Contract.ExternalServices.Meetings.Dtos;
 using PBL6.Application.Contract.Meetings.Dtos;
 using PBL6.Application.ExternalServices;
+using PBL6.Application.Filters;
+using PBL6.Common.Consts;
 
 namespace PBL6.API.Controllers.Messages;
 
@@ -64,6 +66,7 @@ public class MeetingController : ControllerBase
     [AuthorizeFilter]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesDefaultResponseType]
+    [WorkspaceFilter(WorkSpacePolicy.CREATE_UPDATE_MEETING)]
     public async Task<IActionResult> CreateMeetingAsync([FromBody] CreateMeetingDto meeting)
     {
         var meetingDto = await _meetingService.CreateMeetingAsync(meeting);

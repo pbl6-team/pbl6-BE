@@ -19,5 +19,7 @@ namespace PBL6.Application.Contract.Meetings.Dtos
         public Guid? ChannelId { get; set; }
 
         public List<MemberOfMeetingDto> Members { get; set; }   
+
+        public short Status { get; set; }
     }
 }

@@ -133,6 +133,7 @@ namespace PBL6.Application.Services
                             SessionId = meeting.SessionId,
                             Password = meeting.Password,
                             ChannelId = meeting.ChannelId,
+                            Status = (short)MEETING_STATUS.SCHEDULED,
                         }
                     ),
                 };
@@ -177,7 +178,8 @@ namespace PBL6.Application.Services
                                         Description = meeting.Description,
                                         SessionId = meeting.SessionId,
                                         Password = meeting.Password,
-                                        ChannelId = meeting.ChannelId
+                                        ChannelId = meeting.ChannelId,
+                                        Status = (short)MEETING_STATUS.SCHEDULED,
                                     }
                                 )
                             },
@@ -351,7 +353,8 @@ namespace PBL6.Application.Services
                         Description = channel.Meetings.FirstOrDefault().Description,
                         SessionId = channel.Meetings.FirstOrDefault().SessionId,
                         Password = channel.Meetings.FirstOrDefault().Password,
-                        ChannelId = channel.Id
+                        ChannelId = channel.Id,
+                        Status = (short)MEETING_STATUS.SCHEDULED,
                     }
                 ),
             };
@@ -387,7 +390,8 @@ namespace PBL6.Application.Services
                                         Description = channel.Meetings.FirstOrDefault().Description,
                                         SessionId = channel.Meetings.FirstOrDefault().SessionId,
                                         Password = channel.Meetings.FirstOrDefault().Password,
-                                        ChannelId = channel.Id
+                                        ChannelId = channel.Id,
+                                        Status = (short)MEETING_STATUS.SCHEDULED,
                                     }
                                 )
                             },
@@ -484,6 +488,11 @@ namespace PBL6.Application.Services
                     .ThenInclude(x => x.Information)
                     .FirstOrDefaultAsync(x => x.Id == id)
                 ?? throw new BadRequestException("Meeting not found");
+
+            if (meeting.CreatedBy != _currentUserId)
+            {
+                throw new ForbidException("You are not owner of this meeting");
+            }
             var message = new Message
             {
                 Content =
@@ -519,7 +528,7 @@ namespace PBL6.Application.Services
                 {
                     member.Status = (short)CHANNEL_MEMBER_STATUS.ACTIVE;
                 }
-                else
+                else if (member.UserId != meeting.CreatedBy)
                 {
                     member.Status = (short)CHANNEL_MEMBER_STATUS.REMOVED;
                 }
@@ -550,34 +559,33 @@ namespace PBL6.Application.Services
                 .ThenInclude(x => x.Information)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
-            message.Data =
-                JsonSerializer.Serialize(
-                    new MeetingDto
-                    {
-                        Id = meeting.Id,
-                        Name = meeting.Name,
-                        TimeStart = meeting.TimeStart,
-                        TimeEnd = meeting.TimeEnd,
-                        Description = meeting.Description,
-                        SessionId = meeting.SessionId,
-                        Password = meeting.Password,
-                        ChannelId = meeting.ChannelId,
-                        Members = meeting.Channel.ChannelMembers
-                            .Select(
-                                x =>
-                                    new MemberOfMeetingDto
-                                    {
-                                        UserId = x.UserId,
-                                        FullName =
-                                            x.User.Information.FirstName
-                                            + " "
-                                            + x.User.Information.LastName,
-                                        Email = x.User.Email,
-                                        IsHost = x.UserId == meeting.CreatedBy,
-                                    }
-                            )
-                            .ToList()
-                    }
+            message.Data = JsonSerializer.Serialize(
+                new MeetingDto
+                {
+                    Id = meeting.Id,
+                    Name = meeting.Name,
+                    TimeStart = meeting.TimeStart,
+                    TimeEnd = meeting.TimeEnd,
+                    Description = meeting.Description,
+                    SessionId = meeting.SessionId,
+                    Password = meeting.Password,
+                    ChannelId = meeting.ChannelId,
+                    Members = meeting.Channel.ChannelMembers
+                        .Select(
+                            x =>
+                                new MemberOfMeetingDto
+                                {
+                                    UserId = x.UserId,
+                                    FullName =
+                                        x.User.Information.FirstName
+                                        + " "
+                                        + x.User.Information.LastName,
+                                    Email = x.User.Email,
+                                    IsHost = x.UserId == meeting.CreatedBy,
+                                }
+                        )
+                        .ToList()
+                }
             );
 
             message = await _unitOfWork.Messages.AddAsync(message);
@@ -625,16 +633,35 @@ namespace PBL6.Application.Services
             var currentUserId = Guid.Parse(
                 _currentUser.UserId ?? throw new UnauthorizedException("User is not logged in")
             );
+            var currentUser = await _unitOfWork.Users
+                .Queryable()
+                .Include(x => x.Information)
+                .FirstOrDefaultAsync(x => x.Id == currentUserId && x.IsActive);
+
             if (meeting.CreatedBy != currentUserId)
             {
-                throw new BadRequestException("You are not owner of this meeting");
+                throw new ForbidException("You are not owner of this meeting");
             }
 
             var message = new Message
             {
-                Content = $"{currentUserId} has deleted meeting {meeting.Name}",
+                Content = $"{currentUser.Information.FirstName} {currentUser.Information.LastName} has canceled meeting {meeting.Name}",
                 Type = (short)MESSAGE_TYPE.MEETING,
                 ToChannelId = meeting.ChannelId,
+                Data = JsonSerializer.Serialize(
+                    new MeetingDto
+                    {
+                        Id = meeting.Id,
+                        Name = meeting.Name,
+                        TimeStart = meeting.TimeStart,
+                        TimeEnd = meeting.TimeEnd,
+                        Description = meeting.Description,
+                        SessionId = meeting.SessionId,
+                        Password = meeting.Password,
+                        ChannelId = meeting.ChannelId,
+                        Status = (short)MEETING_STATUS.CANCELED,
+                    }
+                )
             };
             message = await _unitOfWork.Messages.AddAsync(message);
             meeting.Status = (short)MEETING_STATUS.CANCELED;
@@ -664,8 +691,15 @@ namespace PBL6.Application.Services
                     .Include(x => x.Channel)
                     .ThenInclude(x => x.ChannelMembers)
                     .ThenInclude(x => x.User)
-                    .FirstOrDefaultAsync(x => x.SessionId == input.SessionId)
-                ?? throw new BadRequestException("Meeting not found");
+                    .FirstOrDefaultAsync(
+                        x =>
+                            x.SessionId == input.SessionId
+                            && (
+                                x.Status != (short)MEETING_STATUS.CANCELED
+                            )
+                    ) ?? throw new BadRequestException("Meeting not found or has been canceled");
+            meeting.Status = (short)MEETING_STATUS.ACTIVE;
+
             var isInChannel = await _unitOfWork.Channels.CheckIsMemberAsync(
                 meeting.ChannelId,
                 currentUserId
@@ -753,7 +787,7 @@ namespace PBL6.Application.Services
 
             if (meeting.CreatedBy != currentUserId)
             {
-                throw new BadRequestException("You are not owner of this meeting");
+                throw new ForbidException("You are not owner of this meeting");
             }
 
             meeting.Status = (short)MEETING_STATUS.ENDED;
@@ -778,6 +812,7 @@ namespace PBL6.Application.Services
                             SessionId = meeting.SessionId,
                             Password = meeting.Password,
                             ChannelId = meeting.ChannelId,
+                            Status = (short)MEETING_STATUS.ENDED,  
                         }
                     )
                 };
@@ -967,7 +1002,9 @@ namespace PBL6.Application.Services
                     .FirstOrDefaultAsync(
                         x =>
                             x.Id == id
-                            && x.Channel.ChannelMembers.Any(x => x.UserId == currentUserId && !x.IsDeleted)
+                            && x.Channel.ChannelMembers.Any(
+                                x => x.UserId == currentUserId && !x.IsDeleted
+                            )
                             && !x.IsDeleted
                             && !x.Channel.IsDeleted
                             && !x.Channel.Workspace.IsDeleted

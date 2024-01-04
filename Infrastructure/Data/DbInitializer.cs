@@ -128,7 +128,14 @@ namespace PBL6.Infrastructure.Data
                     Name = "Delete workspace",
                     Description = "Delete workspace",
                     IsActive = true
-                }
+                },
+                new()
+                {
+                    Code = "CREATE_UPDATE_MEETING",
+                    Name = "Create/update meeting",
+                    Description = "Create/update meeting, delete meeting, set meeting for channel",
+                    IsActive = true
+                },
             };
             permissions = permissions
                 .Where(x => !context.WorkspacePermissions.Any(y => y.Code == x.Code))

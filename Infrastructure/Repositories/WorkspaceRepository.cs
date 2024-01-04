@@ -87,7 +87,7 @@ namespace PBL6.Infrastructure.Repositories
         public async Task<WorkspaceMember> GetMemberByUserId(Guid workspaceId, Guid userId)
         {
             return await _apiDbContext.WorkspaceMembers.FirstOrDefaultAsync(
-                x => !x.IsDeleted && x.WorkspaceId == workspaceId && x.UserId == userId
+                x => !x.IsDeleted && x.WorkspaceId == workspaceId && x.UserId == userId && x.Status != (short)WORKSPACE_MEMBER_STATUS.REMOVED
             );
         }
 

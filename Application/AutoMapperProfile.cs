@@ -237,7 +237,10 @@ namespace PBL6.Application
                 .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.User.Information.Picture))
                 .ForMember(x => x.Role, opt => opt.MapFrom(src => src.WorkspaceRole))
                 .ForMember(x => x.Status, opt => opt.MapFrom(src => src.Status))
-                .ForMember(x => x.IsOwner, opt => opt.MapFrom(src => src.Workspace.OwnerId == src.UserId));
+                .ForMember(
+                    x => x.IsOwner,
+                    opt => opt.MapFrom(src => src.Workspace.OwnerId == src.UserId)
+                );
 
             CreateMap<ChannelMember, ChannelUserDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.UserId))
@@ -259,7 +262,10 @@ namespace PBL6.Application
                 .ForMember(x => x.Picture, opt => opt.MapFrom(src => src.User.Information.Picture))
                 .ForMember(x => x.Role, opt => opt.MapFrom(src => src.ChannelRole))
                 .ForMember(x => x.Status, opt => opt.MapFrom(src => src.Status))
-                .ForMember(x => x.IsOwner, opt => opt.MapFrom(src => src.Channel.OwnerId == src.UserId));
+                .ForMember(
+                    x => x.IsOwner,
+                    opt => opt.MapFrom(src => src.Channel.OwnerId == src.UserId)
+                );
 
             CreateMap<Notification, NotificationDto>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(src => src.Id))
@@ -324,7 +330,15 @@ namespace PBL6.Application
                         )
                 )
                 .ForMember(
-                    x => x.Participants, opt => opt.MapFrom(src => src.Channel.ChannelMembers))
+                    x => x.Participants,
+                    opt =>
+                        opt.MapFrom(
+                            src =>
+                                src.Channel.ChannelMembers.Where(
+                                    x => x.Status == (short)CHANNEL_MEMBER_STATUS.ACTIVE
+                                )
+                        )
+                )
                 .ForMember(
                     opt => opt.WorkspaceId,
                     opt => opt.MapFrom(src => src.Channel.WorkspaceId)

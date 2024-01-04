@@ -265,7 +265,7 @@ namespace PBL6.Application.Services
                                     input.Type == ((short)FILE_TYPE.MEDIA)
                                     && (x.Type.Contains("image") || x.Type.Contains("video"))
                                 )
-                                || input.Type != ((short)FILE_TYPE.MEDIA)
+                                || (input.Type != ((short)FILE_TYPE.MEDIA) && !x.Type.Contains("image") && !x.Type.Contains("video"))
                             )
                     )
                     .Select(
@@ -601,7 +601,8 @@ namespace PBL6.Application.Services
                         UserId = currentUserId,
                         IsDeleted = false,
                         IsRead = true,
-                        Reaction = ""
+                        Reaction = "",
+                        MessageId = messageId
                     }
                 );
             }

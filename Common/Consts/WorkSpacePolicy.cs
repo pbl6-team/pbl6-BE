@@ -36,5 +36,10 @@ namespace PBL6.Common.Consts
         /// Delete workspace
         /// </summary>
         public const string DELETE_WORKSPACE = "DELETE_WORKSPACE";
+
+        /// <summary>
+        /// Create/update meeting
+        /// </summary>
+        public const string CREATE_UPDATE_MEETING = "CREATE_UPDATE_MEETING";
     }
 }
