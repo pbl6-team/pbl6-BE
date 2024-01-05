@@ -4,9 +4,7 @@ public interface IDashboardService
 {
     Task<int> TotalWorkspacesAsync(short status);
     Task<int> TotalUsersAsync(short status);
-    Task<int> TotalOnlineUsersAsync();
+    int TotalOnlineUsers();
     Task<IEnumerable<DateTimeOffset>> GetAllUserCreatedDatesAsync();
     Task<IEnumerable<DateTimeOffset>> GetAllWorkspaceCreatedDatesAsync();
-
-
 }

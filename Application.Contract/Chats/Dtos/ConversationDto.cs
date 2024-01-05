@@ -5,6 +5,7 @@ namespace PBL6.Application.Contract.Chats.Dtos
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string LastMessage { get; set; }
+        public Guid? LastMessageId { get; set; }
         public DateTimeOffset LastMessageTime { get; set; }
         public string LastMessageSender { get; set; }
         public string LastMessageSenderAvatar { get; set; }

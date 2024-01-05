@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using Application.Contract.Dashboard;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using PBL6.Application.Hubs;
 using PBL6.Application.Services;
 
 namespace Application.Services.Admins;
@@ -19,9 +20,9 @@ public class DashboardService : BaseService, IDashboardService
 
     static string GetActualAsyncMethodName([CallerMemberName] string name = null) => name;
 
-    public Task<int> TotalOnlineUsersAsync()
+    public int TotalOnlineUsers()
     {
-        throw new NotImplementedException();
+        return ChatHub.TotalOnlineUsers();
     }
 
     public async Task<int> TotalUsersAsync(short status)
@@ -93,7 +94,7 @@ public class DashboardService : BaseService, IDashboardService
             throw;
         }
     }
-    
+
     public async Task<IEnumerable<DateTimeOffset>> GetAllUserCreatedDatesAsync()
     {
         var method = GetActualAsyncMethodName();
@@ -106,16 +107,16 @@ public class DashboardService : BaseService, IDashboardService
         return userCreatedDate;
     }
 
-    
-        public async Task<IEnumerable<DateTimeOffset>> GetAllWorkspaceCreatedDatesAsync()
-        {
-            var method = GetActualAsyncMethodName();
 
-            _logger.LogInformation("[{_className}][{method}] Start", _className, method);
-            
-            var workspaces = await _unitOfWork.Workspaces.Queryable().ToListAsync();
-            var createdDates = workspaces.Select(x => x.CreatedAt).ToList();
-            _logger.LogInformation("[{_className}][{method}] End", _className, method);
-            return createdDates;
-        }
+    public async Task<IEnumerable<DateTimeOffset>> GetAllWorkspaceCreatedDatesAsync()
+    {
+        var method = GetActualAsyncMethodName();
+
+        _logger.LogInformation("[{_className}][{method}] Start", _className, method);
+
+        var workspaces = await _unitOfWork.Workspaces.Queryable().ToListAsync();
+        var createdDates = workspaces.Select(x => x.CreatedAt).ToList();
+        _logger.LogInformation("[{_className}][{method}] End", _className, method);
+        return createdDates;
+    }
 }

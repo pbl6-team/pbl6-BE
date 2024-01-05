@@ -179,6 +179,7 @@ namespace PBL6.Application.Services
                                         + " "
                                         + x.First().Sender.Information.LastName,
                             LastMessage = x.OrderByDescending(x => x.CreatedAt).First().Content,
+                            LastMessageId = x.OrderByDescending(x => x.CreatedAt).First().Id,
                             LastMessageTime = x.OrderByDescending(x => x.CreatedAt)
                                 .First()
                                 .CreatedAt,
