@@ -147,7 +147,6 @@ public class UserController : ControllerBase
     [HttpGet("total-online-users")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [AuthorizeFilter]
     public ActionResult TotalOnlineUsers()
     {
         return Ok(_userService.TotalOnlineUsers());
