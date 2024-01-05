@@ -81,4 +81,21 @@ public class DashboardController : ControllerBase
         var allWorkspaceCreatedDates = await _dashboardService.GetAllWorkspaceCreatedDatesAsync();
         return Ok(allWorkspaceCreatedDates);
     }
+
+    /// <summary>
+    /// API get total online users - cần đăng nhập
+    /// </summary>
+    /// <returns></returns>
+    /// <response code="200">Get thành công</response>
+    /// <response code="400">Có lỗi xảy ra</response>
+    /// <response code="401">Chưa đăng nhập</response>
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [AdminFilter]
+    [HttpGet("total-online-users")]
+    public ActionResult TotalOnlineUsers()
+    {
+        var totalOnlineUsers = _dashboardService.TotalOnlineUsers();
+        return Ok(totalOnlineUsers);
+    }
 }

@@ -607,5 +607,19 @@ namespace PBL6.Application.Hubs
         {
             return await _meetingService.CreateToken(sessionId);
         }
+
+        public static int TotalOnlineUsers()
+        {
+            List<HubUser> userList = Users.Values.ToList();
+            int count = 0;
+            foreach (var user in userList)
+            {
+                if (user.ConnectionIds.Count > 0)
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
     }
 }
