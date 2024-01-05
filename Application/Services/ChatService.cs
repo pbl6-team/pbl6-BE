@@ -264,9 +264,9 @@ namespace PBL6.Application.Services
                             && (
                                 (
                                     input.Type == ((short)FILE_TYPE.MEDIA)
-                                    && (x.Type.Contains("image") || x.Type.Contains("video"))
+                                    && (x.Type.Contains("image"))
                                 )
-                                || (input.Type != ((short)FILE_TYPE.MEDIA) && !x.Type.Contains("image") && !x.Type.Contains("video"))
+                                || (input.Type != ((short)FILE_TYPE.MEDIA) && !x.Type.Contains("image"))
                             )
                     )
                     .Select(
