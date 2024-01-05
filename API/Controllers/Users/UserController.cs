@@ -137,4 +137,19 @@ public class UserController : ControllerBase
         return Ok(await _userService.SearchUserThatNotInWorkspaceAsync(workspaceId, searchValue, numberOfResults));
     }
 
+    /// <summary>
+    /// Get users online - cần đăng nhập
+    /// </summary>
+    /// <returns></returns>
+    /// <response code="200">Get thành công</response>
+    /// <response code="400">Có lỗi xảy ra</response>
+    /// <response code="401">Chưa đăng nhập</response>
+    [HttpGet("total-online-users")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [AuthorizeFilter]
+    public ActionResult TotalOnlineUsers()
+    {
+        return Ok(_userService.TotalOnlineUsers());
+    }
 }

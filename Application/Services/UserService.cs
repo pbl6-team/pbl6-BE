@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using OneSignalApi.Model;
 using PBL6.Application.Contract.Users;
 using PBL6.Application.Contract.Users.Dtos;
+using PBL6.Application.Hubs;
 using PBL6.Application.Services;
 using PBL6.Common.Consts;
 using PBL6.Common.Enum;
@@ -440,5 +441,10 @@ public class UserService : BaseService, IUserService
 
         _logger.LogInformation("[{_className}][{method}] End", _className, method);
         return _mapper.Map<IEnumerable<UserDetailDto>>(users);
+    }
+
+    public int TotalOnlineUsers()
+    {
+        return ChatHub.TotalOnlineUsers();
     }
 }
