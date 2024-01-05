@@ -1,7 +1,9 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using PBL6.Domain.Models.Common;
 
 namespace PBL6.Domain.Models.Users
 {
+    [Table("Meetings", Schema = "Meeting")]
     public class Meeting : FullAuditedEntity
     {
         public string Name { get; set; }
