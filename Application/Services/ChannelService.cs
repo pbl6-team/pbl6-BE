@@ -927,8 +927,10 @@ public class ChannelService : BaseService, IChannelService
         }
 
         var workspaceMemberUserIds = await _unitOfWork.WorkspaceMembers
-            .GetMembers()
-            .Where(x => x.WorkspaceId == workspaceId)
+            .Queryable()
+            .Where(x => x.Status == (short)WORKSPACE_MEMBER_STATUS.ACTIVE && x.WorkspaceId == workspaceId)
+            .Include(x => x.User)
+            .ThenInclude(x => x.Information)
             .Select(x => x.UserId).Distinct().ToListAsync();
 
         var invitedChannelMemberUserIds = await _unitOfWork.ChannelMembers
