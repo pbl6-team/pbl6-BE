@@ -16,5 +16,6 @@ namespace PBL6.Application.Contract.Users
         Task<AdminUserDto> GetByIdForAdminAsync(Guid userId);
         Task<PagedResult<AdminUserDto>> SearchUserForAdminAsync(string searchValue, int pageSize, int pageNumber, short status);
         Task<IEnumerable<UserDetailDto>> SearchUserThatNotInWorkspaceAsync(Guid workspaceId, string searchValue, int numberOfResults);
+        int TotalOnlineUsers();
     }
 }
