@@ -3,7 +3,7 @@ using PBL6.Domain.Models.Common;
 
 namespace PBL6.Domain.Models.Users
 {
-    [Table("FileOfMessages") ]
+    [Table("FileOfMessages", Schema = "Chat")]
     public class FileOfMessage : FullAuditedEntity
     {
         public string Url { get; set; }

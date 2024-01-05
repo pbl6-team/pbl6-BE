@@ -25,8 +25,6 @@ namespace PBL6.Infrastructure.Data
         // Users
         public DbSet<User> Users { get; set; }
         public DbSet<UserInfo> UserInfos { get; set; }
-        public DbSet<Plan> Plans { get; set; }
-        public DbSet<PlanDetail> PlanDetails { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<UserNotification> UserNotifications { get; set; }
         public DbSet<UserToken> UserTokens { get; set; }
